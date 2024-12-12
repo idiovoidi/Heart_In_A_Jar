@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { FluidSimulation } from './FluidSimulation.js';
 
 export class ArterySimulation {
     constructor(container) {
@@ -8,6 +9,7 @@ export class ArterySimulation {
         this.growthQueue = [];
         this.isGrowing = false;
         this.growthSpeed = 100; // ms between growth steps
+        this.fluidSim = new FluidSimulation(container);
         this.setup();
         this.createArterySystem();
         this.createControls();
@@ -50,6 +52,17 @@ export class ArterySimulation {
 
         // Handle window resize
         window.addEventListener('resize', () => this.onWindowResize(), false);
+
+        // Add preservation jar setup
+        const { jar, fluid, heart } = this.fluidSim.init();
+        this.scene.add(jar);
+        this.scene.add(fluid);
+        this.scene.add(heart);
+        this.fluidSim.fluid = fluid;
+
+        // Adjust camera
+        this.camera.position.set(0, 0, 5);
+        this.controls.target.set(0, 0, 0);
     }
 
     createBranch(startPoint, direction, length, radius, depth = 0, isArtery = true, immediate = true) {
@@ -201,10 +214,14 @@ export class ArterySimulation {
             <div>
                 <button id="regenerate">Regenerate Instant</button>
                 <button id="growNew">Grow New System</button>
+                <button id="toggleFluid">Toggle Fluid</button>
                 <br><br>
                 <label>Growth Speed:</label>
                 <input type="range" id="growthSpeed" min="50" max="500" step="50" value="${this.growthSpeed}">
                 <span id="speedValue">${this.growthSpeed}ms</span>
+                <br>
+                <label>Flow Rate:</label>
+                <input type="range" id="flowRate" min="1" max="100" value="10">
             </div>
         `;
         
@@ -231,13 +248,26 @@ export class ArterySimulation {
             this.growthSpeed = parseInt(e.target.value);
             document.getElementById('speedValue').textContent = `${this.growthSpeed}ms`;
         });
+
+        document.getElementById('toggleFluid').addEventListener('click', (e) => {
+            this.fluidSim.isFlowing = !this.fluidSim.isFlowing;
+            e.target.textContent = this.fluidSim.isFlowing ? 'Stop Fluid' : 'Start Fluid';
+        });
+
+        document.getElementById('flowRate').addEventListener('input', (e) => {
+            this.fluidSim.flowRate = e.target.value * 0.001;
+        });
     }
 
     animate() {
         requestAnimationFrame(() => this.animate());
         
+        const deltaTime = 0.016; // Approximate for 60fps
         // Update controls
         this.controls.update();
+        
+        // Update fluid simulation
+        this.fluidSim.update(deltaTime);
         
         // Render scene
         this.renderer.render(this.scene, this.camera);
