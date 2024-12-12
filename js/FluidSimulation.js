@@ -1,11 +1,13 @@
 import * as THREE from 'three';
 import { FluidShader } from './shaders/FluidShader.js';
+import { HeartSimulation } from './HeartSimulation.js';
 
 export class FluidSimulation {
     constructor(container) {
         this.container = container;
         this.isFlowing = false;
         this.time = 0;
+        this.heartSim = new HeartSimulation();
         
         // Jar dimensions
         this.jarHeight = 4;
@@ -109,15 +111,9 @@ export class FluidSimulation {
     }
 
     createHeartBase() {
-        const heartMaterial = new THREE.MeshPhongMaterial({
-            color: 0x990000,
-            shininess: 100
-        });
-
-        const heartGeometry = new THREE.SphereGeometry(0.5, 32, 32);
-        const heart = new THREE.Mesh(heartGeometry, heartMaterial);
-        heart.position.y = -this.jarHeight / 2 + 0.5;
-
+        const heart = this.heartSim.getMesh();
+        heart.position.y = -this.jarHeight / 2 + 1;
+        heart.scale.setScalar(0.8);
         return heart;
     }
 
@@ -131,5 +127,8 @@ export class FluidSimulation {
         if (fluid && fluid.material.uniforms) {
             fluid.material.uniforms.uTime.value = this.time;
         }
+        
+        // Update heart
+        this.heartSim.update(deltaTime);
     }
 } 
