@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { FluidSimulation } from './FluidSimulation.js';
+import { LabEnvironment } from './LabEnvironment.js';
 
 export class ArterySimulation {
     constructor(container) {
@@ -10,6 +11,7 @@ export class ArterySimulation {
         this.isGrowing = false;
         this.growthSpeed = 100; // ms between growth steps
         this.fluidSim = new FluidSimulation(container);
+        this.labEnvironment = new LabEnvironment();
         this.setup();
         this.createArterySystem();
         this.createControls();
@@ -19,7 +21,7 @@ export class ArterySimulation {
     setup() {
         // Scene setup
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0xffffff);
+        this.scene.background = new THREE.Color(0x111111);
         
         // Camera setup
         this.camera = new THREE.PerspectiveCamera(
@@ -28,8 +30,12 @@ export class ArterySimulation {
             0.1,
             1000
         );
-        this.camera.position.z = 5;
-        this.camera.position.y = 2;
+        this.camera.position.set(5, 3, 7);
+        this.camera.lookAt(0, 0, 0);
+
+        // Add lab environment
+        const lab = this.labEnvironment.getMesh();
+        this.scene.add(lab);
 
         // Renderer setup
         this.renderer = new THREE.WebGLRenderer({ 
@@ -55,14 +61,17 @@ export class ArterySimulation {
 
         // Add preservation jar setup
         const { jar, fluid, heart } = this.fluidSim.init();
+        jar.position.y = -1.4;
+        fluid.position.y = -1.4;
+        heart.position.y = -1.4;
         this.scene.add(jar);
         this.scene.add(fluid);
         this.scene.add(heart);
         this.fluidSim.fluid = fluid;
 
-        // Adjust camera
-        this.camera.position.set(0, 0, 5);
-        this.controls.target.set(0, 0, 0);
+        // Adjust camera for better view of smaller lab
+        this.camera.position.set(3, 0, 4);
+        this.controls.target.set(0, -1.4, 0);
     }
 
     createBranch(startPoint, direction, length, radius, depth = 0, isArtery = true, immediate = true) {
