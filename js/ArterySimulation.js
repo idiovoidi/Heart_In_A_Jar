@@ -5,6 +5,9 @@ export class ArterySimulation {
     constructor(container) {
         this.container = container;
         this.branches = [];
+        this.growthQueue = [];
+        this.isGrowing = false;
+        this.growthSpeed = 100; // ms between growth steps
         this.setup();
         this.createArterySystem();
         this.createControls();
@@ -49,8 +52,8 @@ export class ArterySimulation {
         window.addEventListener('resize', () => this.onWindowResize(), false);
     }
 
-    createBranch(startPoint, direction, length, radius, depth = 0, isArtery = true) {
-        if (depth > 8) return; // Limit recursion depth
+    createBranch(startPoint, direction, length, radius, depth = 0, isArtery = true, immediate = true) {
+        if (depth > 8) return;
 
         const endPoint = new THREE.Vector3()
             .addVectors(
@@ -58,77 +61,124 @@ export class ArterySimulation {
                 direction.clone().multiplyScalar(length)
             );
 
-        // Create tube geometry for the vessel
-        const curve = new THREE.CatmullRomCurve3([
-            startPoint,
-            new THREE.Vector3(
-                startPoint.x + (Math.random() - 0.5) * 0.1,
-                startPoint.y + (Math.random() - 0.5) * 0.1,
-                startPoint.z + (Math.random() - 0.5) * 0.1
-            ),
-            endPoint
-        ]);
+        const createVessel = () => {
+            const curve = new THREE.CatmullRomCurve3([
+                startPoint,
+                new THREE.Vector3(
+                    startPoint.x + (Math.random() - 0.5) * 0.1,
+                    startPoint.y + (Math.random() - 0.5) * 0.1,
+                    startPoint.z + (Math.random() - 0.5) * 0.1
+                ),
+                endPoint
+            ]);
 
-        const tubeGeometry = new THREE.TubeGeometry(
-            curve,
-            12,  // tubular segments
-            radius, // radius
-            8,    // radial segments
-            false  // closed
-        );
+            const tubeGeometry = new THREE.TubeGeometry(
+                curve,
+                12,
+                radius,
+                8,
+                false
+            );
 
-        const material = new THREE.MeshPhongMaterial({
-            color: isArtery ? 0xff0000 : 0x0000ff,
-            shininess: 100,
-            transparent: true,
-            opacity: 0.8
-        });
+            const material = new THREE.MeshPhongMaterial({
+                color: isArtery ? 0xff0000 : 0x0000ff,
+                shininess: 100,
+                transparent: true,
+                opacity: 0.8
+            });
 
-        const tube = new THREE.Mesh(tubeGeometry, material);
-        this.scene.add(tube);
-        this.branches.push(tube);
+            const tube = new THREE.Mesh(tubeGeometry, material);
+            this.scene.add(tube);
+            this.branches.push(tube);
 
-        // Create sub-branches
-        if (depth < 8) {
-            const numBranches = Math.floor(Math.random() * 2) + 1;
-            for (let i = 0; i < numBranches; i++) {
-                const newDirection = direction.clone()
-                    .add(new THREE.Vector3(
-                        (Math.random() - 0.5) * 0.8,
-                        (Math.random() - 0.5) * 0.8,
-                        (Math.random() - 0.5) * 0.8
-                    ))
-                    .normalize();
+            // Queue sub-branches
+            if (depth < 8) {
+                const numBranches = Math.floor(Math.random() * 2) + 1;
+                for (let i = 0; i < numBranches; i++) {
+                    const newDirection = direction.clone()
+                        .add(new THREE.Vector3(
+                            (Math.random() - 0.5) * 0.8,
+                            (Math.random() - 0.5) * 0.8,
+                            (Math.random() - 0.5) * 0.8
+                        ))
+                        .normalize();
 
-                this.createBranch(
-                    endPoint,
-                    newDirection,
-                    length * 0.7,
-                    radius * 0.7,
-                    depth + 1,
-                    isArtery
-                );
+                    const branchParams = {
+                        startPoint: endPoint.clone(),
+                        direction: newDirection,
+                        length: length * 0.7,
+                        radius: radius * 0.7,
+                        depth: depth + 1,
+                        isArtery: isArtery
+                    };
+
+                    if (immediate) {
+                        this.createBranch(
+                            branchParams.startPoint,
+                            branchParams.direction,
+                            branchParams.length,
+                            branchParams.radius,
+                            branchParams.depth,
+                            branchParams.isArtery,
+                            true
+                        );
+                    } else {
+                        this.growthQueue.push(branchParams);
+                    }
+                }
             }
+        };
+
+        if (immediate) {
+            createVessel();
+        } else {
+            this.growthQueue.push({
+                startPoint, direction, length, radius, depth, isArtery,
+                execute: createVessel
+            });
         }
     }
 
-    createArterySystem() {
-        // Create main arteries and veins
+    processGrowthQueue() {
+        if (!this.isGrowing || this.growthQueue.length === 0) return;
+
+        const nextBranch = this.growthQueue.shift();
+        if (nextBranch.execute) {
+            nextBranch.execute();
+        } else {
+            this.createBranch(
+                nextBranch.startPoint,
+                nextBranch.direction,
+                nextBranch.length,
+                nextBranch.radius,
+                nextBranch.depth,
+                nextBranch.isArtery,
+                false
+            );
+        }
+
+        setTimeout(() => this.processGrowthQueue(), this.growthSpeed);
+    }
+
+    createArterySystem(immediate = true) {
+        this.growthQueue = [];
         const startPoint = new THREE.Vector3(0, -2, 0);
         const mainDirection = new THREE.Vector3(0, 1, 0);
         
-        // Create arterial system (red)
-        this.createBranch(startPoint, mainDirection, 1, 0.05, 0, true);
-        
-        // Create venous system (blue)
+        this.createBranch(startPoint, mainDirection, 1, 0.05, 0, true, immediate);
         this.createBranch(
-            startPoint.clone().add(new THREE.Vector3(0.2, 0, 0)), 
-            mainDirection, 
-            1, 
-            0.05, 
-            0, 
-            false
+            startPoint.clone().add(new THREE.Vector3(0.2, 0, 0)),
+            mainDirection,
+            1,
+            0.05,
+            0,
+            false,
+            immediate
         );
+
+        if (!immediate) {
+            this.processGrowthQueue();
+        }
     }
 
     onWindowResize() {
@@ -149,19 +199,37 @@ export class ArterySimulation {
         
         controls.innerHTML = `
             <div>
-                <button id="regenerate">Regenerate Vessels</button>
+                <button id="regenerate">Regenerate Instant</button>
+                <button id="growNew">Grow New System</button>
                 <br><br>
-                <label>Rotation Speed:</label>
-                <input type="range" id="rotationSpeed" min="0" max="0.01" step="0.001" value="0.001">
+                <label>Growth Speed:</label>
+                <input type="range" id="growthSpeed" min="50" max="500" step="50" value="${this.growthSpeed}">
+                <span id="speedValue">${this.growthSpeed}ms</span>
             </div>
         `;
         
         this.container.appendChild(controls);
         
         document.getElementById('regenerate').addEventListener('click', () => {
+            this.isGrowing = false;
             this.branches.forEach(branch => this.scene.remove(branch));
             this.branches = [];
-            this.createArterySystem();
+            this.createArterySystem(true);
+        });
+
+        document.getElementById('growNew').addEventListener('click', () => {
+            this.isGrowing = false;
+            setTimeout(() => {
+                this.branches.forEach(branch => this.scene.remove(branch));
+                this.branches = [];
+                this.isGrowing = true;
+                this.createArterySystem(false);
+            }, 100);
+        });
+
+        document.getElementById('growthSpeed').addEventListener('input', (e) => {
+            this.growthSpeed = parseInt(e.target.value);
+            document.getElementById('speedValue').textContent = `${this.growthSpeed}ms`;
         });
     }
 
