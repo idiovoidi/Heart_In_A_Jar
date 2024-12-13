@@ -61,9 +61,9 @@ export class ArterySimulation {
 
         // Add preservation jar setup
         const { jar, fluid, heart } = this.fluidSim.init();
-        jar.position.y = -1.4;
-        fluid.position.y = -1.4;
-        heart.position.y = -1.4;
+        jar.position.y = -0.7;
+        fluid.position.y = -0.7;
+        heart.position.y = -0.7;
         this.scene.add(jar);
         this.scene.add(fluid);
         this.scene.add(heart);
@@ -71,11 +71,11 @@ export class ArterySimulation {
 
         // Adjust camera for better view of smaller lab
         this.camera.position.set(3, 0, 4);
-        this.controls.target.set(0, -1.4, 0);
+        this.controls.target.set(0, -0.7, 0);
     }
 
-    createBranch(startPoint, direction, length, radius, depth = 0, isArtery = true, immediate = true) {
-        if (depth > 8) return;
+    createBranch(startPoint, direction, length, radius, depth = 0, isArtery = true, immediate = true, target = null) {
+        if (depth > 12) return;
 
         const endPoint = new THREE.Vector3()
             .addVectors(
@@ -83,13 +83,20 @@ export class ArterySimulation {
                 direction.clone().multiplyScalar(length)
             );
 
+        // Adjust direction slightly towards target if provided
+        if (target) {
+            const toTarget = target.clone().sub(endPoint).normalize();
+            direction.lerp(toTarget, 0.3);
+            direction.normalize();
+        }
+
         const createVessel = () => {
             const curve = new THREE.CatmullRomCurve3([
                 startPoint,
                 new THREE.Vector3(
-                    startPoint.x + (Math.random() - 0.5) * 0.1,
-                    startPoint.y + (Math.random() - 0.5) * 0.1,
-                    startPoint.z + (Math.random() - 0.5) * 0.1
+                    startPoint.x + (Math.random() - 0.5) * 0.2,
+                    startPoint.y + (Math.random() - 0.5) * 0.2,
+                    startPoint.z + (Math.random() - 0.5) * 0.2
                 ),
                 endPoint
             ]);
@@ -113,25 +120,25 @@ export class ArterySimulation {
             this.scene.add(tube);
             this.branches.push(tube);
 
-            // Queue sub-branches
-            if (depth < 8) {
-                const numBranches = Math.floor(Math.random() * 2) + 1;
+            if (depth < 12) {
+                const numBranches = Math.floor(Math.random() * 3) + 1;
                 for (let i = 0; i < numBranches; i++) {
                     const newDirection = direction.clone()
                         .add(new THREE.Vector3(
-                            (Math.random() - 0.5) * 0.8,
-                            (Math.random() - 0.5) * 0.8,
-                            (Math.random() - 0.5) * 0.8
+                            (Math.random() - 0.5) * 0.6,
+                            (Math.random() - 0.5) * 0.6,
+                            (Math.random() - 0.5) * 0.6
                         ))
                         .normalize();
 
                     const branchParams = {
                         startPoint: endPoint.clone(),
                         direction: newDirection,
-                        length: length * 0.7,
+                        length: length * 0.8,
                         radius: radius * 0.7,
                         depth: depth + 1,
-                        isArtery: isArtery
+                        isArtery: isArtery,
+                        target: target
                     };
 
                     if (immediate) {
@@ -142,7 +149,8 @@ export class ArterySimulation {
                             branchParams.radius,
                             branchParams.depth,
                             branchParams.isArtery,
-                            true
+                            true,
+                            target
                         );
                     } else {
                         this.growthQueue.push(branchParams);
@@ -184,19 +192,40 @@ export class ArterySimulation {
 
     createArterySystem(immediate = true) {
         this.growthQueue = [];
-        const startPoint = new THREE.Vector3(0, -2, 0);
-        const mainDirection = new THREE.Vector3(0, 1, 0);
+        const startPoint = new THREE.Vector3(0, -0.7, 0); // Adjusted to match jar position
         
-        this.createBranch(startPoint, mainDirection, 1, 0.05, 0, true, immediate);
-        this.createBranch(
-            startPoint.clone().add(new THREE.Vector3(0.2, 0, 0)),
-            mainDirection,
-            1,
-            0.05,
-            0,
-            false,
-            immediate
-        );
+        // Create target points for arteries to grow towards
+        const targetPoints = [
+            new THREE.Vector3(-4, 2, -2),  // Upper left back
+            new THREE.Vector3(4, 2, -2),   // Upper right back
+            new THREE.Vector3(-4, 2, 2),   // Upper left front
+            new THREE.Vector3(4, 2, 2),    // Upper right front
+            new THREE.Vector3(-4, -1, -2), // Lower left back
+            new THREE.Vector3(4, -1, -2),  // Lower right back
+            new THREE.Vector3(-4, -1, 2),  // Lower left front
+            new THREE.Vector3(4, -1, 2)    // Lower right front
+        ];
+        
+        // Create arteries growing towards each target
+        targetPoints.forEach((target, index) => {
+            const direction = target.clone()
+                .sub(startPoint)
+                .normalize();
+            
+            const distance = startPoint.distanceTo(target);
+            const isArtery = index < 4; // First 4 are arteries, rest are veins
+            
+            this.createBranch(
+                startPoint.clone(),
+                direction,
+                distance * 0.3, // Initial segment length
+                0.03,          // Thinner vessels
+                0,
+                isArtery,
+                immediate,
+                target        // Pass target for guidance
+            );
+        });
 
         if (!immediate) {
             this.processGrowthQueue();

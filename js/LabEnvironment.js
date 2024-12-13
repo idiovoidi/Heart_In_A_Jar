@@ -19,40 +19,6 @@ export class LabEnvironment {
         floor.position.y = -2;
         this.labGroup.add(floor);
 
-        // Create larger lab table
-        const tableGeometry = new THREE.BoxGeometry(4, 0.2, 2);
-        const tableMaterial = new THREE.MeshStandardMaterial({
-            color: 0x444444,
-            roughness: 0.3,
-            metalness: 0.8
-        });
-        const table = new THREE.Mesh(tableGeometry, tableMaterial);
-        // Raise table position to match jar height
-        table.position.y = -1.5;
-        this.labGroup.add(table);
-
-        // Adjust table legs for new dimensions
-        const legGeometry = new THREE.CylinderGeometry(0.05, 0.05, 0.8);
-        const legMaterial = new THREE.MeshStandardMaterial({
-            color: 0x333333,
-            roughness: 0.3,
-            metalness: 0.8
-        });
-
-        // Adjust leg positions for larger table
-        const tablePositions = [
-            [-1.8, -1.9, 0.8],
-            [1.8, -1.9, 0.8],
-            [-1.8, -1.9, -0.8],
-            [1.8, -1.9, -0.8]
-        ];
-
-        tablePositions.forEach(pos => {
-            const leg = new THREE.Mesh(legGeometry, legMaterial);
-            leg.position.set(...pos);
-            this.labGroup.add(leg);
-        });
-
         this.addLabEquipment();
         this.createWallPanels();
         this.addLabProps();
