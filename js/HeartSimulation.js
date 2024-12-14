@@ -7,16 +7,69 @@ export class HeartSimulation {
         this.beatSpeed = 2;
         this.isBeating = true;
         this.createAnatomicalHeart();
+        this.heartGroup.scale.set(0.1, 0.1, 0.1);
+        this.heartGroup.rotation.z = Math.PI;
+        this.heartGroup.position.set(0, 0, 0);
     }
 
     createAnatomicalHeart() {
-        // Create the main chambers
-        this.createLeftVentricle();
-        this.createRightVentricle();
-        this.createLeftAtrium();
-        this.createRightAtrium();
-        this.createAorta();
-        this.createPulmonaryArtery();
+        const heartShape = new THREE.Shape();
+        
+        heartShape.moveTo(0, -2);
+        
+        heartShape.bezierCurveTo(
+            -3, -2,     // cp1 - wider curve
+            -4, -0.5,   // cp2 - higher control point
+            -2.5, 1.5   // end point - smoother transition
+        );
+        
+        heartShape.bezierCurveTo(
+            -2, 3,      // cp1 - higher curve
+            -1, 3.5,    // cp2 - rounder peak
+            0, 2.8      // end point - higher center
+        );
+        
+        heartShape.bezierCurveTo(
+            1, 3.5,     // cp1
+            2, 3,       // cp2
+            2.5, 1.5    // end point
+        );
+        
+        heartShape.bezierCurveTo(
+            4, -0.5,    // cp1
+            3, -2,      // cp2
+            0, -2       // back to start
+        );
+
+        const extrudeSettings = {
+            depth: 3,               // Increased depth for more volume
+            bevelEnabled: true,
+            bevelThickness: 1.2,    // Increased thickness
+            bevelSize: 0.8,         // Increased bevel size
+            bevelSegments: 64,      // More segments for smoother edges
+            curveSegments: 96       // More segments for smoother curves
+        };
+
+        const heartGeometry = new THREE.ExtrudeGeometry(heartShape, extrudeSettings);
+        
+        const heartMaterial = new THREE.MeshPhongMaterial({
+            color: 0xff2222,
+            specular: 0x444444,
+            shininess: 30,
+            flatShading: false,
+            side: THREE.DoubleSide,
+            depthWrite: false,     // Disable depth writing
+            depthTest: false       // Disable depth testing
+        });
+
+        const heart = new THREE.Mesh(heartGeometry, heartMaterial);
+        
+        heart.geometry.center();
+        
+        heart.rotation.x = Math.PI * 0.2;
+        heart.rotation.y = Math.PI * 0.15;
+        
+        this.heartGroup.add(heart);
     }
 
     createChamber(radius, height, segments, color) {
@@ -161,6 +214,13 @@ export class HeartSimulation {
 
         this.time += deltaTime * this.beatSpeed;
         
+        const scale = 1 + Math.sin(this.time * 4) * 0.03;
+        this.heartGroup.scale.set(
+            0.1 * scale,
+            0.1 * scale,
+            0.1 * scale
+        );
+        
         // Update all chamber materials
         this.heartGroup.traverse((child) => {
             if (child.isMesh && child.material.uniforms) {
@@ -179,5 +239,33 @@ export class HeartSimulation {
 
     getMesh() {
         return this.heartGroup;
+    }
+
+    dispose() {
+        // Dispose of all heart meshes and materials
+        this.heartGroup.traverse(child => {
+            if (child.geometry) {
+                child.geometry.dispose();
+            }
+            if (child.material) {
+                if (child.material.uniforms) {
+                    // Clean up shader uniforms
+                    Object.values(child.material.uniforms).forEach(uniform => {
+                        if (uniform.value && uniform.value.dispose) {
+                            uniform.value.dispose();
+                        }
+                    });
+                }
+                child.material.dispose();
+            }
+        });
+
+        // Clear the group
+        while(this.heartGroup.children.length > 0) {
+            this.heartGroup.remove(this.heartGroup.children[0]);
+        }
+
+        this.isBeating = false;
+        this.time = 0;
     }
 } 
