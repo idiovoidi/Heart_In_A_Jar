@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { FluidSimulation } from './FluidSimulation.js';
 import { LabEnvironment } from './LabEnvironment.js';
 import { InputManager } from './inputs/InputManager.js';
+import { LabJar } from './LabJar.js';
 
 export class ArterySimulation {
     constructor(container) {
@@ -161,17 +162,13 @@ export class ArterySimulation {
             window.addEventListener('resize', this.onWindowResize, false);
 
             console.log('Setting up fluid simulation...');
-            // Add preservation jar setup
-            const { jar, fluid, heart } = this.fluidSim.init();
+            // Create jar using new class
+            const jar = new LabJar().getMesh();
             jar.position.y = -0.35;
-            fluid.position.y = -0.35;
-            heart.position.y = -0.35;
             
             console.log('Adding objects to scene...');
             this.scene.add(jar);
-            this.scene.add(fluid);
-            this.scene.add(heart);
-            this.fluidSim.fluid = fluid;
+            this.fluidSim.fluid = jar;
 
             // Set initial camera and controls position
             this.controls.target.set(0, -0.35, 0);

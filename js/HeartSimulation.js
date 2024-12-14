@@ -19,45 +19,115 @@ export class HeartSimulation {
 
     createAnatomicalHeart() {
         try {
+            // Create main structural groups but keep existing geometry
+            this.structure = {
+                core: new THREE.Group(),        // Base heart shape
+                chambers: new THREE.Group(),    // Four chambers
+                vessels: new THREE.Group(),     // Major blood vessels
+                valves: new THREE.Group(),      // All heart valves
+                muscles: new THREE.Group(),     // Muscle layers
+                surface: new THREE.Group()      // Surface details and vessels
+            };
+
+            // Create chambers with existing geometry
             console.log('Creating chambers...');
             this.chambers = {
                 leftVentricle: this.createLeftVentricle(),
                 rightVentricle: this.createRightVentricle(),
                 leftAtrium: this.createLeftAtrium(),
                 rightAtrium: this.createRightAtrium(),
-                connectingTissue: this.createConnectingTissue(),
-                muscleFibers: this.createMuscleFibers()
+                connectingTissue: this.createConnectingTissue()
             };
 
-            console.log('Creating surface features...');
-            this.surfaceFeatures = {
-                vessels: this.createCoronaryVessels(),
-                details: this.createSurfaceDetails()
-            };
+            // Add chambers to their group
+            Object.values(this.chambers).forEach(chamber => {
+                if (chamber) this.structure.chambers.add(chamber);
+            });
 
-            // Add all parts to the heart group
-            [...Object.values(this.chambers), ...Object.values(this.surfaceFeatures)]
-                .forEach(part => {
-                    if (part) this.heartGroup.add(part);
-                });
-
+            // Create valves with existing geometry
             console.log('Creating valves...');
             this.valves = {
                 mitral: this.createMitralValve(),
                 tricuspid: this.createTricuspidValve(),
                 semilunar: this.createSemilunarValves()
             };
+            Object.values(this.valves).forEach(valve => {
+                if (valve) this.structure.valves.add(valve);
+            });
 
-            // Adjust initial position and rotation
+            // Create surface features with existing geometry
+            console.log('Creating surface features...');
+            this.surface = {
+                coronaryVessels: this.createCoronaryVessels(),
+                muscleFibers: this.createMuscleFibers(),
+                details: this.createSurfaceDetails()
+            };
+            Object.values(this.surface).forEach(detail => {
+                if (detail) this.structure.surface.add(detail);
+            });
+
+            // Add all structural groups to heart group
+            Object.values(this.structure).forEach(group => {
+                this.heartGroup.add(group);
+            });
+
+            // Position and rotate the complete heart
             this.heartGroup.rotation.x = Math.PI * 0.15;
             this.heartGroup.rotation.y = Math.PI * 0.1;
             this.heartGroup.position.y = -0.35;
-            
+
             console.log('Heart creation complete');
         } catch (error) {
             console.error('Error in createAnatomicalHeart:', error);
             this.createSimpleHeart();
         }
+    }
+
+    createCoreShape() {
+        // Create the basic teardrop shape that forms the heart's foundation
+        const shape = new THREE.Shape();
+        
+        // Start at apex
+        shape.moveTo(0, -2.5);
+        
+        // Left side curve
+        shape.bezierCurveTo(
+            -2, -2.5,   // cp1
+            -4, 0,      // cp2
+            -3, 3       // end point
+        );
+        
+        // Top curve
+        shape.bezierCurveTo(
+            -2, 4,      // cp1
+            2, 4,       // cp2
+            3, 3        // end point
+        );
+        
+        // Right side curve
+        shape.bezierCurveTo(
+            4, 0,       // cp1
+            2, -2.5,    // cp2
+            0, -2.5     // back to start
+        );
+
+        const geometry = new THREE.ExtrudeGeometry(shape, {
+            depth: 3,
+            bevelEnabled: true,
+            bevelThickness: 0.8,
+            bevelSize: 0.6,
+            bevelSegments: 64,
+            curveSegments: 64
+        });
+
+        const material = new THREE.MeshPhongMaterial({
+            color: 0x8B0000,
+            shininess: 30,
+            side: THREE.DoubleSide
+        });
+
+        const coreMesh = new THREE.Mesh(geometry, material);
+        this.structure.core.add(coreMesh);
     }
 
     createLeftVentricle() {
