@@ -25,8 +25,21 @@ export class HeartSimulation {
                 rightVentricle: this.createRightVentricle(),
                 leftAtrium: this.createLeftAtrium(),
                 rightAtrium: this.createRightAtrium(),
-                connectingTissue: this.createConnectingTissue()
+                connectingTissue: this.createConnectingTissue(),
+                muscleFibers: this.createMuscleFibers()
             };
+
+            console.log('Creating surface features...');
+            this.surfaceFeatures = {
+                vessels: this.createCoronaryVessels(),
+                details: this.createSurfaceDetails()
+            };
+
+            // Add all parts to the heart group
+            [...Object.values(this.chambers), ...Object.values(this.surfaceFeatures)]
+                .forEach(part => {
+                    if (part) this.heartGroup.add(part);
+                });
 
             console.log('Creating valves...');
             this.valves = {
@@ -34,17 +47,6 @@ export class HeartSimulation {
                 tricuspid: this.createTricuspidValve(),
                 semilunar: this.createSemilunarValves()
             };
-
-            // Add all parts to the heart group
-            console.log('Adding chambers to heart group...');
-            Object.values(this.chambers).forEach(chamber => {
-                if (chamber) this.heartGroup.add(chamber);
-            });
-            
-            console.log('Adding valves to heart group...');
-            Object.values(this.valves).forEach(valve => {
-                if (valve) this.heartGroup.add(valve);
-            });
 
             // Adjust initial position and rotation
             this.heartGroup.rotation.x = Math.PI * 0.15;
@@ -378,6 +380,22 @@ export class HeartSimulation {
                 });
             }
         }
+
+        // Animate muscle fibers
+        if (this.chambers.muscleFibers) {
+            const muscleContract = Math.max(0, Math.sin(this.time * 4));
+            this.chambers.muscleFibers.traverse(fiber => {
+                if (fiber.isMesh) {
+                    // Twist and compress the fibers during contraction
+                    fiber.scale.y = 1 - muscleContract * 0.15;
+                    fiber.scale.x = 1 + muscleContract * 0.05;
+                    fiber.scale.z = 1 + muscleContract * 0.05;
+                    
+                    // Add slight rotational twist
+                    fiber.rotation.y += muscleContract * 0.02;
+                }
+            });
+        }
     }
 
     createSimpleHeart() {
@@ -445,5 +463,171 @@ export class HeartSimulation {
         
         connections.add(leftConnection, rightConnection);
         return connections;
+    }
+
+    createCoronaryVessels() {
+        const vesselGroup = new THREE.Group();
+        
+        // Helper function to create vessel curves
+        const createVessel = (points, radius, color) => {
+            const curve = new THREE.CatmullRomCurve3(points);
+            const geometry = new THREE.TubeGeometry(curve, 48, radius, 8, false);
+            const material = new THREE.MeshPhongMaterial({
+                color: color,
+                shininess: 50,
+                transparent: true,
+                opacity: 0.9
+            });
+            return new THREE.Mesh(geometry, material);
+        };
+
+        // Left coronary artery (LAD)
+        const ladPoints = [
+            new THREE.Vector3(-0.8, 2.0, 0.5),   // Origin
+            new THREE.Vector3(-1.0, 1.5, 0.6),   // First curve
+            new THREE.Vector3(-1.2, 0.5, 0.4),   // Mid section
+            new THREE.Vector3(-0.8, -0.5, 0.2),  // Lower curve
+            new THREE.Vector3(-0.4, -1.5, 0.1)   // Apex
+        ];
+        const lad = createVessel(ladPoints, 0.06, 0xcc0000);
+
+        // Left circumflex artery (LCX)
+        const lcxPoints = [
+            new THREE.Vector3(-0.8, 2.0, 0.5),   // Shared origin with LAD
+            new THREE.Vector3(-1.5, 1.8, 0.2),   // Curve around left atrium
+            new THREE.Vector3(-2.0, 1.0, -0.2),  // Posterior curve
+            new THREE.Vector3(-1.5, 0.0, -0.4)   // Terminal branch
+        ];
+        const lcx = createVessel(lcxPoints, 0.05, 0xcc0000);
+
+        // Right coronary artery (RCA)
+        const rcaPoints = [
+            new THREE.Vector3(0.8, 2.0, 0.5),    // Origin
+            new THREE.Vector3(1.2, 1.5, 0.4),    // First curve
+            new THREE.Vector3(1.5, 0.5, 0.0),    // Mid section
+            new THREE.Vector3(1.2, -0.5, -0.2),  // Lower curve
+            new THREE.Vector3(0.6, -1.0, -0.3)   // Terminal branch
+        ];
+        const rca = createVessel(rcaPoints, 0.055, 0xcc0000);
+
+        // Coronary veins (darker color)
+        const coronaryVeinPoints = [
+            new THREE.Vector3(0, -1.5, 0.3),     // Apex
+            new THREE.Vector3(-0.5, -0.5, 0.4),  // Lower curve
+            new THREE.Vector3(-1.0, 0.5, 0.5),   // Mid section
+            new THREE.Vector3(-1.2, 1.5, 0.4),   // Upper curve
+            new THREE.Vector3(-0.8, 2.2, 0.3)    // Terminal point
+        ];
+        const coronaryVein = createVessel(coronaryVeinPoints, 0.07, 0x000080);
+
+        vesselGroup.add(lad, lcx, rca, coronaryVein);
+        return vesselGroup;
+    }
+
+    createSurfaceDetails() {
+        const detailGroup = new THREE.Group();
+
+        // Create sulci (grooves)
+        const createGroove = (points, width) => {
+            const curve = new THREE.CatmullRomCurve3(points);
+            const geometry = new THREE.TubeGeometry(curve, 32, width, 8, false);
+            const material = new THREE.MeshPhongMaterial({
+                color: 0x8B0000,
+                transparent: true,
+                opacity: 0.7,
+                depthWrite: false
+            });
+            return new THREE.Mesh(geometry, material);
+        };
+
+        // Anterior interventricular sulcus
+        const aivPoints = [
+            new THREE.Vector3(0, 2.0, 0.5),
+            new THREE.Vector3(0, 0.5, 0.4),
+            new THREE.Vector3(0, -1.0, 0.2)
+        ];
+        const aivGroove = createGroove(aivPoints, 0.1);
+
+        // Atrioventricular groove
+        const avPoints = [
+            new THREE.Vector3(-2.0, 1.5, 0),
+            new THREE.Vector3(-1.0, 1.8, 0.2),
+            new THREE.Vector3(0, 1.9, 0.3),
+            new THREE.Vector3(1.0, 1.8, 0.2),
+            new THREE.Vector3(2.0, 1.5, 0)
+        ];
+        const avGroove = createGroove(avPoints, 0.12);
+
+        detailGroup.add(aivGroove, avGroove);
+        return detailGroup;
+    }
+
+    createMuscleFibers() {
+        const fiberGroup = new THREE.Group();
+        
+        // Helper function to create a spiral muscle fiber
+        const createFiber = (startPoint, radius, turns, height, thickness, direction) => {
+            const points = [];
+            const segments = 64;
+            
+            for (let i = 0; i <= segments; i++) {
+                const t = i / segments;
+                const angle = turns * Math.PI * 2 * t * direction;
+                const y = height * t;
+                const x = radius * Math.cos(angle) * (1 - t * 0.3); // Taper towards top
+                const z = radius * Math.sin(angle) * (1 - t * 0.3);
+                points.push(new THREE.Vector3(x, y, z));
+            }
+            
+            const curve = new THREE.CatmullRomCurve3(points);
+            const geometry = new THREE.TubeGeometry(curve, 64, thickness, 8, false);
+            const material = new THREE.MeshPhongMaterial({
+                color: 0x8B0000,
+                shininess: 30,
+                transparent: true,
+                opacity: 0.85,
+                side: THREE.DoubleSide
+            });
+            
+            return new THREE.Mesh(geometry, material);
+        };
+
+        // Create multiple layers of muscle fibers
+        const createMuscleLayer = (baseY, direction) => {
+            const layerGroup = new THREE.Group();
+            const fiberCount = 12;
+            
+            for (let i = 0; i < fiberCount; i++) {
+                const angle = (i / fiberCount) * Math.PI * 2;
+                const radius = 1.5 + Math.sin(angle) * 0.2;
+                const fiber = createFiber(
+                    new THREE.Vector3(0, baseY, 0),
+                    radius,
+                    2.5,  // turns
+                    3,    // height
+                    0.08, // thickness
+                    direction
+                );
+                
+                fiber.position.y = baseY;
+                fiber.rotation.y = angle;
+                layerGroup.add(fiber);
+            }
+            
+            return layerGroup;
+        };
+
+        // Add multiple layers with alternating directions
+        const layers = [
+            { y: -2.0, direction: 1 },    // Bottom layer, clockwise
+            { y: -1.5, direction: -1 },   // Middle layer, counter-clockwise
+            { y: -1.0, direction: 1 }     // Top layer, clockwise
+        ];
+
+        layers.forEach(layer => {
+            fiberGroup.add(createMuscleLayer(layer.y, layer.direction));
+        });
+
+        return fiberGroup;
     }
 } 
