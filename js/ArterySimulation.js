@@ -328,6 +328,13 @@ export class ArterySimulation {
                 return;
             }
 
+            // Validate scene state
+            if (!this.scene || !this.camera || !this.renderer) {
+                console.error('Essential components missing');
+                return;
+            }
+
+            console.log('Rendering frame...'); // Remove after debugging
             requestAnimationFrame(() => this.animate());
             
             const deltaTime = 0.016;

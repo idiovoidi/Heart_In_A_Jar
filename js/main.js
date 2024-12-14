@@ -4,29 +4,36 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 let simulation;
 
-document.addEventListener('DOMContentLoaded', () => {
+function initSimulation() {
     try {
-        console.log('DOM Content Loaded');
+        if (simulation) {
+            console.log('Cleaning up old simulation...');
+            simulation.dispose();
+            simulation = null;
+        }
+
+        console.log('Creating new simulation...');
         const container = document.getElementById('container');
         if (!container) {
             console.error('Container element not found');
             return;
         }
         
-        // Set container style to prevent scrolling issues
-        container.style.position = 'fixed';
-        container.style.top = '0';
-        container.style.left = '0';
-        container.style.width = '100%';
-        container.style.height = '100%';
-        container.style.overflow = 'hidden';
-        
-        console.log('Creating simulation...');
         simulation = new ArterySimulation(container);
     } catch (error) {
-        console.error('Error initializing application:', error);
+        console.error('Error initializing simulation:', error);
     }
-});
+}
+
+document.addEventListener('DOMContentLoaded', initSimulation);
+
+// Handle hot reloads better
+if (module.hot) {
+    module.hot.accept(() => {
+        console.log('Hot reloading, reinitializing simulation...');
+        initSimulation();
+    });
+}
 
 // Only clean up when the page is actually unloading
 window.addEventListener('beforeunload', () => {
