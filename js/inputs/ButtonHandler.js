@@ -1,82 +1,118 @@
+import * as THREE from 'three';
+
 export class ButtonHandler {
-    constructor(simulation) {
-        this.simulation = simulation;
-        this.setupHandlers();
+    constructor(scene) {
+        this.scene = scene;
+        this.createControlPanel();
     }
 
-    setupHandlers() {
-        this.handleRegenerate = () => {
-            console.log('Regenerating system...');
-            this.simulation.isGrowing = false;
-            this.simulation.cleanupBranches();
-            this.simulation.createArterySystem(true);
-            this.simulation.isGrowing = true;
-        };
+    createControlPanel() {
+        // Create main control panel
+        const panel = document.createElement('div');
+        panel.className = 'control-panel';
+        document.body.appendChild(panel);
 
-        this.handleGrowNew = () => {
-            console.log('Growing new system...');
-            this.simulation.isGrowing = false;
-            this.simulation.cleanupBranches();
-            this.simulation.createArterySystem(false);
-            this.simulation.isGrowing = true;
-            this.simulation.processGrowthQueue();
-        };
-
-        this.handleToggleFluid = (e) => {
-            console.log('Toggling fluid...');
-            this.simulation.fluidSim.isFlowing = !this.simulation.fluidSim.isFlowing;
-            e.target.textContent = this.simulation.fluidSim.isFlowing ? 'Stop Fluid' : 'Start Fluid';
-        };
-
-        this.handleHeartBeat = (e) => {
-            console.log('Toggling heartbeat...');
-            const heartSim = this.simulation.fluidSim.heartSim;
-            heartSim.setBeating(!heartSim.isBeating);
-            e.target.textContent = heartSim.isBeating ? 'Stop Heart' : 'Start Heart';
-        };
-    }
-
-    init() {
-        console.log('Initializing button controls...');
-        const controls = document.createElement('div');
-        controls.className = 'controls';
-        controls.innerHTML = `
-            <div>
-                <button id="regenerate">Regenerate Instant</button>
-                <button id="growNew">Grow New System</button>
-                <button id="toggleFluid">Start Fluid</button>
-                <button id="toggleHeart">Start Heart</button>
-                <br><br>
-                <label>Growth Speed:</label>
-                <input type="range" id="growthSpeed" min="50" max="500" step="50" value="${this.simulation.growthSpeed}">
-                <span id="speedValue">${this.simulation.growthSpeed}ms</span>
-                <br>
-                <label>Flow Rate:</label>
-                <input type="range" id="flowRate" min="1" max="100" value="50">
-                <br>
-                <label>Heart Rate:</label>
-                <input type="range" id="heartRate" min="1" max="5" step="0.5" value="2">
-            </div>
-        `;
+        // Heart Controls Section
+        this.createHeartControls(panel);
         
-        this.simulation.container.appendChild(controls);
+        // View Controls Section
+        this.createViewControls(panel);
+        
+        // Artery Controls Section
+        this.createArteryControls(panel);
+    }
 
-        // Add event listeners
-        document.getElementById('regenerate')?.addEventListener('click', this.handleRegenerate);
-        document.getElementById('growNew')?.addEventListener('click', this.handleGrowNew);
-        document.getElementById('toggleFluid')?.addEventListener('click', this.handleToggleFluid);
-        document.getElementById('toggleHeart')?.addEventListener('click', this.handleHeartBeat);
+    createHeartControls(panel) {
+        // Toggle Beat Button
+        const toggleBeatBtn = document.createElement('button');
+        toggleBeatBtn.textContent = 'Toggle Heartbeat';
+        toggleBeatBtn.onclick = () => this.toggleHeartbeat();
+        panel.appendChild(toggleBeatBtn);
+
+        // Beat Speed Slider
+        const speedContainer = document.createElement('div');
+        speedContainer.className = 'slider-container';
+        
+        const speedLabel = document.createElement('label');
+        speedLabel.textContent = 'Beat Speed';
+        speedContainer.appendChild(speedLabel);
+
+        const speedSlider = document.createElement('input');
+        speedSlider.type = 'range';
+        speedSlider.min = '0.5';
+        speedSlider.max = '4';
+        speedSlider.step = '0.1';
+        speedSlider.value = '2';
+        speedSlider.oninput = (e) => this.updateBeatSpeed(e.target.value);
+        speedContainer.appendChild(speedSlider);
+        
+        panel.appendChild(speedContainer);
+    }
+
+    createViewControls(panel) {
+        // Reset View Button
+        const resetViewBtn = document.createElement('button');
+        resetViewBtn.textContent = 'Reset View';
+        resetViewBtn.onclick = () => this.resetView();
+        panel.appendChild(resetViewBtn);
+    }
+
+    createArteryControls(panel) {
+        // Regenerate Arteries Button
+        const regenArteriesBtn = document.createElement('button');
+        regenArteriesBtn.textContent = 'Regenerate Arteries';
+        regenArteriesBtn.onclick = () => this.regenerateArteries();
+        panel.appendChild(regenArteriesBtn);
+    }
+
+    regenerateArteries() {
+        if (this.scene.arterySim) {
+            // Remove old artery system
+            if (this.scene.arterySystem) {
+                this.scene.scene.remove(this.scene.arterySystem);
+            }
+            
+            // Create new artery system
+            this.scene.arterySim.createArterySystem(false);
+            this.scene.arterySystem = this.scene.arterySim.getMesh();
+            
+            // Position arteries
+            this.scene.arterySystem.scale.set(0.25, 0.25, 0.25);
+            this.scene.arterySystem.position.copy(this.scene.heart.position);
+            this.scene.arterySystem.position.y += 0.5; // Start above heart
+            this.scene.arterySystem.rotation.copy(this.scene.heart.rotation);
+            
+            this.scene.scene.add(this.scene.arterySystem);
+        }
+    }
+
+    toggleHeartbeat() {
+        if (this.scene.heartSim) {
+            const isBeating = !this.scene.heartSim.isBeating;
+            this.scene.heartSim.setBeating(isBeating);
+        }
+    }
+
+    updateBeatSpeed(speed) {
+        if (this.scene.heartSim) {
+            this.scene.heartSim.setBeatSpeed(parseFloat(speed));
+        }
+    }
+
+    resetView() {
+        if (this.scene.camera && this.scene.controls) {
+            this.scene.camera.position.set(0, 0, 8);
+            this.scene.camera.lookAt(0, -1, 0);
+            this.scene.camera.zoom = 1;
+            this.scene.camera.updateProjectionMatrix();
+            this.scene.controls.reset();
+        }
     }
 
     dispose() {
-        document.getElementById('regenerate')?.removeEventListener('click', this.handleRegenerate);
-        document.getElementById('growNew')?.removeEventListener('click', this.handleGrowNew);
-        document.getElementById('toggleFluid')?.removeEventListener('click', this.handleToggleFluid);
-        document.getElementById('toggleHeart')?.removeEventListener('click', this.handleHeartBeat);
-        
-        const controls = document.querySelector('.controls');
-        if (controls) {
-            controls.remove();
+        const panel = document.querySelector('.control-panel');
+        if (panel) {
+            panel.remove();
         }
     }
 } 

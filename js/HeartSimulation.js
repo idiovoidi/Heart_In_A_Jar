@@ -2,19 +2,21 @@ import * as THREE from 'three';
 
 export class HeartSimulation {
     constructor() {
+        console.log('Starting HeartSimulation constructor');
         this.heartGroup = new THREE.Group();
         this.time = 0;
         this.beatSpeed = 2;
         this.isBeating = true;
-        this.baseScale = 0.15;
-        this.initialRotation = Math.PI;
         
-        console.log('Initializing heart simulation...');
+        // Create artery system first
+        console.log('Creating artery system...');
+        this.arterySystem = new THREE.Group();
+        this.createArterySystem();
+        
+        console.log('Creating anatomical heart...');
         this.createAnatomicalHeart();
         
-        this.heartGroup.scale.set(this.baseScale, this.baseScale, this.baseScale);
-        this.heartGroup.rotation.z = this.initialRotation;
-        this.heartGroup.position.set(0, 0, 0);
+        console.log('HeartSimulation constructor complete');
     }
 
     createAnatomicalHeart() {
@@ -420,7 +422,7 @@ export class HeartSimulation {
         }
 
         // Add slight twisting motion
-        const twistAngle = this.initialRotation + ventricleContract * 0.1;
+        const twistAngle = Math.PI * 0.15 + ventricleContract * 0.1;
         this.heartGroup.rotation.z = twistAngle;
 
         // Valve animations
@@ -699,5 +701,68 @@ export class HeartSimulation {
         });
 
         return fiberGroup;
+    }
+
+    createArterySystem() {
+        try {
+            const material = new THREE.MeshPhongMaterial({
+                color: 0xff3333,
+                transparent: true,
+                opacity: 0.9
+            });
+
+            const createBranch = (parent, length, radius, direction, depth) => {
+                if (depth > 6) return;
+
+                console.log(`Creating branch at depth ${depth}`);
+                const geometry = new THREE.CylinderGeometry(radius, radius * 0.8, length, 8, 1);
+                const branch = new THREE.Mesh(geometry, material);
+                branch.position.copy(direction).multiplyScalar(length * 0.5);
+                branch.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.clone().normalize());
+                parent.add(branch);
+
+                // Limit branching for testing
+                if (depth < 3) {  // Reduced from 6 to 3 for testing
+                    for (let i = 0; i < 2; i++) {
+                        const newDirection = direction.clone();
+                        newDirection.applyEuler(new THREE.Euler(
+                            (Math.random() - 0.5) * Math.PI / 4,
+                            (Math.random() - 0.5) * Math.PI / 4,
+                            (Math.random() - 0.5) * Math.PI / 4
+                        ));
+                        createBranch(branch, length * 0.7, radius * 0.6, newDirection, depth + 1);
+                    }
+                }
+            };
+
+            // Create fewer initial branches for testing
+            const baseLength = 0.6;
+            const baseRadius = 0.08;
+            const directions = [
+                new THREE.Vector3(0, 1, 0),
+                new THREE.Vector3(0.5, 1, 0)
+            ];
+
+            directions.forEach((direction, i) => {
+                console.log(`Creating main artery ${i}`);
+                createBranch(this.arterySystem, baseLength, baseRadius, direction, 0);
+            });
+
+            console.log('Artery system creation complete');
+            return true;
+        } catch (error) {
+            console.error('Error creating artery system:', error);
+            return false;
+        }
+    }
+
+    getArterySystem() {
+        console.log('Getting artery system...');
+        if (!this.arterySystem) {
+            console.warn('No artery system available');
+            return null;
+        }
+        console.log(`Artery system has ${this.arterySystem.children.length} main branches`);
+        return this.arterySystem;
     }
 } 

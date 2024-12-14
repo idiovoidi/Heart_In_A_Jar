@@ -1,52 +1,48 @@
-import { ArterySimulation } from './ArterySimulation.js';
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { Scene } from './Scene.js';
 
-let simulation;
+let scene;
 
-function initSimulation() {
+function initScene() {
     try {
-        if (simulation) {
-            console.log('Cleaning up old simulation...');
-            simulation.dispose();
-            simulation = null;
+        if (scene) {
+            console.log('Cleaning up old scene...');
+            scene.dispose();
+            scene = null;
         }
 
-        console.log('Creating new simulation...');
+        console.log('Creating new scene...');
         const container = document.getElementById('container');
         if (!container) {
-            console.error('Container element not found');
-            return;
+            throw new Error('Container not found');
         }
-        
-        simulation = new ArterySimulation(container);
+        scene = new Scene(container);
     } catch (error) {
-        console.error('Error initializing simulation:', error);
+        console.error('Error initializing scene:', error);
     }
 }
 
-document.addEventListener('DOMContentLoaded', initSimulation);
+document.addEventListener('DOMContentLoaded', initScene);
 
 // Handle hot reloads better
 if (module.hot) {
     module.hot.accept(() => {
-        console.log('Hot reloading, reinitializing simulation...');
-        initSimulation();
+        console.log('Hot reloading, reinitializing scene...');
+        initScene();
     });
 }
 
 // Only clean up when the page is actually unloading
 window.addEventListener('beforeunload', () => {
-    if (simulation) {
-        simulation.dispose();
-        simulation = null;
+    if (scene) {
+        scene.dispose();
+        scene = null;
     }
 });
 
 // Remove the visibility change handler since it's causing issues
 // document.addEventListener('visibilitychange', () => {
-//     if (document.hidden && simulation) {
-//         simulation.dispose();
-//         simulation = null;
+//     if (document.hidden && scene) {
+//         scene.dispose();
+//         scene = null;
 //     }
 // }); 

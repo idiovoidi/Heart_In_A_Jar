@@ -1,309 +1,130 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { FluidSimulation } from './FluidSimulation.js';
-import { LabEnvironment } from './LabEnvironment.js';
-import { InputManager } from './inputs/InputManager.js';
-import { LabJar } from './LabJar.js';
 
 export class ArterySimulation {
-    constructor(container) {
-        if (!container) {
-            console.error('Container element not found');
-            return;
-        }
-        
-        console.log('Initializing ArterySimulation...');
-        
-        try {
-            this.container = container;
-            this.branches = [];
-            this.growthQueue = [];
-            this.isGrowing = false;
-            this.growthSpeed = 100;
-            
-            console.log('Creating FluidSimulation...');
-            this.fluidSim = new FluidSimulation(container);
-            
-            console.log('Setting up scene...');
-            this.setup();
-            
-            console.log('Creating artery system...');
-            this.createArterySystem(false);
-            
-            console.log('Creating controls...');
-            this.inputManager = new InputManager(this);
-            this.inputManager.init();
-            
-            console.log('Starting animation loop...');
-            this.animate();
-        } catch (error) {
-            console.error('Error initializing ArterySimulation:', error);
-        }
-    }
-
-    dispose() {
-        // Remove event listeners
-        window.removeEventListener('resize', this.onWindowResize);
-        
-        // Dispose of branches
-        this.cleanupBranches();
-
-        // Dispose of fluid simulation
-        if (this.fluidSim) {
-            this.fluidSim.dispose();
-        }
-
-        // Clear scene
-        while(this.scene.children.length > 0) { 
-            const object = this.scene.children[0];
-            this.scene.remove(object);
-        }
-
-        // Dispose of lights
-        this.scene.traverse(object => {
-            if (object.isLight) {
-                object.dispose();
-            }
-        });
-
-        // Dispose of controls
-        if (this.controls) {
-            this.controls.dispose();
-        }
-
-        // Dispose of renderer
-        if (this.renderer) {
-            this.renderer.dispose();
-            this.renderer.forceContextLoss();
-            this.renderer.domElement.remove();
-            this.renderer = null;
-        }
-
-        // Clear growth queue
+    constructor() {
+        console.log('Initializing ArterySimulation');
+        this.arteryGroup = new THREE.Group();
+        this.branches = [];
         this.growthQueue = [];
         this.isGrowing = false;
-
-        // Clear references
-        this.scene = null;
-        this.camera = null;
-        this.controls = null;
-
-        // Add input manager disposal
-        if (this.inputManager) {
-            this.inputManager.dispose();
-        }
+        this.growthSpeed = 20;
     }
 
-    cleanupBranches() {
-        this.branches.forEach(branch => {
-            if (branch.geometry) {
-                branch.geometry.dispose();
-            }
-            if (branch.material) {
-                branch.material.dispose();
-            }
-            this.scene.remove(branch);
+    getMesh() {
+        return this.arteryGroup;
+    }
+
+    createArterySystem(immediate = false) {
+        console.log('Creating artery system...');
+        this.growthQueue = [];
+        
+        const arteryMaterial = new THREE.MeshPhongMaterial({
+            color: 0xff2222,
+            transparent: true,
+            opacity: 0.9,
+            side: THREE.DoubleSide,
+            emissive: 0x330000,
+            shininess: 50
         });
-        this.branches = [];
-    }
 
-    setup() {
-        try {
-            // Scene setup
-            this.scene = new THREE.Scene();
-            this.scene.background = new THREE.Color(0x111111);
-            
-            // Camera setup
-            this.camera = new THREE.PerspectiveCamera(
-                45,  // narrower FOV
-                window.innerWidth / window.innerHeight,
-                0.1,
-                1000
-            );
-            
-            // Initial camera setup
-            this.camera.position.set(3, 0, 4);
-            this.camera.zoom = 1.0;
-            this.camera.updateProjectionMatrix();
-            this.camera.lookAt(0, -0.35, 0);
-            
-            // Renderer setup
-            this.renderer = new THREE.WebGLRenderer({ 
-                antialias: true,
-                alpha: true 
-            });
-            this.renderer.setSize(window.innerWidth, window.innerHeight);
-            this.container.appendChild(this.renderer.domElement);
+        const veinMaterial = new THREE.MeshPhongMaterial({
+            color: 0x2222ff,
+            transparent: true,
+            opacity: 0.9,
+            side: THREE.DoubleSide,
+            emissive: 0x000033,
+            shininess: 50
+        });
 
-            // Lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(0, 10, 10);
-            this.scene.add(ambientLight, directionalLight);
+        const createBranch = (parent, length, radius, direction, depth, isArtery = true) => {
+            if (depth > 10) return;
 
-            // Controls setup
-            this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-            this.controls.enableDamping = true;
-            this.controls.dampingFactor = 0.05;
-            this.controls.minDistance = 2;
-            this.controls.maxDistance = 10;
-            this.controls.enablePan = false;
-            this.controls.maxPolarAngle = Math.PI * 0.75;
-            this.controls.minPolarAngle = Math.PI * 0.25;
-            this.controls.target.set(0, -0.35, 0);
-            this.controls.update();
-
-            // Handle window resize
-            this.onWindowResize = () => {
-                this.camera.aspect = window.innerWidth / window.innerHeight;
-                this.camera.updateProjectionMatrix();
-                this.renderer.setSize(window.innerWidth, window.innerHeight);
-            };
-            window.addEventListener('resize', this.onWindowResize, false);
-
-            console.log('Setting up fluid simulation...');
-            // Create jar using new class
-            const jar = new LabJar().getMesh();
-            jar.position.y = -0.35;
-            
-            console.log('Adding objects to scene...');
-            this.scene.add(jar);
-            this.fluidSim.fluid = jar;
-
-            // Set initial camera and controls position
-            this.controls.target.set(0, -0.35, 0);
-            
-            console.log('Setup complete');
-        } catch (error) {
-            console.error('Error in setup:', error);
-            throw error;
-        }
-    }
-
-    createBranch(startPoint, direction, length, radius, depth = 0, isArtery = true, immediate = false) {
-        if (depth > 8) return;
-
-        const endPoint = new THREE.Vector3()
-            .addVectors(
-                startPoint,
-                direction.clone().multiplyScalar(length)
-            );
-
-        const createVessel = () => {
-            const curve = new THREE.CatmullRomCurve3([
-                startPoint,
-                new THREE.Vector3(
-                    startPoint.x + (Math.random() - 0.5) * 0.1,
-                    startPoint.y + (Math.random() - 0.5) * 0.1,
-                    startPoint.z + (Math.random() - 0.5) * 0.1
-                ),
-                endPoint
-            ]);
-
-            const tubeGeometry = new THREE.TubeGeometry(
-                curve,
-                12,
+            const geometry = new THREE.CylinderGeometry(
                 radius,
+                radius * 0.9,
+                length,
                 8,
-                false
+                1
             );
 
-            const material = new THREE.MeshPhongMaterial({
-                color: isArtery ? 0xff0000 : 0x0000ff,
-                shininess: 100,
-                transparent: false,
-                side: THREE.DoubleSide,
-                depthWrite: true,
-                depthTest: true
-            });
+            const branch = new THREE.Mesh(
+                geometry,
+                isArtery ? arteryMaterial : veinMaterial
+            );
 
-            const tube = new THREE.Mesh(tubeGeometry, material);
-            tube.renderOrder = 4;
-            this.scene.add(tube);
-            this.branches.push(tube);
+            // Position the branch
+            const position = parent ? parent.position.clone() : new THREE.Vector3();
+            if (parent) {
+                position.add(direction.clone().multiplyScalar(length));
+            }
+            branch.position.copy(position);
 
-            // Queue sub-branches
-            if (depth < 8) {
-                const numBranches = Math.floor(Math.random() * 2) + 1;
+            // Orient the branch
+            branch.quaternion.setFromUnitVectors(
+                new THREE.Vector3(0, 1, 0),
+                direction
+            );
+
+            // Add to scene
+            (parent || this.arteryGroup).add(branch);
+            this.branches.push(branch);
+
+            // Create sub-branches
+            if (depth < 10) {
+                const numBranches = Math.floor(Math.random() * 2) + 2;
                 for (let i = 0; i < numBranches; i++) {
-                    const newDirection = direction.clone()
-                        .add(new THREE.Vector3(
-                            (Math.random() - 0.5) * 0.8,
-                            (Math.random() - 0.5) * 0.8,
-                            (Math.random() - 0.5) * 0.8
-                        ))
-                        .normalize();
+                    const newDirection = direction.clone();
+                    
+                    // Add strong upward bias
+                    newDirection.y += 1.0;
+                    
+                    // Add outward spread
+                    newDirection.x += (Math.random() - 0.5) * 1.2;
+                    newDirection.z += (Math.random() - 0.5) * 1.2;
+                    
+                    newDirection.normalize();
 
-                    const branchParams = {
-                        startPoint: endPoint.clone(),
-                        direction: newDirection,
-                        length: length * 0.7,
-                        radius: radius * 0.7,
-                        depth: depth + 1,
-                        isArtery: isArtery
-                    };
+                    const newLength = length * 0.95;
+                    const newRadius = radius * 0.9;
 
                     if (immediate) {
-                        this.createBranch(
-                            branchParams.startPoint,
-                            branchParams.direction,
-                            branchParams.length,
-                            branchParams.radius,
-                            branchParams.depth,
-                            branchParams.isArtery,
-                            true
-                        );
+                        createBranch(branch, newLength, newRadius, newDirection, depth + 1, isArtery);
                     } else {
-                        this.growthQueue.push(branchParams);
+                        this.growthQueue.push({
+                            parent: branch,
+                            length: newLength,
+                            radius: newRadius,
+                            direction: newDirection,
+                            depth: depth + 1,
+                            isArtery: isArtery
+                        });
                     }
                 }
             }
         };
 
-        if (immediate) {
-            createVessel();
-        } else {
-            this.growthQueue.push({
-                execute: createVessel
-            });
-        }
-    }
+        // Create initial branches
+        const startDirections = [
+            // Main arteries (red)
+            { dir: new THREE.Vector3(0, 1, 0.2), isArtery: true },
+            { dir: new THREE.Vector3(0.2, 1, 0), isArtery: true },
+            { dir: new THREE.Vector3(-0.2, 1, 0), isArtery: true },
+            // Main veins (blue)
+            { dir: new THREE.Vector3(0.1, 1, -0.2), isArtery: false },
+            { dir: new THREE.Vector3(-0.1, 1, 0.2), isArtery: false }
+        ];
 
-    processGrowthQueue() {
-        if (!this.isGrowing || this.growthQueue.length === 0) return;
-
-        const nextBranch = this.growthQueue.shift();
-        if (nextBranch.execute) {
-            nextBranch.execute();
-        } else {
-            this.createBranch(
-                nextBranch.startPoint,
-                nextBranch.direction,
-                nextBranch.length,
-                nextBranch.radius,
-                nextBranch.depth,
-                nextBranch.isArtery,
-                false
+        startDirections.forEach(({ dir, isArtery }) => {
+            dir.normalize();
+            createBranch(
+                null,
+                2.0,     // Longer initial branches
+                0.2,     // Thicker initial branches
+                dir,
+                0,
+                isArtery
             );
-        }
-
-        setTimeout(() => this.processGrowthQueue(), this.growthSpeed);
-    }
-
-    createArterySystem(immediate = false) {
-        this.growthQueue = [];
-        const startPoint = new THREE.Vector3(0, -0.35, 0);
-        
-        this.createBranch(startPoint, new THREE.Vector3(0, 1, 0), 1, 0.05, 0, true, immediate);
-        this.createBranch(
-            startPoint.clone().add(new THREE.Vector3(0.2, 0, 0)),
-            new THREE.Vector3(0, 1, 0),
-            1,
-            0.05,
-            0,
-            false,
-            immediate
-        );
+        });
 
         if (!immediate) {
             this.isGrowing = true;
@@ -311,35 +132,73 @@ export class ArterySimulation {
         }
     }
 
-    onWindowResize() {
-        this.camera.aspect = window.innerWidth / window.innerHeight;
-        this.camera.updateProjectionMatrix();
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+    processGrowthQueue() {
+        if (!this.isGrowing || this.growthQueue.length === 0) return;
+
+        // Process multiple branches per frame
+        for (let i = 0; i < 4 && this.growthQueue.length > 0; i++) {
+            const { parent, length, radius, direction, depth, isArtery } = this.growthQueue.shift();
+            const geometry = new THREE.CylinderGeometry(radius, radius * 0.9, length, 8, 1);
+            const material = new THREE.MeshPhongMaterial({
+                color: isArtery ? 0xff2222 : 0x2222ff,
+                transparent: true,
+                opacity: 0.9,
+                side: THREE.DoubleSide,
+                emissive: isArtery ? 0x330000 : 0x000033,
+                shininess: 50
+            });
+
+            const branch = new THREE.Mesh(geometry, material);
+            const position = parent.position.clone().add(direction.clone().multiplyScalar(length));
+            branch.position.copy(position);
+            branch.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+
+            parent.add(branch);
+            this.branches.push(branch);
+
+            // Continue branching
+            if (depth < 10) {
+                const numNewBranches = Math.floor(Math.random() * 2) + 2;
+                for (let j = 0; j < numNewBranches; j++) {
+                    const newDirection = direction.clone();
+                    newDirection.y += 1.0;
+                    newDirection.x += (Math.random() - 0.5) * 1.2;
+                    newDirection.z += (Math.random() - 0.5) * 1.2;
+                    newDirection.normalize();
+
+                    this.growthQueue.push({
+                        parent: branch,
+                        length: length * 0.95,
+                        radius: radius * 0.9,
+                        direction: newDirection,
+                        depth: depth + 1,
+                        isArtery: isArtery
+                    });
+                }
+            }
+        }
+
+        setTimeout(() => this.processGrowthQueue(), this.growthSpeed);
     }
 
-    animate() {
-        try {
-            if (!this.container.isConnected) {
-                console.log('Container disconnected, disposing...');
-                this.dispose();
-                return;
+    update(deltaTime) {
+        const time = performance.now() * 0.001;
+        this.branches.forEach((branch, index) => {
+            if (branch.isMesh) {
+                const offset = index * 0.1;
+                const scale = 1 + Math.sin(time * 2 + offset) * 0.1;
+                branch.scale.setScalar(scale);
             }
+        });
+    }
 
-            // Validate scene state
-            if (!this.scene || !this.camera || !this.renderer) {
-                console.error('Essential components missing');
-                return;
-            }
-
-            console.log('Rendering frame...'); // Remove after debugging
-            requestAnimationFrame(() => this.animate());
-            
-            const deltaTime = 0.016;
-            this.controls.update();
-            this.fluidSim.update(deltaTime);
-            this.renderer.render(this.scene, this.camera);
-        } catch (error) {
-            console.error('Error in animation loop:', error);
-        }
+    dispose() {
+        this.isGrowing = false;
+        this.growthQueue = [];
+        this.branches.forEach(branch => {
+            if (branch.geometry) branch.geometry.dispose();
+            if (branch.material) branch.material.dispose();
+        });
+        this.branches = [];
     }
 } 
