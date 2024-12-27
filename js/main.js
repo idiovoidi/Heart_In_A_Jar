@@ -4,6 +4,7 @@ import { ButtonHandler } from './inputs/ButtonHandler.js';
 import { ArterySimulation } from './ArterySimulation.js';
 import { FleshClumps } from './FleshClumps.js';
 import { FluidSimulation } from './FluidSimulation.js';
+import { LabEnvironment } from './LabEnvironment.js';
 
 const canvas = document.getElementById("renderCanvas");
 const engine = new BABYLON.Engine(canvas, true);
@@ -31,6 +32,9 @@ class SceneManager {
             }
             if (this.fluidSim) {
                 this.fluidSim.update(deltaTime);
+            }
+            if (this.labEnvironment) {
+                this.labEnvironment.update(deltaTime);
             }
             this.scene.render();
         });
@@ -80,6 +84,7 @@ class SceneManager {
         this.arterySim = new ArterySimulation(this.scene);
         this.fleshClumps = new FleshClumps(this.scene);
         this.fluidSim = new FluidSimulation(this.scene);
+        this.labEnvironment = new LabEnvironment(this.scene);
         
         // Position and scale components
         this.positionComponents();
@@ -144,6 +149,9 @@ class SceneManager {
         }
         if (this.labJar) {
             this.labJar.dispose();
+        }
+        if (this.labEnvironment) {
+            this.labEnvironment.dispose();
         }
         this.scene.dispose();
     }

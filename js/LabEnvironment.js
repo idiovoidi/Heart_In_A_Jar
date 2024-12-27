@@ -1,157 +1,109 @@
-import * as THREE from 'three';
-
 export class LabEnvironment {
-    constructor() {
-        this.labGroup = new THREE.Group();
-        this.createLaboratory();
+    constructor(scene) {
+        this.scene = scene;
+        this.environmentGroup = new BABYLON.TransformNode("environmentGroup", scene);
+        
+        this.setupFog();
+        this.setupParticles();
+        this.setupLighting();
     }
 
-    createLaboratory() {
-        // Create lab floor - smaller room size
-        const floorGeometry = new THREE.PlaneGeometry(10, 10);
-        const floorMaterial = new THREE.MeshStandardMaterial({
-            color: 0x333333,
-            roughness: 0.8,
-            metalness: 0.2
-        });
-        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-        floor.rotation.x = -Math.PI / 2;
-        floor.position.y = -2;
-        this.labGroup.add(floor);
+    setupFog() {
+        // Add volumetric fog
+        this.scene.fogMode = BABYLON.Scene.FOGMODE_EXP;
+        this.scene.fogDensity = 0.05;
+        this.scene.fogColor = new BABYLON.Color3(0.1, 0.1, 0.15);
+    }
 
-        // Create larger lab table
-        const tableGeometry = new THREE.BoxGeometry(4, 0.2, 2);
-        const tableMaterial = new THREE.MeshStandardMaterial({
-            color: 0x444444,
-            roughness: 0.3,
-            metalness: 0.8
-        });
-        const table = new THREE.Mesh(tableGeometry, tableMaterial);
-        // Raise table position to match jar height
-        table.position.y = -1.5;
-        this.labGroup.add(table);
+    setupParticles() {
+        // Create dust particles
+        this.dustParticles = new BABYLON.ParticleSystem("dustParticles", 1000, this.scene);
+        this.dustParticles.particleTexture = new BABYLON.Texture("textures/dust.png", this.scene);
+        
+        // Particle behavior
+        this.dustParticles.minEmitBox = new BABYLON.Vector3(-2, -2, -2);
+        this.dustParticles.maxEmitBox = new BABYLON.Vector3(2, 2, 2);
+        this.dustParticles.minSize = 0.02;
+        this.dustParticles.maxSize = 0.05;
+        this.dustParticles.minLifeTime = 5;
+        this.dustParticles.maxLifeTime = 8;
+        this.dustParticles.emitRate = 50;
+        
+        // Slow upward drift
+        this.dustParticles.gravity = new BABYLON.Vector3(0, 0.02, 0);
+        this.dustParticles.direction1 = new BABYLON.Vector3(-0.1, 0.1, -0.1);
+        this.dustParticles.direction2 = new BABYLON.Vector3(0.1, 0.1, 0.1);
+        this.dustParticles.minEmitPower = 0.1;
+        this.dustParticles.maxEmitPower = 0.3;
+        
+        // Particle color
+        this.dustParticles.color1 = new BABYLON.Color4(0.8, 0.8, 0.9, 0.1);
+        this.dustParticles.color2 = new BABYLON.Color4(0.9, 0.9, 1.0, 0.15);
+        this.dustParticles.colorDead = new BABYLON.Color4(0.9, 0.9, 1.0, 0);
 
-        // Adjust table legs for new dimensions
-        const legGeometry = new THREE.CylinderGeometry(0.05, 0.05, 0.8);
-        const legMaterial = new THREE.MeshStandardMaterial({
-            color: 0x333333,
-            roughness: 0.3,
-            metalness: 0.8
-        });
+        this.dustParticles.parent = this.environmentGroup;
+        this.dustParticles.start();
+    }
 
-        // Adjust leg positions for larger table
-        const tablePositions = [
-            [-1.8, -1.9, 0.8],
-            [1.8, -1.9, 0.8],
-            [-1.8, -1.9, -0.8],
-            [1.8, -1.9, -0.8]
+    setupLighting() {
+        // Add point lights for atmosphere
+        const createPointLight = (name, position, intensity, radius) => {
+            const light = new BABYLON.PointLight(
+                name,
+                position,
+                this.scene
+            );
+            light.intensity = intensity;
+            light.radius = radius;
+            return light;
+        };
+
+        // Create multiple point lights for depth
+        this.lights = [
+            createPointLight("topLight", 
+                new BABYLON.Vector3(0, 3, 0), 
+                0.4, 
+                5
+            ),
+            createPointLight("backLight", 
+                new BABYLON.Vector3(0, 0, -3), 
+                0.3, 
+                4
+            ),
+            createPointLight("frontLight", 
+                new BABYLON.Vector3(0, 0, 3), 
+                0.2, 
+                4
+            )
         ];
 
-        tablePositions.forEach(pos => {
-            const leg = new THREE.Mesh(legGeometry, legMaterial);
-            leg.position.set(...pos);
-            this.labGroup.add(leg);
-        });
-
-        this.addLabEquipment();
-        this.createWallPanels();
-        this.addLabProps();
+        // Add subtle color variations to lights
+        this.lights[0].diffuse = new BABYLON.Color3(0.9, 0.95, 1.0);
+        this.lights[1].diffuse = new BABYLON.Color3(0.8, 0.9, 1.0);
+        this.lights[2].diffuse = new BABYLON.Color3(1.0, 0.95, 0.9);
     }
 
-    createWallPanels() {
-        // Smaller walls for cozier lab
-        const wallGeometry = new THREE.PlaneGeometry(10, 6);
-        const wallMaterial = new THREE.MeshStandardMaterial({
-            color: 0xeeeeee,
-            roughness: 0.9,
-            metalness: 0.1
+    update(deltaTime) {
+        // Animate lights subtly
+        const time = performance.now() * 0.001;
+        
+        this.lights.forEach((light, index) => {
+            const offset = index * Math.PI * 0.5;
+            const intensity = 0.2 + Math.sin(time * 0.5 + offset) * 0.1;
+            light.intensity = intensity;
         });
 
-        // Back wall
-        const backWall = new THREE.Mesh(wallGeometry, wallMaterial);
-        backWall.position.z = -3;
-        backWall.position.y = 1;
-        this.labGroup.add(backWall);
-
-        // Side walls
-        const sideWall1 = backWall.clone();
-        sideWall1.rotation.y = Math.PI / 2;
-        sideWall1.position.x = -5;
-        sideWall1.position.z = 0;
-        this.labGroup.add(sideWall1);
-
-        const sideWall2 = backWall.clone();
-        sideWall2.rotation.y = -Math.PI / 2;
-        sideWall2.position.x = 5;
-        sideWall2.position.z = 0;
-        this.labGroup.add(sideWall2);
+        // Update fog density with subtle variation
+        this.scene.fogDensity = 0.05 + Math.sin(time * 0.2) * 0.01;
     }
 
-    addLabEquipment() {
-        // Microscope
-        const microscopeBase = new THREE.CylinderGeometry(0.15, 0.2, 0.1);
-        const microscopeMaterial = new THREE.MeshStandardMaterial({
-            color: 0x222222,
-            roughness: 0.2,
-            metalness: 0.8
-        });
-        const microscope = new THREE.Mesh(microscopeBase, microscopeMaterial);
-        microscope.position.set(-1.5, -1.3, 0.5);
-        this.labGroup.add(microscope);
-
-        // Test tubes
-        const tubeGeometry = new THREE.CylinderGeometry(0.03, 0.03, 0.2);
-        const tubeMaterial = new THREE.MeshPhysicalMaterial({
-            color: 0xffffff,
-            transparent: true,
-            opacity: 0.6,
-            roughness: 0,
-            metalness: 0,
-            clearcoat: 1.0
-        });
-
-        // Reposition test tubes
-        for (let i = 0; i < 5; i++) {
-            const tube = new THREE.Mesh(tubeGeometry, tubeMaterial);
-            tube.position.set(1.2 + i * 0.1, -1.3, 0.7);
-            this.labGroup.add(tube);
+    dispose() {
+        if (this.dustParticles) {
+            this.dustParticles.dispose();
         }
-    }
-
-    addLabProps() {
-        // Ceiling lights - fewer for smaller room
-        const lightGeometry = new THREE.BoxGeometry(0.8, 0.1, 0.3);
-        const lightMaterial = new THREE.MeshStandardMaterial({
-            color: 0xffffff,
-            emissive: 0xffffff,
-            emissiveIntensity: 1
+        this.lights.forEach(light => {
+            light.dispose();
         });
-
-        // Adjust light positions for smaller room
-        for (let i = -3; i <= 3; i += 3) {
-            const light = new THREE.Mesh(lightGeometry, lightMaterial);
-            light.position.set(i, 3, 0);
-            this.labGroup.add(light);
-
-            const pointLight = new THREE.PointLight(0xffffff, 0.5);
-            pointLight.position.copy(light.position);
-            this.labGroup.add(pointLight);
-        }
-
-        // Single shelf unit on the back wall
-        const shelfGeometry = new THREE.BoxGeometry(2, 0.1, 0.5);
-        const shelfMaterial = new THREE.MeshStandardMaterial({
-            color: 0x666666,
-            roughness: 0.7,
-            metalness: 0.3
-        });
-
-        const shelf = new THREE.Mesh(shelfGeometry, shelfMaterial);
-        shelf.position.set(-3, 0.5, -2.7);
-        this.labGroup.add(shelf);
-    }
-
-    getMesh() {
-        return this.labGroup;
+        this.environmentGroup.dispose();
     }
 } 
