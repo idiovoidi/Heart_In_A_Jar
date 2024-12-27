@@ -1,6 +1,7 @@
 import { LabJar } from './LabJar.js';
 import { HeartSimulation } from './HeartSimulation.js';
 import { ButtonHandler } from './inputs/ButtonHandler.js';
+import { ArterySimulation } from './ArterySimulation.js';
 
 const canvas = document.getElementById("renderCanvas");
 const engine = new BABYLON.Engine(canvas, true);
@@ -19,6 +20,9 @@ class SceneManager {
             if (this.heartSim) {
                 this.heartSim.update(engine.getDeltaTime() / 1000);
             }
+            if (this.arterySim) {
+                this.arterySim.update(engine.getDeltaTime() / 1000);
+            }
             this.scene.render();
         });
 
@@ -32,14 +36,14 @@ class SceneManager {
         const scene = new BABYLON.Scene(engine);
         scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
         
-        // Camera setup
+        // Camera setup with adjusted position
         const camera = new BABYLON.ArcRotateCamera("camera", 
-            0, Math.PI / 3, 10,
+            0, Math.PI / 3, 12,  // Increased radius from 10 to 12
             BABYLON.Vector3.Zero(),
             scene
         );
         camera.attachControl(canvas, true);
-        camera.setPosition(new BABYLON.Vector3(0, 0, 8));
+        camera.setPosition(new BABYLON.Vector3(0, 0, 10));  // Adjusted from 8 to 10
         camera.setTarget(new BABYLON.Vector3(0, -1, 0));
         
         // Lighting setup
@@ -64,12 +68,16 @@ class SceneManager {
         // Initialize components
         this.labJar = new LabJar(this.scene);
         this.heartSim = new HeartSimulation(this.scene);
+        this.arterySim = new ArterySimulation(this.scene);
         
         // Position and scale components
         this.positionComponents();
         
         // Setup post-processing
         this.setupPostProcessing();
+
+        // Start artery growth
+        this.arterySim.createArterySystem();
     }
 
     positionComponents() {
@@ -77,11 +85,17 @@ class SceneManager {
         this.labJar.getMesh().scaling = new BABYLON.Vector3(1.2, 1.2, 1.2);
         this.labJar.getMesh().position.y = -1;
 
-        // Position heart
+        // Position heart - make it larger and adjust position
         const heartMesh = this.heartSim.getMesh();
-        heartMesh.scaling = new BABYLON.Vector3(0.25, 0.25, 0.25);
-        heartMesh.position = new BABYLON.Vector3(0, -1.8, 0);
+        heartMesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);  // Increased from 0.25 to 0.4
+        heartMesh.position = new BABYLON.Vector3(0, -1.5, 0);    // Raised from -1.8 to -1.5
         heartMesh.rotation = new BABYLON.Vector3(Math.PI * 0.15, 0, 0);
+
+        // Position artery system - match heart scale and position
+        const arteryMesh = this.arterySim.getMesh();
+        arteryMesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);  // Match heart scale
+        arteryMesh.position = heartMesh.position.clone();
+        arteryMesh.rotation = heartMesh.rotation.clone();
     }
 
     setupPostProcessing() {

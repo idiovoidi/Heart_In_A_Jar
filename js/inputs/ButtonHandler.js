@@ -15,6 +15,9 @@ export class ButtonHandler {
         
         // View Controls Section
         this.createViewControls(panel);
+
+        // Artery Controls Section
+        this.createArteryControls(panel);
     }
 
     createHeartControls(panel) {
@@ -52,6 +55,37 @@ export class ButtonHandler {
         panel.appendChild(resetViewBtn);
     }
 
+    createArteryControls(panel) {
+        const arteryContainer = document.createElement('div');
+        arteryContainer.className = 'control-section';
+
+        // Start/Stop Growth Button
+        const toggleGrowthBtn = document.createElement('button');
+        toggleGrowthBtn.textContent = 'Start Artery Growth';
+        toggleGrowthBtn.onclick = () => this.toggleArteryGrowth();
+        arteryContainer.appendChild(toggleGrowthBtn);
+
+        // Growth Speed Slider
+        const speedContainer = document.createElement('div');
+        speedContainer.className = 'slider-container';
+        
+        const speedLabel = document.createElement('label');
+        speedLabel.textContent = 'Growth Speed';
+        speedContainer.appendChild(speedLabel);
+
+        const speedSlider = document.createElement('input');
+        speedSlider.type = 'range';
+        speedSlider.min = '50';
+        speedSlider.max = '200';
+        speedSlider.step = '10';
+        speedSlider.value = '100';
+        speedSlider.oninput = (e) => this.updateGrowthSpeed(e.target.value);
+        speedContainer.appendChild(speedSlider);
+        
+        arteryContainer.appendChild(speedContainer);
+        panel.appendChild(arteryContainer);
+    }
+
     toggleHeartbeat() {
         if (this.sceneManager.heartSim) {
             const isBeating = !this.sceneManager.heartSim.isBeating;
@@ -68,8 +102,25 @@ export class ButtonHandler {
     resetView() {
         const camera = this.sceneManager.scene.activeCamera;
         if (camera) {
-            camera.setPosition(new BABYLON.Vector3(0, 0, 8));
+            camera.setPosition(new BABYLON.Vector3(0, 0, 10));
             camera.setTarget(new BABYLON.Vector3(0, -1, 0));
+        }
+    }
+
+    toggleArteryGrowth() {
+        if (this.sceneManager.arterySim) {
+            if (this.sceneManager.arterySim.isGrowing) {
+                this.sceneManager.arterySim.isGrowing = false;
+            } else {
+                this.sceneManager.arterySim.isGrowing = true;
+                this.sceneManager.arterySim.processGrowthQueue();
+            }
+        }
+    }
+
+    updateGrowthSpeed(speed) {
+        if (this.sceneManager.arterySim) {
+            this.sceneManager.arterySim.growthSpeed = parseInt(speed);
         }
     }
 
