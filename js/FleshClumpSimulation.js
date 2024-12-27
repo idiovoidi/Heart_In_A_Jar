@@ -14,11 +14,11 @@ export class FleshClumpSimulation {
     }
 
     createFleshClumps() {
-        const numClumps = 8;
+        const numClumps = 5;
         const minSize = 0.15;
-        const maxSize = 0.4;
-        const minPosition = new THREE.Vector3(-0.6, 0, -0.6);
-        const maxPosition = new THREE.Vector3(0.6, 0.3, 0.6);
+        const maxSize = 1.5;
+        const minPosition = new THREE.Vector3(-22.6, 0, -22.6);
+        const maxPosition = new THREE.Vector3(22.6, 0.3, 12.6);
 
         for (let i = 0; i < numClumps; i++) {
             const size = Math.random() * (maxSize - minSize) + minSize;

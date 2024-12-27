@@ -119,7 +119,9 @@ class SceneManager {
     }
 
     setupEnvironment() {
-        // Initialize components
+        console.log('Setting up environment...');
+        
+        // Initialize components in correct order
         this.labJar = new LabJar(this.scene);
         this.heartSim = new HeartSimulation(this.scene);
         this.arterySim = new ArterySimulation(this.scene);
@@ -132,23 +134,20 @@ class SceneManager {
         
         // Setup post-processing
         this.setupPostProcessing();
-
-        // Start artery growth
-        this.arterySim.createArterySystem();
     }
 
     positionComponents() {
         // Position jar higher on the table
         this.labJar.getMesh().scaling = new BABYLON.Vector3(1.2, 1.2, 1.2);
-        this.labJar.getMesh().position.y = -1.4;  // Raised from -1 to -1.4
+        this.labJar.getMesh().position.y = -1.4;
 
-        // Position heart - adjust for new jar position
+        // Position heart
         const heartMesh = this.heartSim.getMesh();
         heartMesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);
-        heartMesh.position = new BABYLON.Vector3(0, -1.9, 0);    // Adjusted for new jar position
+        heartMesh.position = new BABYLON.Vector3(0, -1.9, 0);
         heartMesh.rotation = new BABYLON.Vector3(Math.PI * 0.15, 0, 0);
 
-        // Position artery system
+        // Position artery system relative to heart
         const arteryMesh = this.arterySim.getMesh();
         arteryMesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);
         arteryMesh.position = heartMesh.position.clone();
@@ -157,12 +156,12 @@ class SceneManager {
         // Position flesh clumps
         const fleshMesh = this.fleshClumps.getMesh();
         fleshMesh.scaling = new BABYLON.Vector3(0.3, 0.3, 0.3);
-        fleshMesh.position = new BABYLON.Vector3(0, -2.35, 0);   // Adjusted for new jar position
+        fleshMesh.position = new BABYLON.Vector3(0, -2.35, 0);
 
         // Position fluid
         const fluidMesh = this.fluidSim.getMesh();
         fluidMesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);
-        fluidMesh.position = new BABYLON.Vector3(0, -2.2, 0);    // Adjusted for new jar position
+        fluidMesh.position = new BABYLON.Vector3(0, -2.2, 0);
     }
 
     setupPostProcessing() {

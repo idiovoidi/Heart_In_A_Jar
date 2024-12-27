@@ -65,11 +65,30 @@ export class ButtonHandler {
         const arteryContainer = document.createElement('div');
         arteryContainer.className = 'control-section';
 
-        // Start/Stop Growth Button
+        // Change button text based on growth state
         const toggleGrowthBtn = document.createElement('button');
-        toggleGrowthBtn.textContent = 'Start Artery Growth';
-        toggleGrowthBtn.onclick = () => this.toggleArteryGrowth();
+        toggleGrowthBtn.textContent = 'Pause Growth';
+        toggleGrowthBtn.onclick = () => {
+            if (this.sceneManager.arterySim) {
+                this.sceneManager.arterySim.isGrowing = !this.sceneManager.arterySim.isGrowing;
+                toggleGrowthBtn.textContent = this.sceneManager.arterySim.isGrowing ? 'Pause Growth' : 'Resume Growth';
+                
+                if (this.sceneManager.arterySim.isGrowing) {
+                    this.sceneManager.arterySim.processGrowthQueue();
+                }
+            }
+        };
         arteryContainer.appendChild(toggleGrowthBtn);
+
+        // Add Reset button
+        const resetGrowthBtn = document.createElement('button');
+        resetGrowthBtn.textContent = 'Reset Growth';
+        resetGrowthBtn.onclick = () => {
+            if (this.sceneManager.arterySim) {
+                this.sceneManager.arterySim.reset();
+            }
+        };
+        arteryContainer.appendChild(resetGrowthBtn);
 
         // Growth Speed Slider
         const speedContainer = document.createElement('div');

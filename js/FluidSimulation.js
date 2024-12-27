@@ -6,76 +6,51 @@ export class FluidSimulation {
         this.targetLevel = 0;
         this.fillSpeed = 0.0001;
         this.isFlowing = false;
-        this.jarRadius = 5.5;
+        this.jarRadius = 4.8;
         this.maxHeight = 3.5;
-        
-        // Create particle texture
-        this.particleTexture = this.createParticleTexture();
         
         this.createFluid();
         this.createParticleSystem();
     }
 
-    createParticleTexture() {
-        const size = 32;
-        const texture = new BABYLON.DynamicTexture("particleTexture", size, this.scene, true);
-        const ctx = texture.getContext();
-        
-        // Create a radial gradient for a soft particle
-        const gradient = ctx.createRadialGradient(
-            size/2, size/2, 0,
-            size/2, size/2, size/2
-        );
-        
-        gradient.addColorStop(0, 'white');
-        gradient.addColorStop(1, 'transparent');
-        
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, size, size);
-        
-        texture.update();
-        return texture;
-    }
-
     createFluid() {
-        // Create fluid mesh (cylinder that will grow)
+        // Create fluid mesh
         const fluid = BABYLON.MeshBuilder.CreateCylinder("fluid", {
             height: 0.1,
-            diameter: this.jarRadius * 2 * 0.95, // Slightly smaller than jar
+            diameter: this.jarRadius * 2 * 0.95,
             tessellation: 32,
             subdivisions: 1
         }, this.scene);
 
-        // Create custom shader material for fluid
+        // Create advanced shader material
         const shaderMaterial = new BABYLON.ShaderMaterial("fluidShader", this.scene, {
             vertex: "fluid",
             fragment: "fluid",
-        },
-        {
+        }, {
             attributes: ["position", "normal", "uv"],
-            uniforms: ["world", "worldView", "worldViewProjection", "view", "projection", "time", "height"],
+            uniforms: ["world", "worldView", "worldViewProjection", "view", "projection", "time", "height", "cameraPosition"],
             defines: [],
             needAlphaBlending: true,
-            needAlphaTesting: true,
+            needAlphaTesting: false,
         });
 
         // Set shader parameters
         shaderMaterial.setFloat("time", 0);
         shaderMaterial.setFloat("height", 0.1);
         shaderMaterial.setVector3("baseColor", new BABYLON.Vector3(0.7, 0.1, 0.1));
-        shaderMaterial.setFloat("transparency", 0.85);
-        shaderMaterial.setFloat("waveHeight", 0.05);
-        shaderMaterial.setFloat("waveFrequency", 2.0);
+        shaderMaterial.setFloat("transparency", 0.9);
+        shaderMaterial.setFloat("waveHeight", 0.03);
+        shaderMaterial.setFloat("waveFrequency", 3.0);
         shaderMaterial.backFaceCulling = false;
 
         fluid.material = shaderMaterial;
-        fluid.position.y = -2; // Start at bottom of jar
+        fluid.position.y = -2;
         fluid.parent = this.fluidGroup;
 
         this.fluidMesh = fluid;
         this.shaderMaterial = shaderMaterial;
 
-        // Add custom shader code to the scene
+        // Enhanced vertex shader with better wave movement
         BABYLON.Effect.ShadersStore["fluidVertexShader"] = `
             precision highp float;
 
@@ -86,6 +61,8 @@ export class FluidSimulation {
 
             // Uniforms
             uniform mat4 worldViewProjection;
+            uniform mat4 world;
+            uniform vec3 cameraPosition;
             uniform float time;
             uniform float height;
             uniform float waveHeight;
@@ -95,22 +72,29 @@ export class FluidSimulation {
             varying vec2 vUv;
             varying vec3 vPosition;
             varying vec3 vNormal;
+            varying vec3 vViewDir;
 
             void main(void) {
                 vUv = uv;
                 vPosition = position;
-                vNormal = normal;
-
-                // Add waves to the surface
+                
+                // Create more complex wave movement
                 vec3 pos = position;
                 if (pos.y > 0.45) {
-                    pos.y += sin(pos.x * waveFrequency + time) * cos(pos.z * waveFrequency + time) * waveHeight;
+                    float wave1 = sin(pos.x * waveFrequency + time) * cos(pos.z * waveFrequency + time * 0.7);
+                    float wave2 = cos(pos.x * waveFrequency * 1.5 + time * 0.8) * sin(pos.z * waveFrequency * 1.3 + time);
+                    pos.y += (wave1 + wave2) * waveHeight;
                 }
 
+                vec4 worldPos = world * vec4(pos, 1.0);
+                vViewDir = normalize(cameraPosition - worldPos.xyz);
+                vNormal = normalize(mat3(world) * normal);
+                
                 gl_Position = worldViewProjection * vec4(pos, 1.0);
             }
         `;
 
+        // Enhanced fragment shader with better fluid effects
         BABYLON.Effect.ShadersStore["fluidFragmentShader"] = `
             precision highp float;
 
@@ -123,22 +107,32 @@ export class FluidSimulation {
             varying vec2 vUv;
             varying vec3 vPosition;
             varying vec3 vNormal;
+            varying vec3 vViewDir;
 
             void main(void) {
-                // Create swirling patterns
-                float swirl = sin(vPosition.x * 4.0 + time) * cos(vPosition.z * 4.0 + time * 0.5) * 0.5 + 0.5;
+                // Create more complex swirling patterns
+                float swirl1 = sin(vPosition.x * 4.0 + time) * cos(vPosition.z * 4.0 + time * 0.5);
+                float swirl2 = cos(vPosition.x * 6.0 - time * 0.7) * sin(vPosition.z * 5.0 + time * 0.3);
+                float swirl = (swirl1 + swirl2) * 0.5;
                 
                 // Add depth-based color variation
                 float depth = vPosition.y * 0.5 + 0.5;
                 
+                // Add fresnel effect
+                float fresnelTerm = pow(1.0 - max(dot(vNormal, vViewDir), 0.0), 3.0);
+                
                 // Combine effects
                 vec3 color = baseColor * (0.8 + swirl * 0.4) * (0.7 + depth * 0.6);
+                color += vec3(0.3, 0.1, 0.1) * fresnelTerm; // Add reddish highlights
                 
-                // Add edge highlighting
-                float edge = 1.0 - pow(abs(dot(vNormal, vec3(0.0, 1.0, 0.0))), 2.0);
-                color += edge * 0.2;
+                // Add caustics-like effect
+                float caustics = pow(sin(vPosition.x * 10.0 + time) * cos(vPosition.z * 8.0 - time), 2.0);
+                color += vec3(0.2, 0.05, 0.05) * caustics;
 
-                gl_FragColor = vec4(color, transparency);
+                // Calculate final alpha
+                float alpha = transparency * (0.8 + fresnelTerm * 0.2);
+                
+                gl_FragColor = vec4(color, alpha);
             }
         `;
     }

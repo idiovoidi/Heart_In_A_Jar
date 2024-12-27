@@ -1,27 +1,32 @@
 export class ArterySimulation {
     constructor(scene) {
+        console.log('Initializing ArterySimulation');
         this.scene = scene;
         this.arteryGroup = new BABYLON.TransformNode("arteryGroup", scene);
         this.arteries = [];
         this.growthQueue = [];
-        this.isGrowing = false;
+        this.isGrowing = true;
         this.growthSpeed = 1;
         this.maxBranches = 50;
-        this.branchCount = 0;
+        this.branchCount = 2;
         this.pulseSpeed = 4;
         this.pulseIntensity = 0.05;
-        this.jarRadius = 1.8; // Match LabJar radius
-        this.jarHeight = 7;   // Match LabJar height
+        this.jarRadius = 4.8;
+        this.jarHeight = 7;
+
+        // Start growing immediately
+        this.createArterySystem();
     }
 
     createArterySystem() {
+        console.log('Creating artery system...');
         // Start positions relative to heart position
-        const heartPosition = new BABYLON.Vector3(0, -1.8, 0);
+        const heartPosition = new BABYLON.Vector3(0, -1.9, 0);
         
         // Create initial growth points from heart surface
         this.createInitialGrowthPoints(heartPosition);
         
-        this.isGrowing = true;
+        console.log(`Initial growth queue size: ${this.growthQueue.length}`);
         this.processGrowthQueue();
     }
 
@@ -53,66 +58,27 @@ export class ArterySimulation {
     }
 
     addArtery(startPoint, direction, radius, parent = null) {
+        console.log('Adding artery:', { startPoint, radius });
         const length = 0.3 + Math.random() * 0.2;
         let endPoint = startPoint.add(direction.scale(length));
 
-        // Check if endpoint would intersect with jar wall
-        const distanceFromCenter = new BABYLON.Vector3(
-            endPoint.x,
-            0,
-            endPoint.z
-        ).length();
-
-        // If near jar wall, adjust endpoint to follow wall
-        if (distanceFromCenter > this.jarRadius * 0.85) {
-            const normalizedPos = new BABYLON.Vector3(endPoint.x, 0, endPoint.z).normalize();
-            endPoint = new BABYLON.Vector3(
-                normalizedPos.x * this.jarRadius * 0.85,
-                endPoint.y,
-                normalizedPos.z * this.jarRadius * 0.85
-            );
-            
-            // Adjust direction to follow jar wall
-            direction = new BABYLON.Vector3(
-                direction.x * 0.2, // Reduce horizontal movement
-                direction.y * 1.2, // Increase upward movement
-                direction.z * 0.2
-            ).normalize();
-        }
-
-        // Create curved path
-        const controlPoint1 = startPoint.add(direction.scale(length * 0.33));
-        const controlPoint2 = startPoint.add(direction.scale(length * 0.66));
-        
-        // Add organic movement
-        const randomOffset = 0.1;
-        controlPoint1.addInPlace(new BABYLON.Vector3(
-            (Math.random() - 0.5) * randomOffset,
-            (Math.random() - 0.5) * randomOffset,
-            (Math.random() - 0.5) * randomOffset
-        ));
-
-        const catmullRom = BABYLON.Curve3.CreateCatmullRomSpline(
-            [startPoint, controlPoint1, controlPoint2, endPoint],
-            60,
-            false
-        );
-
+        // Create artery mesh
+        const points = [startPoint, endPoint];
         const artery = BABYLON.MeshBuilder.CreateTube("artery", {
-            path: catmullRom.getPoints(),
+            path: points,
             radius: radius,
             tessellation: 12,
-            cap: BABYLON.Mesh.CAP_ALL
+            cap: BABYLON.Mesh.CAP_ALL,
+            updatable: true
         }, this.scene);
 
-        // Create organic-looking material
-        const material = new BABYLON.PBRMaterial("arteryMaterial", this.scene);
-        material.albedoColor = new BABYLON.Color3(0.8, 0.1, 0.1);
-        material.emissiveColor = new BABYLON.Color3(0.3, 0, 0);
-        material.subSurface.isTranslucencyEnabled = true;
-        material.subSurface.translucencyIntensity = 0.8;
-        material.roughness = 0.4;
-        material.metallic = 0.0;
+        // Create bright, visible material
+        const material = new BABYLON.StandardMaterial("arteryMaterial", this.scene);
+        material.diffuseColor = new BABYLON.Color3(0.9, 0.1, 0.1);
+        material.emissiveColor = new BABYLON.Color3(0.4, 0, 0);
+        material.specularColor = new BABYLON.Color3(1, 1, 1);
+        material.specularPower = 32;
+        material.alpha = 1.0;
         
         artery.material = material;
         artery.parent = this.arteryGroup;
@@ -134,8 +100,8 @@ export class ArterySimulation {
             parent.children.push(arteryData);
         }
 
-        // Add new growth points if not at jar top
-        if (this.branchCount < this.maxBranches && endPoint.y < this.jarHeight) {
+        // Add new growth points
+        if (this.branchCount < this.maxBranches) {
             this.addGrowthPoints(arteryData);
         }
 
@@ -189,19 +155,20 @@ export class ArterySimulation {
     }
 
     processGrowthQueue() {
+        console.log(`Processing growth queue. Size: ${this.growthQueue.length}, Growing: ${this.isGrowing}, Branches: ${this.branchCount}`);
+        
         if (!this.isGrowing || this.growthQueue.length === 0 || this.branchCount >= this.maxBranches) {
-            this.isGrowing = false;
             return;
         }
 
-        // Process next growth point
         const growth = this.growthQueue.shift();
-        this.addArtery(growth.point, growth.direction, growth.radius, growth.parent);
+        const artery = this.addArtery(growth.point, growth.direction, growth.radius, growth.parent);
+        console.log(`Added artery. Total count: ${this.arteries.length}`);
 
-        // Schedule next growth after delay
+        // Shorter delay for faster growth
         setTimeout(() => {
             this.processGrowthQueue();
-        }, 1000 / this.growthSpeed);
+        }, 100); // 100ms delay between growths
     }
 
     update(deltaTime) {
@@ -230,5 +197,21 @@ export class ArterySimulation {
             artery.mesh.dispose();
         });
         this.arteryGroup.dispose();
+    }
+
+    reset() {
+        // Clear existing arteries
+        this.arteries.forEach(artery => {
+            if (artery.mesh) {
+                artery.mesh.dispose();
+            }
+        });
+        this.arteries = [];
+        this.growthQueue = [];
+        this.branchCount = 0;
+        
+        // Restart growth
+        this.isGrowing = true;
+        this.createArterySystem();
     }
 } 

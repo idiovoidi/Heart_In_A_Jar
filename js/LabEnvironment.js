@@ -16,7 +16,7 @@ export class LabEnvironment {
     }
 
     createParticleTexture() {
-        const size = 32;
+        const size = 38;
         const texture = new BABYLON.DynamicTexture("particleTexture", size, this.scene, true);
         const ctx = texture.getContext();
         
