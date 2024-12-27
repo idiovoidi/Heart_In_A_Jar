@@ -2,12 +2,38 @@ export class LabEnvironment {
     constructor(scene) {
         this.scene = scene;
         this.environmentGroup = new BABYLON.TransformNode("environmentGroup", scene);
+        this.isOverheadLightOn = true;
+        
+        // Create particle texture programmatically
+        this.particleTexture = this.createParticleTexture();
         
         this.setupFog();
         this.setupParticles();
         this.setupLighting();
         this.createLabDesk();
         this.createLabEquipment();
+        this.createOverheadLight();
+    }
+
+    createParticleTexture() {
+        const size = 32;
+        const texture = new BABYLON.DynamicTexture("particleTexture", size, this.scene, true);
+        const ctx = texture.getContext();
+        
+        // Create a radial gradient for a soft particle
+        const gradient = ctx.createRadialGradient(
+            size/2, size/2, 0,
+            size/2, size/2, size/2
+        );
+        
+        gradient.addColorStop(0, 'white');
+        gradient.addColorStop(1, 'transparent');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, size, size);
+        
+        texture.update();
+        return texture;
     }
 
     setupFog() {
@@ -20,7 +46,7 @@ export class LabEnvironment {
     setupParticles() {
         // Create dust particles
         this.dustParticles = new BABYLON.ParticleSystem("dustParticles", 1000, this.scene);
-        this.dustParticles.particleTexture = new BABYLON.Texture("textures/dust.png", this.scene);
+        this.dustParticles.particleTexture = this.particleTexture;
         
         // Particle behavior
         this.dustParticles.minEmitBox = new BABYLON.Vector3(-2, -2, -2);
@@ -97,6 +123,22 @@ export class LabEnvironment {
 
         // Update fog density with subtle variation
         this.scene.fogDensity = 0.05 + Math.sin(time * 0.2) * 0.01;
+
+        // Add subtle flicker to overhead light when on
+        if (this.isOverheadLightOn && this.overheadLight) {
+            const flicker = 0.95 + Math.random() * 0.1;
+            this.overheadLight.intensity = 0.8 * flicker;
+            
+            // Subtle tube flicker
+            this.lightTubes.forEach(tube => {
+                const tubeFlicker = 0.97 + Math.random() * 0.06;
+                tube.material.emissiveColor = new BABYLON.Color3(
+                    0.9 * tubeFlicker,
+                    0.9 * tubeFlicker,
+                    1 * tubeFlicker
+                );
+            });
+        }
     }
 
     dispose() {
@@ -261,7 +303,7 @@ export class LabEnvironment {
 
     createFlame(burnerGroup) {
         const flameSystem = new BABYLON.ParticleSystem("flame", 200, this.scene);
-        flameSystem.particleTexture = new BABYLON.Texture("textures/flame.png", this.scene);
+        flameSystem.particleTexture = this.particleTexture;
         
         flameSystem.emitter = new BABYLON.Vector3(0, 0.8, 0);
         flameSystem.minEmitBox = new BABYLON.Vector3(-0.1, 0, -0.1);
@@ -360,5 +402,108 @@ export class LabEnvironment {
             liquid.position.y = -0.3 + liquidHeight/2;
             liquid.parent = tubeGroup;
         }
+    }
+
+    createOverheadLight() {
+        // Create light fixture group
+        const fixtureGroup = new BABYLON.TransformNode("overheadFixture", this.scene);
+        fixtureGroup.position = new BABYLON.Vector3(0, 4, 0);
+        fixtureGroup.parent = this.environmentGroup;
+
+        // Create metal housing
+        const housing = BABYLON.MeshBuilder.CreateBox("lightHousing", {
+            width: 2,
+            height: 0.2,
+            depth: 0.6
+        }, this.scene);
+        
+        const metalMaterial = new BABYLON.PBRMaterial("fixtureMetal", this.scene);
+        metalMaterial.metallic = 0.8;
+        metalMaterial.roughness = 0.3;
+        metalMaterial.albedoColor = new BABYLON.Color3(0.7, 0.7, 0.7);
+        housing.material = metalMaterial;
+        housing.parent = fixtureGroup;
+
+        // Create light tubes
+        const createTube = (offset) => {
+            const tube = BABYLON.MeshBuilder.CreateCylinder("lightTube", {
+                height: 1.8,
+                diameter: 0.15,
+                tessellation: 16
+            }, this.scene);
+            tube.position.x = offset;
+            tube.rotation.z = Math.PI / 2;
+
+            // Create glowing material for the tube
+            const tubeMaterial = new BABYLON.StandardMaterial("tubeMaterial", this.scene);
+            tubeMaterial.emissiveColor = new BABYLON.Color3(0.9, 0.9, 1);
+            tubeMaterial.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.9);
+            tubeMaterial.specularColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+            tube.material = tubeMaterial;
+            tube.parent = fixtureGroup;
+            return { mesh: tube, material: tubeMaterial };
+        };
+
+        // Create two fluorescent tubes
+        this.lightTubes = [
+            createTube(-0.4),
+            createTube(0.4)
+        ];
+
+        // Create the actual light source
+        this.overheadLight = new BABYLON.PointLight(
+            "overheadLight",
+            new BABYLON.Vector3(0, -0.5, 0),
+            this.scene
+        );
+        this.overheadLight.intensity = 0.8;
+        this.overheadLight.radius = 10;
+        this.overheadLight.diffuse = new BABYLON.Color3(0.9, 0.95, 1.0);
+        this.overheadLight.parent = fixtureGroup;
+
+        // Add chains to suspend the light
+        this.createSuspensionChains(fixtureGroup);
+    }
+
+    createSuspensionChains(fixtureGroup) {
+        const createChain = (x, z) => {
+            const chain = BABYLON.MeshBuilder.CreateCylinder("chain", {
+                height: 2,
+                diameter: 0.05,
+                tessellation: 8
+            }, this.scene);
+            chain.position = new BABYLON.Vector3(x, 1, z);
+            
+            const chainMaterial = new BABYLON.PBRMaterial("chainMetal", this.scene);
+            chainMaterial.metallic = 0.9;
+            chainMaterial.roughness = 0.4;
+            chainMaterial.albedoColor = new BABYLON.Color3(0.6, 0.6, 0.6);
+            chain.material = chainMaterial;
+            chain.parent = fixtureGroup;
+        };
+
+        // Create four suspension chains
+        createChain(-0.8, 0.2);
+        createChain(0.8, 0.2);
+        createChain(-0.8, -0.2);
+        createChain(0.8, -0.2);
+    }
+
+    toggleOverheadLight() {
+        this.isOverheadLightOn = !this.isOverheadLightOn;
+        
+        // Toggle light intensity
+        this.overheadLight.intensity = this.isOverheadLightOn ? 0.8 : 0;
+        
+        // Toggle tube glow
+        this.lightTubes.forEach(tube => {
+            if (this.isOverheadLightOn) {
+                tube.material.emissiveColor = new BABYLON.Color3(0.9, 0.9, 1);
+                tube.material.diffuseColor = new BABYLON.Color3(0.8, 0.8, 0.9);
+            } else {
+                tube.material.emissiveColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+                tube.material.diffuseColor = new BABYLON.Color3(0.3, 0.3, 0.3);
+            }
+        });
     }
 } 

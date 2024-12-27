@@ -6,11 +6,35 @@ export class FluidSimulation {
         this.targetLevel = 0;
         this.fillSpeed = 0.0001;
         this.isFlowing = false;
-        this.jarRadius = 1.8;
+        this.jarRadius = 5.5;
         this.maxHeight = 3.5;
+        
+        // Create particle texture
+        this.particleTexture = this.createParticleTexture();
         
         this.createFluid();
         this.createParticleSystem();
+    }
+
+    createParticleTexture() {
+        const size = 32;
+        const texture = new BABYLON.DynamicTexture("particleTexture", size, this.scene, true);
+        const ctx = texture.getContext();
+        
+        // Create a radial gradient for a soft particle
+        const gradient = ctx.createRadialGradient(
+            size/2, size/2, 0,
+            size/2, size/2, size/2
+        );
+        
+        gradient.addColorStop(0, 'white');
+        gradient.addColorStop(1, 'transparent');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, size, size);
+        
+        texture.update();
+        return texture;
     }
 
     createFluid() {
@@ -120,10 +144,8 @@ export class FluidSimulation {
     }
 
     createParticleSystem() {
-        // Create particle system for drips and splashes
         this.particleSystem = new BABYLON.ParticleSystem("fluidParticles", 2000, this.scene);
-        this.particleSystem.particleTexture = new BABYLON.Texture("textures/fluidParticle.png", this.scene);
-        
+        this.particleSystem.particleTexture = this.particleTexture;
         // Particle behavior
         this.particleSystem.minEmitBox = new BABYLON.Vector3(-0.5, 0, -0.5);
         this.particleSystem.maxEmitBox = new BABYLON.Vector3(0.5, 0, 0.5);

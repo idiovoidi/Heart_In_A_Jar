@@ -21,6 +21,9 @@ export class ButtonHandler {
 
         // Fluid Controls Section
         this.createFluidControls(panel);
+
+        // Lab Controls Section
+        this.createLabControls(panel);
     }
 
     createHeartControls(panel) {
@@ -102,6 +105,19 @@ export class ButtonHandler {
         panel.appendChild(fluidContainer);
     }
 
+    createLabControls(panel) {
+        const labContainer = document.createElement('div');
+        labContainer.className = 'control-section';
+
+        // Overhead Light Toggle Button
+        const toggleLightBtn = document.createElement('button');
+        toggleLightBtn.textContent = 'Toggle Overhead Light';
+        toggleLightBtn.onclick = () => this.toggleOverheadLight();
+        labContainer.appendChild(toggleLightBtn);
+
+        panel.appendChild(labContainer);
+    }
+
     toggleHeartbeat() {
         if (this.sceneManager.heartSim) {
             const isBeating = !this.sceneManager.heartSim.isBeating;
@@ -147,6 +163,12 @@ export class ButtonHandler {
             } else {
                 this.sceneManager.fluidSim.startFilling(0.8);
             }
+        }
+    }
+
+    toggleOverheadLight() {
+        if (this.sceneManager.labEnvironment) {
+            this.sceneManager.labEnvironment.toggleOverheadLight();
         }
     }
 

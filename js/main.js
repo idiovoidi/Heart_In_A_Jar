@@ -11,13 +11,21 @@ const engine = new BABYLON.Engine(canvas, true);
 
 class SceneManager {
     constructor() {
+        // Initialize engine with optimized settings
+        const engineOptions = {
+            preserveDrawingBuffer: true,
+            stencil: true,
+            disableWebGL2Support: false,
+            antialias: true
+        };
+        
         this.scene = this.createScene();
         this.setupEnvironment();
         
         // Add ButtonHandler initialization
         this.buttonHandler = new ButtonHandler(this);
         
-        // Start the render loop
+        // Start the render loop with optimized settings
         engine.runRenderLoop(() => {
             const deltaTime = engine.getDeltaTime();
             
@@ -36,7 +44,11 @@ class SceneManager {
             if (this.labEnvironment) {
                 this.labEnvironment.update(deltaTime);
             }
-            this.scene.render();
+            
+            // Only render if the scene is ready
+            if (this.scene.activeCamera) {
+                this.scene.render();
+            }
         });
 
         // Handle window resize
@@ -46,26 +58,46 @@ class SceneManager {
     }
 
     createScene() {
-        const scene = new BABYLON.Scene(engine);
+        // Create scene with optimization options
+        const scene = new BABYLON.Scene(engine, {
+            useGeometryUniqueIdsMap: true,
+            useMaterialMeshMap: true,
+            useClonedMeshMap: true
+        });
+        
         scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
         
-        // Camera setup with adjusted position
-        const camera = new BABYLON.ArcRotateCamera("camera", 
-            0, Math.PI / 3, 12,  // Increased radius from 10 to 12
+        // Optimize engine settings
+        engine.setHardwareScalingLevel(1.0);
+        engine.enableOfflineSupport = false;
+        
+        // Camera setup with adjusted position and optimized settings
+        const camera = new BABYLON.ArcRotateCamera(
+            "camera", 
+            0, Math.PI / 3, 12,
             BABYLON.Vector3.Zero(),
             scene
         );
         camera.attachControl(canvas, true);
-        camera.setPosition(new BABYLON.Vector3(0, 0, 10));  // Adjusted from 8 to 10
+        camera.setPosition(new BABYLON.Vector3(0, 0, 10));
         camera.setTarget(new BABYLON.Vector3(0, -1, 0));
         
-        // Lighting setup
+        // Optimize camera settings
+        camera.minZ = 0.1;
+        camera.maxZ = 100;
+        camera.wheelPrecision = 50;
+        camera.pinchPrecision = 50;
+        camera.lowerRadiusLimit = 5;
+        camera.upperRadiusLimit = 20;
+        
+        // Lighting setup with optimized settings
         const ambientLight = new BABYLON.HemisphericLight(
             "ambientLight",
             new BABYLON.Vector3(0, 1, 0),
             scene
         );
         ambientLight.intensity = 0.6;
+        ambientLight.groundColor = new BABYLON.Color3(0.1, 0.1, 0.1);
 
         const directionalLight = new BABYLON.DirectionalLight(
             "directionalLight",
@@ -73,7 +105,16 @@ class SceneManager {
             scene
         );
         directionalLight.intensity = 0.8;
-
+        
+        // Enable engine optimizations
+        scene.autoClear = false; // Manually clear the frame buffer
+        scene.autoClearDepthAndStencil = false;
+        scene.skipPointerMovePicking = true;
+        
+        // Enable frustum culling
+        scene.useRightHandedSystem = true;
+        scene.useCameraFrustumCulling = true;
+        
         return scene;
     }
 

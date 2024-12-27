@@ -2,179 +2,222 @@ export class ArterySimulation {
     constructor(scene) {
         this.scene = scene;
         this.arteryGroup = new BABYLON.TransformNode("arteryGroup", scene);
-        this.branches = [];
-        this.isGrowing = false;
+        this.arteries = [];
         this.growthQueue = [];
-        this.growthSpeed = 100;
-        this.jarRadius = 1.0;
-        this.jarHeight = 3.0;
-        this.maxBranches = 200;
-    }
-
-    createSmoothBranch(startPoint, endPoint, radius, tension = 0.5) {
-        try {
-            // Create control points for natural curve
-            const direction = endPoint.subtract(startPoint);
-            const midPoint = BABYLON.Vector3.Lerp(startPoint, endPoint, 0.5);
-            
-            // Add random offset to midpoint for more organic look
-            midPoint.addInPlace(new BABYLON.Vector3(
-                (Math.random() - 0.5) * 0.2,
-                Math.random() * 0.2,
-                (Math.random() - 0.5) * 0.2
-            ));
-
-            const points = [startPoint, midPoint, endPoint];
-            const curve = BABYLON.Curve3.CreateCatmullRomSpline(points, 8);
-            
-            const tube = BABYLON.MeshBuilder.CreateTube("branch", {
-                path: curve.getPoints(),
-                radius: radius,
-                tessellation: 8,
-                updatable: false
-            }, this.scene);
-
-            return tube;
-        } catch (error) {
-            console.error('Error creating branch:', error);
-            return null;
-        }
-    }
-
-    checkJarCollision(point) {
-        const distanceFromCenter = Math.sqrt(point.x * point.x + point.z * point.z);
-        const heightInJar = point.y + 1.8; // Adjust based on jar position
-        return distanceFromCenter > this.jarRadius * 0.8 || heightInJar > this.jarHeight * 0.8;
-    }
-
-    getRandomGrowthDirection(currentPos, parentDir) {
-        const dir = new BABYLON.Vector3(
-            (Math.random() - 0.5) * 2,
-            Math.random() * 0.5 + 0.5, // Upward bias
-            (Math.random() - 0.5) * 2
-        );
-        
-        // Add some influence from parent direction
-        if (parentDir) {
-            BABYLON.Vector3.LerpToRef(dir.normalize(), parentDir, 0.3, dir);
-        }
-        
-        // If near jar wall, try to grow along it
-        const distanceFromCenter = Math.sqrt(currentPos.x * currentPos.x + currentPos.z * currentPos.z);
-        if (distanceFromCenter > this.jarRadius * 0.7) {
-            const normalToWall = new BABYLON.Vector3(currentPos.x, 0, currentPos.z).normalize();
-            dir.subtractInPlace(normalToWall.scale(0.5));
-        }
-
-        return dir.normalize();
+        this.isGrowing = false;
+        this.growthSpeed = 1;
+        this.maxBranches = 50;
+        this.branchCount = 0;
+        this.pulseSpeed = 4;
+        this.pulseIntensity = 0.05;
+        this.jarRadius = 1.8; // Match LabJar radius
+        this.jarHeight = 7;   // Match LabJar height
     }
 
     createArterySystem() {
-        // Clear existing branches
-        this.branches.forEach(branch => {
-            if (branch.material) {
-                branch.material.dispose();
-            }
-            branch.dispose();
-        });
-        this.branches = [];
-        this.growthQueue = [];
+        // Start positions relative to heart position
+        const heartPosition = new BABYLON.Vector3(0, -1.8, 0);
+        
+        // Create initial growth points from heart surface
+        this.createInitialGrowthPoints(heartPosition);
+        
+        this.isGrowing = true;
+        this.processGrowthQueue();
+    }
 
-        // Create materials
-        const arteryMaterial = new BABYLON.StandardMaterial("arteryMaterial", this.scene);
-        arteryMaterial.diffuseColor = new BABYLON.Color3(1, 0.133, 0.133);
-        arteryMaterial.emissiveColor = new BABYLON.Color3(0.2, 0, 0);
-        arteryMaterial.alpha = 0.9;
+    createInitialGrowthPoints(heartPosition) {
+        // Create multiple starting points around the heart
+        const numStartPoints = 6;
+        for (let i = 0; i < numStartPoints; i++) {
+            const angle = (i / numStartPoints) * Math.PI * 2;
+            const startPoint = new BABYLON.Vector3(
+                heartPosition.x + Math.cos(angle) * 0.3,
+                heartPosition.y + 0.2,
+                heartPosition.z + Math.sin(angle) * 0.3
+            );
 
-        // Initialize growth queue with starting points from the heart position
-        const startPoints = [
-            { dir: new BABYLON.Vector3(0.5, 1, 0.5), isArtery: true },
-            { dir: new BABYLON.Vector3(-0.5, 1, 0.5), isArtery: true },
-            { dir: new BABYLON.Vector3(0, 1, 0.5), isArtery: true },
-            { dir: new BABYLON.Vector3(0.5, 1, -0.5), isArtery: false },
-            { dir: new BABYLON.Vector3(-0.5, 1, -0.5), isArtery: false }
-        ];
+            // Calculate direction towards jar wall and up
+            const directionToWall = new BABYLON.Vector3(
+                Math.cos(angle),
+                0.5, // Upward tendency
+                Math.sin(angle)
+            ).normalize();
 
-        // Use the heart position as the starting point
-        const heartPosition = this.arteryGroup.position;
-
-        startPoints.forEach(({ dir, isArtery }) => {
             this.growthQueue.push({
-                position: heartPosition.clone(),
-                direction: dir.normalize(),
-                radius: 0.05,  // Start with thinner arteries
-                isArtery: isArtery,
-                generation: 0
+                point: startPoint,
+                direction: directionToWall,
+                radius: 0.15,
+                parent: null
             });
-        });
-
-        // Start growth process if enabled
-        if (this.isGrowing) {
-            this.processGrowthQueue();
         }
     }
 
+    addArtery(startPoint, direction, radius, parent = null) {
+        const length = 0.3 + Math.random() * 0.2;
+        let endPoint = startPoint.add(direction.scale(length));
+
+        // Check if endpoint would intersect with jar wall
+        const distanceFromCenter = new BABYLON.Vector3(
+            endPoint.x,
+            0,
+            endPoint.z
+        ).length();
+
+        // If near jar wall, adjust endpoint to follow wall
+        if (distanceFromCenter > this.jarRadius * 0.85) {
+            const normalizedPos = new BABYLON.Vector3(endPoint.x, 0, endPoint.z).normalize();
+            endPoint = new BABYLON.Vector3(
+                normalizedPos.x * this.jarRadius * 0.85,
+                endPoint.y,
+                normalizedPos.z * this.jarRadius * 0.85
+            );
+            
+            // Adjust direction to follow jar wall
+            direction = new BABYLON.Vector3(
+                direction.x * 0.2, // Reduce horizontal movement
+                direction.y * 1.2, // Increase upward movement
+                direction.z * 0.2
+            ).normalize();
+        }
+
+        // Create curved path
+        const controlPoint1 = startPoint.add(direction.scale(length * 0.33));
+        const controlPoint2 = startPoint.add(direction.scale(length * 0.66));
+        
+        // Add organic movement
+        const randomOffset = 0.1;
+        controlPoint1.addInPlace(new BABYLON.Vector3(
+            (Math.random() - 0.5) * randomOffset,
+            (Math.random() - 0.5) * randomOffset,
+            (Math.random() - 0.5) * randomOffset
+        ));
+
+        const catmullRom = BABYLON.Curve3.CreateCatmullRomSpline(
+            [startPoint, controlPoint1, controlPoint2, endPoint],
+            60,
+            false
+        );
+
+        const artery = BABYLON.MeshBuilder.CreateTube("artery", {
+            path: catmullRom.getPoints(),
+            radius: radius,
+            tessellation: 12,
+            cap: BABYLON.Mesh.CAP_ALL
+        }, this.scene);
+
+        // Create organic-looking material
+        const material = new BABYLON.PBRMaterial("arteryMaterial", this.scene);
+        material.albedoColor = new BABYLON.Color3(0.8, 0.1, 0.1);
+        material.emissiveColor = new BABYLON.Color3(0.3, 0, 0);
+        material.subSurface.isTranslucencyEnabled = true;
+        material.subSurface.translucencyIntensity = 0.8;
+        material.roughness = 0.4;
+        material.metallic = 0.0;
+        
+        artery.material = material;
+        artery.parent = this.arteryGroup;
+
+        const arteryData = {
+            mesh: artery,
+            startPoint: startPoint,
+            endPoint: endPoint,
+            direction: direction,
+            radius: radius,
+            children: [],
+            parent: parent
+        };
+
+        this.arteries.push(arteryData);
+        this.branchCount++;
+
+        if (parent) {
+            parent.children.push(arteryData);
+        }
+
+        // Add new growth points if not at jar top
+        if (this.branchCount < this.maxBranches && endPoint.y < this.jarHeight) {
+            this.addGrowthPoints(arteryData);
+        }
+
+        return arteryData;
+    }
+
+    addGrowthPoints(artery) {
+        const numPoints = 1 + Math.floor(Math.random() * 2);
+        
+        for (let i = 0; i < numPoints; i++) {
+            const t = 0.3 + Math.random() * 0.4;
+            const point = BABYLON.Vector3.Lerp(artery.startPoint, artery.endPoint, t);
+            
+            // Calculate direction with upward tendency and wall awareness
+            let direction = artery.direction.clone();
+            
+            // Add upward bias
+            direction.y += 0.3;
+            
+            // Add tendency to grow towards jar wall if not already near it
+            const distanceFromCenter = new BABYLON.Vector3(point.x, 0, point.z).length();
+            if (distanceFromCenter < this.jarRadius * 0.6) {
+                const towardWall = new BABYLON.Vector3(point.x, 0, point.z).normalize();
+                direction.addInPlace(towardWall.scale(0.3));
+            }
+            
+            direction.normalize();
+            
+            // Add random variation
+            const randomAngle = (Math.random() - 0.5) * Math.PI * 0.4;
+            direction = this.rotateVector(direction, randomAngle);
+            
+            this.growthQueue.push({
+                point: point,
+                direction: direction,
+                radius: artery.radius * 0.9,
+                parent: artery
+            });
+        }
+    }
+
+    rotateVector(vector, angle) {
+        // Create rotation matrix around random axis perpendicular to growth direction
+        const randomPerpendicular = BABYLON.Vector3.Cross(
+            vector, 
+            new BABYLON.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
+        ).normalize();
+        
+        const rotationMatrix = BABYLON.Matrix.RotationAxis(randomPerpendicular, angle);
+        return BABYLON.Vector3.TransformNormal(vector.clone(), rotationMatrix).normalize();
+    }
+
     processGrowthQueue() {
-        if (!this.isGrowing || this.growthQueue.length === 0 || this.branches.length >= this.maxBranches) {
+        if (!this.isGrowing || this.growthQueue.length === 0 || this.branchCount >= this.maxBranches) {
+            this.isGrowing = false;
             return;
         }
 
-        const branch = this.growthQueue.shift();
-        const length = 0.2 - branch.generation * 0.02;  // Shorter segments for more control
-        const direction = this.getRandomGrowthDirection(branch.position, branch.direction);
-        const endPoint = branch.position.add(direction.scale(length));
+        // Process next growth point
+        const growth = this.growthQueue.shift();
+        this.addArtery(growth.point, growth.direction, growth.radius, growth.parent);
 
-        // Check if endpoint is within jar bounds
-        if (!this.checkJarCollision(endPoint)) {
-            const branchMesh = this.createSmoothBranch(
-                branch.position,
-                endPoint,
-                branch.radius,
-                0.5
-            );
-
-            if (branchMesh) {
-                const material = new BABYLON.StandardMaterial("branchMat", this.scene);
-                material.diffuseColor = branch.isArtery ? 
-                    new BABYLON.Color3(1, 0.133, 0.133) :
-                    new BABYLON.Color3(0.133, 0.133, 1);
-                material.emissiveColor = branch.isArtery ?
-                    new BABYLON.Color3(0.2, 0, 0) :
-                    new BABYLON.Color3(0, 0, 0.2);
-                material.alpha = 0.9;
-
-                branchMesh.material = material;
-                branchMesh.parent = this.arteryGroup;
-                this.branches.push(branchMesh);
-
-                // Add new growth points with more variation
-                if (branch.generation < 8) {
-                    const numBranches = Math.random() < 0.3 ? 2 : 1;  // Reduce branching probability
-                    for (let i = 0; i < numBranches; i++) {
-                        this.growthQueue.push({
-                            position: endPoint.clone(),
-                            direction: direction.clone(),
-                            radius: branch.radius * 0.95,  // Slower radius reduction
-                            isArtery: branch.isArtery,
-                            generation: branch.generation + 1
-                        });
-                    }
-                }
-            }
-        }
-
-        // Continue growth process
-        setTimeout(() => this.processGrowthQueue(), this.growthSpeed);
+        // Schedule next growth after delay
+        setTimeout(() => {
+            this.processGrowthQueue();
+        }, 1000 / this.growthSpeed);
     }
 
     update(deltaTime) {
         const time = performance.now() * 0.001;
-        this.branches.forEach((branch, index) => {
-            if (branch instanceof BABYLON.Mesh) {
-                const offset = index * 0.1;
-                const scale = 1 + Math.sin(time * 2 + offset) * 0.1;
-                branch.scaling = new BABYLON.Vector3(scale, 1, scale);
-            }
+        
+        // Create realistic heartbeat pulse pattern
+        const pulse = Math.pow(Math.sin(time * this.pulseSpeed), 2) * this.pulseIntensity;
+        
+        this.arteries.forEach((artery, index) => {
+            // Add delay based on distance from heart for wave-like effect
+            const distanceDelay = index * 0.1;
+            const delayedPulse = Math.pow(Math.sin((time - distanceDelay) * this.pulseSpeed), 2) * this.pulseIntensity;
+            
+            // Scale more on x/z axes for realistic vessel expansion
+            const scale = 1 + delayedPulse;
+            artery.mesh.scaling = new BABYLON.Vector3(scale, 1, scale);
         });
     }
 
@@ -183,15 +226,9 @@ export class ArterySimulation {
     }
 
     dispose() {
-        this.isGrowing = false;
-        this.growthQueue = [];
-        this.branches.forEach(branch => {
-            if (branch.material) {
-                branch.material.dispose();
-            }
-            branch.dispose();
+        this.arteries.forEach(artery => {
+            artery.mesh.dispose();
         });
-        this.branches = [];
         this.arteryGroup.dispose();
     }
 } 
