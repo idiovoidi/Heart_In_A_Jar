@@ -2,6 +2,8 @@ import { LabJar } from './LabJar.js';
 import { HeartSimulation } from './HeartSimulation.js';
 import { ButtonHandler } from './inputs/ButtonHandler.js';
 import { ArterySimulation } from './ArterySimulation.js';
+import { FleshClumps } from './FleshClumps.js';
+import { FluidSimulation } from './FluidSimulation.js';
 
 const canvas = document.getElementById("renderCanvas");
 const engine = new BABYLON.Engine(canvas, true);
@@ -16,12 +18,19 @@ class SceneManager {
         
         // Start the render loop
         engine.runRenderLoop(() => {
-            // Add heart update
+            const deltaTime = engine.getDeltaTime();
+            
             if (this.heartSim) {
-                this.heartSim.update(engine.getDeltaTime() / 1000);
+                this.heartSim.update(deltaTime / 1000);
             }
             if (this.arterySim) {
-                this.arterySim.update(engine.getDeltaTime() / 1000);
+                this.arterySim.update(deltaTime / 1000);
+            }
+            if (this.fleshClumps) {
+                this.fleshClumps.update(deltaTime / 1000);
+            }
+            if (this.fluidSim) {
+                this.fluidSim.update(deltaTime);
             }
             this.scene.render();
         });
@@ -69,6 +78,8 @@ class SceneManager {
         this.labJar = new LabJar(this.scene);
         this.heartSim = new HeartSimulation(this.scene);
         this.arterySim = new ArterySimulation(this.scene);
+        this.fleshClumps = new FleshClumps(this.scene);
+        this.fluidSim = new FluidSimulation(this.scene);
         
         // Position and scale components
         this.positionComponents();
@@ -96,6 +107,16 @@ class SceneManager {
         arteryMesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);  // Match heart scale
         arteryMesh.position = heartMesh.position.clone();
         arteryMesh.rotation = heartMesh.rotation.clone();
+
+        // Position flesh clumps
+        const fleshMesh = this.fleshClumps.getMesh();
+        fleshMesh.scaling = new BABYLON.Vector3(0.3, 0.3, 0.3);  // Reduced from 0.5 to 0.3
+        fleshMesh.position = new BABYLON.Vector3(0, -1.95, 0);   // Slightly lower
+
+        // Position fluid
+        const fluidMesh = this.fluidSim.getMesh();
+        fluidMesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);
+        fluidMesh.position = new BABYLON.Vector3(0, -1.8, 0);
     }
 
     setupPostProcessing() {

@@ -18,6 +18,9 @@ export class ButtonHandler {
 
         // Artery Controls Section
         this.createArteryControls(panel);
+
+        // Fluid Controls Section
+        this.createFluidControls(panel);
     }
 
     createHeartControls(panel) {
@@ -86,6 +89,19 @@ export class ButtonHandler {
         panel.appendChild(arteryContainer);
     }
 
+    createFluidControls(panel) {
+        const fluidContainer = document.createElement('div');
+        fluidContainer.className = 'control-section';
+
+        // Start/Stop Filling Button
+        const toggleFillBtn = document.createElement('button');
+        toggleFillBtn.textContent = 'Start Filling';
+        toggleFillBtn.onclick = () => this.toggleFluidFilling();
+        fluidContainer.appendChild(toggleFillBtn);
+
+        panel.appendChild(fluidContainer);
+    }
+
     toggleHeartbeat() {
         if (this.sceneManager.heartSim) {
             const isBeating = !this.sceneManager.heartSim.isBeating;
@@ -121,6 +137,16 @@ export class ButtonHandler {
     updateGrowthSpeed(speed) {
         if (this.sceneManager.arterySim) {
             this.sceneManager.arterySim.growthSpeed = parseInt(speed);
+        }
+    }
+
+    toggleFluidFilling() {
+        if (this.sceneManager.fluidSim) {
+            if (this.sceneManager.fluidSim.isFlowing) {
+                this.sceneManager.fluidSim.stopFilling();
+            } else {
+                this.sceneManager.fluidSim.startFilling(0.8);
+            }
         }
     }
 
