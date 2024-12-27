@@ -97,31 +97,31 @@ class SceneManager {
     }
 
     positionComponents() {
-        // Position jar
+        // Position jar higher on the table
         this.labJar.getMesh().scaling = new BABYLON.Vector3(1.2, 1.2, 1.2);
-        this.labJar.getMesh().position.y = -1;
+        this.labJar.getMesh().position.y = -1.4;  // Raised from -1 to -1.4
 
-        // Position heart - make it larger and adjust position
+        // Position heart - adjust for new jar position
         const heartMesh = this.heartSim.getMesh();
-        heartMesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);  // Increased from 0.25 to 0.4
-        heartMesh.position = new BABYLON.Vector3(0, -1.5, 0);    // Raised from -1.8 to -1.5
+        heartMesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);
+        heartMesh.position = new BABYLON.Vector3(0, -1.9, 0);    // Adjusted for new jar position
         heartMesh.rotation = new BABYLON.Vector3(Math.PI * 0.15, 0, 0);
 
-        // Position artery system - match heart scale and position
+        // Position artery system
         const arteryMesh = this.arterySim.getMesh();
-        arteryMesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);  // Match heart scale
+        arteryMesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);
         arteryMesh.position = heartMesh.position.clone();
         arteryMesh.rotation = heartMesh.rotation.clone();
 
         // Position flesh clumps
         const fleshMesh = this.fleshClumps.getMesh();
-        fleshMesh.scaling = new BABYLON.Vector3(0.3, 0.3, 0.3);  // Reduced from 0.5 to 0.3
-        fleshMesh.position = new BABYLON.Vector3(0, -1.95, 0);   // Slightly lower
+        fleshMesh.scaling = new BABYLON.Vector3(0.3, 0.3, 0.3);
+        fleshMesh.position = new BABYLON.Vector3(0, -2.35, 0);   // Adjusted for new jar position
 
         // Position fluid
         const fluidMesh = this.fluidSim.getMesh();
         fluidMesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);
-        fluidMesh.position = new BABYLON.Vector3(0, -1.8, 0);
+        fluidMesh.position = new BABYLON.Vector3(0, -2.2, 0);    // Adjusted for new jar position
     }
 
     setupPostProcessing() {
