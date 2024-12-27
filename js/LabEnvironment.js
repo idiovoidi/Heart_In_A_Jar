@@ -145,17 +145,23 @@ export class LabEnvironment {
     }
 
     createLabEquipment() {
-        // Adjust positions for higher table
-        // Create beakers
-        this.createBeaker(-2, -2.8, 0, 0.8);    // Raised Y position
-        this.createBeaker(-1, -2.8, 1, 0.6);    // Raised Y position
-        this.createBeaker(2, -2.8, -1, 0.5);    // Raised Y position
+        // Spread equipment around the jar
+        // Left side of jar
+        this.createBeaker(-4, -2.8, -1, 0.8);    // Large beaker
+        this.createBeaker(-3, -2.8, 1, 0.6);     // Medium beaker
+        this.createBeaker(-4, -2.8, 2, 0.5);     // Small beaker
 
-        // Create Bunsen burner
-        this.createBunsenBurner(1.5, -2.8, 0.5); // Raised Y position
+        // Right side of jar
+        this.createBunsenBurner(3.5, -2.8, -1);  // Bunsen burner
+        this.createTestTubeRack(4, -2.8, 1);     // Test tube rack
 
-        // Create test tube rack with tubes
-        this.createTestTubeRack(0.5, -2.8, -0.5); // Raised Y position
+        // Behind jar
+        this.createBeaker(0, -2.8, 2, 0.7);      // Another beaker
+        this.createBeaker(1.5, -2.8, 2.5, 0.5);  // Small beaker
+
+        // Front of jar
+        this.createBeaker(-2, -2.8, -2, 0.6);    // Medium beaker
+        this.createTestTubeRack(2, -2.8, -2);    // Another test tube rack
     }
 
     createBeaker(x, y, z, scale = 1.0) {
@@ -192,7 +198,7 @@ export class LabEnvironment {
         rim.material = glassMaterial;
         rim.parent = beakerGroup;
 
-        // Add random colored liquid
+        // Add random colored liquid with more controlled colors
         if (Math.random() > 0.3) {
             const liquidHeight = 0.2 + Math.random() * 0.7;
             const liquid = BABYLON.MeshBuilder.CreateCylinder("liquid", {
@@ -202,11 +208,18 @@ export class LabEnvironment {
             }, this.scene);
 
             const liquidMaterial = new BABYLON.StandardMaterial("liquidMaterial", this.scene);
-            liquidMaterial.diffuseColor = new BABYLON.Color3(
-                Math.random(),
-                Math.random(),
-                Math.random()
-            );
+            
+            // Use a set of predefined laboratory-like colors
+            const labColors = [
+                new BABYLON.Color3(0.2, 0.6, 0.8),  // Blue solution
+                new BABYLON.Color3(0.8, 0.2, 0.2),  // Red solution
+                new BABYLON.Color3(0.2, 0.8, 0.2),  // Green solution
+                new BABYLON.Color3(0.8, 0.6, 0.2),  // Amber solution
+                new BABYLON.Color3(0.6, 0.2, 0.8),  // Purple solution
+                new BABYLON.Color3(0.8, 0.4, 0.0)   // Orange solution
+            ];
+            
+            liquidMaterial.diffuseColor = labColors[Math.floor(Math.random() * labColors.length)];
             liquidMaterial.alpha = 0.8;
             liquid.material = liquidMaterial;
             liquid.position.y = -0.6 + liquidHeight/2;
@@ -290,14 +303,13 @@ export class LabEnvironment {
         base.material = woodMaterial;
         base.parent = rackGroup;
 
-        // Create test tubes
-        for (let i = 0; i < 5; i++) {
-            this.createTestTube(
-                -0.5 + i * 0.25,
-                0.3,
-                0,
-                rackGroup
-            );
+        // Create test tubes in a slight arc
+        const numTubes = 5;
+        for (let i = 0; i < numTubes; i++) {
+            const angle = (i - (numTubes-1)/2) * 0.1;
+            const xPos = -0.5 + i * 0.25;
+            const zPos = Math.sin(angle) * 0.1;
+            this.createTestTube(xPos, 0.3, zPos, rackGroup);
         }
     }
 
@@ -323,7 +335,7 @@ export class LabEnvironment {
         tube.material = glassMaterial;
         tube.parent = tubeGroup;
 
-        // Add random colored liquid
+        // Add random colored liquid with lab-appropriate colors
         if (Math.random() > 0.2) {
             const liquidHeight = 0.1 + Math.random() * 0.4;
             const liquid = BABYLON.MeshBuilder.CreateCylinder("liquid", {
@@ -333,11 +345,16 @@ export class LabEnvironment {
             }, this.scene);
 
             const liquidMaterial = new BABYLON.StandardMaterial("liquidMaterial", this.scene);
-            liquidMaterial.diffuseColor = new BABYLON.Color3(
-                Math.random(),
-                Math.random(),
-                Math.random()
-            );
+            const labColors = [
+                new BABYLON.Color3(0.2, 0.6, 0.8),  // Blue solution
+                new BABYLON.Color3(0.8, 0.2, 0.2),  // Red solution
+                new BABYLON.Color3(0.2, 0.8, 0.2),  // Green solution
+                new BABYLON.Color3(0.8, 0.6, 0.2),  // Amber solution
+                new BABYLON.Color3(0.6, 0.2, 0.8),  // Purple solution
+                new BABYLON.Color3(0.8, 0.4, 0.0)   // Orange solution
+            ];
+            
+            liquidMaterial.diffuseColor = labColors[Math.floor(Math.random() * labColors.length)];
             liquidMaterial.alpha = 0.8;
             liquid.material = liquidMaterial;
             liquid.position.y = -0.3 + liquidHeight/2;
