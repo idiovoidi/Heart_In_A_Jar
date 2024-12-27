@@ -1,8 +1,6 @@
-import * as THREE from 'three';
-
 export class ButtonHandler {
-    constructor(scene) {
-        this.scene = scene;
+    constructor(sceneManager) {
+        this.sceneManager = sceneManager;
         this.createControlPanel();
     }
 
@@ -17,9 +15,6 @@ export class ButtonHandler {
         
         // View Controls Section
         this.createViewControls(panel);
-        
-        // Artery Controls Section
-        this.createArteryControls(panel);
     }
 
     createHeartControls(panel) {
@@ -57,55 +52,24 @@ export class ButtonHandler {
         panel.appendChild(resetViewBtn);
     }
 
-    createArteryControls(panel) {
-        // Regenerate Arteries Button
-        const regenArteriesBtn = document.createElement('button');
-        regenArteriesBtn.textContent = 'Regenerate Arteries';
-        regenArteriesBtn.onclick = () => this.regenerateArteries();
-        panel.appendChild(regenArteriesBtn);
-    }
-
-    regenerateArteries() {
-        if (this.scene.arterySim) {
-            // Remove old artery system
-            if (this.scene.arterySystem) {
-                this.scene.scene.remove(this.scene.arterySystem);
-            }
-            
-            // Create new artery system
-            this.scene.arterySim.createArterySystem(false);
-            this.scene.arterySystem = this.scene.arterySim.getMesh();
-            
-            // Position arteries
-            this.scene.arterySystem.scale.set(0.25, 0.25, 0.25);
-            this.scene.arterySystem.position.copy(this.scene.heart.position);
-            this.scene.arterySystem.position.y += 0.5; // Start above heart
-            this.scene.arterySystem.rotation.copy(this.scene.heart.rotation);
-            
-            this.scene.scene.add(this.scene.arterySystem);
-        }
-    }
-
     toggleHeartbeat() {
-        if (this.scene.heartSim) {
-            const isBeating = !this.scene.heartSim.isBeating;
-            this.scene.heartSim.setBeating(isBeating);
+        if (this.sceneManager.heartSim) {
+            const isBeating = !this.sceneManager.heartSim.isBeating;
+            this.sceneManager.heartSim.setBeating(isBeating);
         }
     }
 
     updateBeatSpeed(speed) {
-        if (this.scene.heartSim) {
-            this.scene.heartSim.setBeatSpeed(parseFloat(speed));
+        if (this.sceneManager.heartSim) {
+            this.sceneManager.heartSim.setBeatSpeed(parseFloat(speed));
         }
     }
 
     resetView() {
-        if (this.scene.camera && this.scene.controls) {
-            this.scene.camera.position.set(0, 0, 8);
-            this.scene.camera.lookAt(0, -1, 0);
-            this.scene.camera.zoom = 1;
-            this.scene.camera.updateProjectionMatrix();
-            this.scene.controls.reset();
+        const camera = this.sceneManager.scene.activeCamera;
+        if (camera) {
+            camera.setPosition(new BABYLON.Vector3(0, 0, 8));
+            camera.setTarget(new BABYLON.Vector3(0, -1, 0));
         }
     }
 

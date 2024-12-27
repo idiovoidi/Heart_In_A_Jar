@@ -5,24 +5,80 @@ export class ArterySimulation {
         console.log('Initializing ArterySimulation');
         this.arteryGroup = new THREE.Group();
         this.branches = [];
+        this.isGrowing = true;
         this.growthQueue = [];
-        this.isGrowing = false;
-        this.growthSpeed = 20;
+        this.growthSpeed = 100;
+        this.jarRadius = 1.0;  // Will be scaled with jar
+        this.jarHeight = 3.0;
+        this.maxBranches = 200;
     }
 
     getMesh() {
         return this.arteryGroup;
     }
 
-    createArterySystem(immediate = false) {
+    createSmoothBranch(startPoint, endPoint, radius, tension = 0.5) {
+        try {
+            // Create control points for natural curve
+            const direction = endPoint.clone().sub(startPoint);
+            const midPoint = startPoint.clone().lerp(endPoint, 0.5);
+            
+            // Add random offset to midpoint for more organic look
+            midPoint.add(new THREE.Vector3(
+                (Math.random() - 0.5) * 0.2,
+                Math.random() * 0.2,
+                (Math.random() - 0.5) * 0.2
+            ));
+
+            const curve = new THREE.CatmullRomCurve3([
+                startPoint,
+                midPoint,
+                endPoint
+            ], false, 'catmullrom', tension);
+
+            return new THREE.TubeGeometry(curve, 8, radius, 8, false);
+        } catch (error) {
+            console.error('Error creating branch:', error);
+            return null;
+        }
+    }
+
+    checkJarCollision(point) {
+        const distanceFromCenter = Math.sqrt(point.x * point.x + point.z * point.z);
+        const heightInJar = point.y + 1.8; // Adjust based on jar position
+        return distanceFromCenter > this.jarRadius * 0.8 || heightInJar > this.jarHeight * 0.8;
+    }
+
+    getRandomGrowthDirection(currentPos, parentDir) {
+        const dir = new THREE.Vector3();
+        
+        // Tendency to grow upward and outward
+        dir.y = Math.random() * 0.5 + 0.5; // Upward bias
+        dir.x = (Math.random() - 0.5) * 2;
+        dir.z = (Math.random() - 0.5) * 2;
+        
+        // Add some influence from parent direction
+        if (parentDir) {
+            dir.lerp(parentDir, 0.3);
+        }
+        
+        // If near jar wall, try to grow along it
+        const distanceFromCenter = Math.sqrt(currentPos.x * currentPos.x + currentPos.z * currentPos.z);
+        if (distanceFromCenter > this.jarRadius * 0.7) {
+            const normalToWall = new THREE.Vector3(currentPos.x, 0, currentPos.z).normalize();
+            dir.sub(normalToWall.multiplyScalar(0.5));
+        }
+
+        return dir.normalize();
+    }
+
+    createArterySystem() {
         console.log('Creating artery system...');
-        this.growthQueue = [];
         
         const arteryMaterial = new THREE.MeshPhongMaterial({
             color: 0xff2222,
             transparent: true,
             opacity: 0.9,
-            side: THREE.DoubleSide,
             emissive: 0x330000,
             shininess: 50
         });
@@ -31,149 +87,85 @@ export class ArterySimulation {
             color: 0x2222ff,
             transparent: true,
             opacity: 0.9,
-            side: THREE.DoubleSide,
             emissive: 0x000033,
             shininess: 50
         });
 
-        const createBranch = (parent, length, radius, direction, depth, isArtery = true) => {
-            if (depth > 10) return;
-
-            const geometry = new THREE.CylinderGeometry(
-                radius,
-                radius * 0.9,
-                length,
-                8,
-                1
-            );
-
-            const branch = new THREE.Mesh(
-                geometry,
-                isArtery ? arteryMaterial : veinMaterial
-            );
-
-            // Position the branch
-            const position = parent ? parent.position.clone() : new THREE.Vector3();
-            if (parent) {
-                position.add(direction.clone().multiplyScalar(length));
-            }
-            branch.position.copy(position);
-
-            // Orient the branch
-            branch.quaternion.setFromUnitVectors(
-                new THREE.Vector3(0, 1, 0),
-                direction
-            );
-
-            // Add to scene
-            (parent || this.arteryGroup).add(branch);
-            this.branches.push(branch);
-
-            // Create sub-branches
-            if (depth < 10) {
-                const numBranches = Math.floor(Math.random() * 2) + 2;
-                for (let i = 0; i < numBranches; i++) {
-                    const newDirection = direction.clone();
-                    
-                    // Add strong upward bias
-                    newDirection.y += 1.0;
-                    
-                    // Add outward spread
-                    newDirection.x += (Math.random() - 0.5) * 1.2;
-                    newDirection.z += (Math.random() - 0.5) * 1.2;
-                    
-                    newDirection.normalize();
-
-                    const newLength = length * 0.95;
-                    const newRadius = radius * 0.9;
-
-                    if (immediate) {
-                        createBranch(branch, newLength, newRadius, newDirection, depth + 1, isArtery);
-                    } else {
-                        this.growthQueue.push({
-                            parent: branch,
-                            length: newLength,
-                            radius: newRadius,
-                            direction: newDirection,
-                            depth: depth + 1,
-                            isArtery: isArtery
-                        });
-                    }
-                }
-            }
-        };
-
-        // Create initial branches
-        const startDirections = [
-            // Main arteries (red)
-            { dir: new THREE.Vector3(0, 1, 0.2), isArtery: true },
-            { dir: new THREE.Vector3(0.2, 1, 0), isArtery: true },
-            { dir: new THREE.Vector3(-0.2, 1, 0), isArtery: true },
-            // Main veins (blue)
-            { dir: new THREE.Vector3(0.1, 1, -0.2), isArtery: false },
-            { dir: new THREE.Vector3(-0.1, 1, 0.2), isArtery: false }
+        // Initialize growth queue with starting points
+        const startPoints = [
+            { pos: new THREE.Vector3(0, 0, 0), dir: new THREE.Vector3(0.5, 1, 0.5), isArtery: true },
+            { pos: new THREE.Vector3(0.2, 0, 0), dir: new THREE.Vector3(0, 1, 0.5), isArtery: true },
+            { pos: new THREE.Vector3(-0.2, 0, 0), dir: new THREE.Vector3(-0.5, 1, 0), isArtery: true },
+            { pos: new THREE.Vector3(0, 0, 0.2), dir: new THREE.Vector3(0.5, 1, 0), isArtery: false },
+            { pos: new THREE.Vector3(0, 0, -0.2), dir: new THREE.Vector3(-0.5, 1, 0), isArtery: false }
         ];
 
-        startDirections.forEach(({ dir, isArtery }) => {
-            dir.normalize();
-            createBranch(
-                null,
-                2.0,     // Longer initial branches
-                0.2,     // Thicker initial branches
-                dir,
-                0,
-                isArtery
-            );
+        startPoints.forEach(({ pos, dir, isArtery }) => {
+            this.growthQueue.push({
+                position: pos,
+                direction: dir.normalize(),
+                radius: 0.1,
+                isArtery: isArtery,
+                generation: 0
+            });
         });
 
-        if (!immediate) {
-            this.isGrowing = true;
-            this.processGrowthQueue();
-        }
+        // Start growth process
+        this.processGrowthQueue();
     }
 
     processGrowthQueue() {
-        if (!this.isGrowing || this.growthQueue.length === 0) return;
+        if (!this.isGrowing || this.growthQueue.length === 0 || this.branches.length >= this.maxBranches) {
+            return;
+        }
 
-        // Process multiple branches per frame
-        for (let i = 0; i < 4 && this.growthQueue.length > 0; i++) {
-            const { parent, length, radius, direction, depth, isArtery } = this.growthQueue.shift();
-            const geometry = new THREE.CylinderGeometry(radius, radius * 0.9, length, 8, 1);
-            const material = new THREE.MeshPhongMaterial({
-                color: isArtery ? 0xff2222 : 0x2222ff,
-                transparent: true,
-                opacity: 0.9,
-                side: THREE.DoubleSide,
-                emissive: isArtery ? 0x330000 : 0x000033,
-                shininess: 50
-            });
+        const branch = this.growthQueue.shift();
+        const length = 0.3 - branch.generation * 0.02;
+        const direction = this.getRandomGrowthDirection(branch.position, branch.direction);
+        const endPoint = branch.position.clone().add(direction.multiplyScalar(length));
 
-            const branch = new THREE.Mesh(geometry, material);
-            const position = parent.position.clone().add(direction.clone().multiplyScalar(length));
-            branch.position.copy(position);
-            branch.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+        // Check if endpoint is within jar bounds
+        if (!this.checkJarCollision(endPoint)) {
+            const geometry = this.createSmoothBranch(
+                branch.position,
+                endPoint,
+                branch.radius,
+                0.5
+            );
 
-            parent.add(branch);
-            this.branches.push(branch);
-
-            // Continue branching
-            if (depth < 10) {
-                const numNewBranches = Math.floor(Math.random() * 2) + 2;
-                for (let j = 0; j < numNewBranches; j++) {
-                    const newDirection = direction.clone();
-                    newDirection.y += 1.0;
-                    newDirection.x += (Math.random() - 0.5) * 1.2;
-                    newDirection.z += (Math.random() - 0.5) * 1.2;
-                    newDirection.normalize();
-
-                    this.growthQueue.push({
-                        parent: branch,
-                        length: length * 0.95,
-                        radius: radius * 0.9,
-                        direction: newDirection,
-                        depth: depth + 1,
-                        isArtery: isArtery
+            if (geometry) {
+                const material = branch.isArtery ? 
+                    new THREE.MeshPhongMaterial({
+                        color: 0xff2222,
+                        transparent: true,
+                        opacity: 0.9,
+                        emissive: 0x330000,
+                        shininess: 50
+                    }) :
+                    new THREE.MeshPhongMaterial({
+                        color: 0x2222ff,
+                        transparent: true,
+                        opacity: 0.9,
+                        emissive: 0x000033,
+                        shininess: 50
                     });
+
+                const mesh = new THREE.Mesh(geometry, material);
+                this.arteryGroup.add(mesh);
+                this.branches.push(mesh);
+
+                // Add new growth points
+                if (branch.generation < 8) {
+                    const numBranches = Math.random() < 0.5 ? 2 : 1;
+                    for (let i = 0; i < numBranches; i++) {
+                        this.growthQueue.push({
+                            position: endPoint.clone(),
+                            direction: direction.clone(),
+                            radius: branch.radius * 0.9,
+                            isArtery: branch.isArtery,
+                            generation: branch.generation + 1
+                        });
+                    }
                 }
             }
         }

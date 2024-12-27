@@ -119,9 +119,6 @@ export class Scene {
             console.log('Setting up heart...');
             this.heartSim = new HeartSimulation();
             this.heart = this.heartSim.getMesh();
-            if (!this.heart) {
-                throw new Error('Failed to create heart mesh');
-            }
             this.heart.scale.set(0.25, 0.25, 0.25);
             this.heart.position.set(0, -1.8, 0);
             this.heart.rotation.x = Math.PI * 0.15;
@@ -130,17 +127,12 @@ export class Scene {
             // Setup artery system
             console.log('Setting up artery system...');
             this.arterySim = new ArterySimulation();
-            this.arterySim.createArterySystem(false); // false for animated growth
+            this.arterySim.createArterySystem();
             this.arterySystem = this.arterySim.getMesh();
-            
-            // Position arteries relative to heart
-            this.arterySystem.scale.set(0.25, 0.25, 0.25); // Match heart scale
+            this.arterySystem.scale.set(0.25, 0.25, 0.25);
             this.arterySystem.position.copy(this.heart.position);
-            this.arterySystem.position.y += 0.5; // Start above heart
             this.arterySystem.rotation.copy(this.heart.rotation);
-            
             this.scene.add(this.arterySystem);
-            console.log('Artery system added to scene');
 
             // Setup flesh clumps
             console.log('Setting up flesh clumps...');
@@ -153,6 +145,7 @@ export class Scene {
             console.log('All objects setup complete');
         } catch (error) {
             console.error('Error in setupObjects:', error);
+            console.error(error.stack);
             throw error;
         }
     }

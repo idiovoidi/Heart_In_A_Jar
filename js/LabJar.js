@@ -1,145 +1,86 @@
-import * as THREE from 'three';
-
 export class LabJar {
-    constructor() {
-        this.jarGroup = new THREE.Group();
+    constructor(scene) {
+        this.scene = scene;
+        this.jarGroup = new BABYLON.TransformNode("jarGroup", scene);
         this.createJar();
     }
 
     createJar() {
-        // Create the main components
-        this.createMainBody();
-        this.createRim();
-        this.createBottom();
-        this.createInnerGlow();
-        this.createOpeningBevel();
-    }
+        // Create glass material
+        const glassMaterial = new BABYLON.PBRMaterial("glassMaterial", this.scene);
+        glassMaterial.metallic = 0.1;
+        glassMaterial.roughness = 0.1;
+        glassMaterial.alpha = 0.3;
+        glassMaterial.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND;
+        glassMaterial.backFaceCulling = false;
+        glassMaterial.clearCoat.isEnabled = true;
+        glassMaterial.clearCoat.roughness = 0.1;
 
-    createMainBody() {
-        // Main jar body - cylinder with no top cap
-        const jarGeometry = new THREE.CylinderGeometry(
-            2,    // top radius
-            2,    // bottom radius
-            4,    // height
-            32,   // radial segments
-            1,    // height segments
-            true  // open ended
-        );
+        // Main jar body
+        const jarBody = BABYLON.MeshBuilder.CreateCylinder("jarBody", {
+            height: 4,
+            diameter: 4,
+            tessellation: 32,
+            cap: BABYLON.Mesh.NO_CAP
+        }, this.scene);
+        jarBody.material = glassMaterial;
+        jarBody.parent = this.jarGroup;
 
-        const glassMaterial = new THREE.MeshPhongMaterial({
-            color: 0xffffff,
-            transparent: true,
-            opacity: 0.3,
-            shininess: 100,
-            side: THREE.DoubleSide,
-            specular: 0x444444,
-            refractionRatio: 0.98
-        });
+        // Create jar bottom
+        const bottom = BABYLON.MeshBuilder.CreateDisc("jarBottom", {
+            radius: 2,
+            tessellation: 32
+        }, this.scene);
+        bottom.rotation.x = Math.PI/2;
+        bottom.position.y = -2;
+        bottom.material = glassMaterial;
+        bottom.parent = this.jarGroup;
 
-        const jarMesh = new THREE.Mesh(jarGeometry, glassMaterial);
-        this.jarGroup.add(jarMesh);
-    }
+        // Create outer rim
+        const outerRim = BABYLON.MeshBuilder.CreateTorus("outerRim", {
+            diameter: 4.2,
+            thickness: 0.4,
+            tessellation: 48
+        }, this.scene);
+        outerRim.position.y = 2;
+        outerRim.material = glassMaterial;
+        outerRim.parent = this.jarGroup;
 
-    createRim() {
-        // Outer rim
-        const outerRimGeometry = new THREE.TorusGeometry(
-            2.1,  // radius
-            0.2,  // tube radius
-            16,   // radial segments
-            48    // tubular segments
-        );
+        // Create inner rim
+        const innerRim = BABYLON.MeshBuilder.CreateTorus("innerRim", {
+            diameter: 3.6,
+            thickness: 0.3,
+            tessellation: 48
+        }, this.scene);
+        innerRim.position.y = 2;
+        innerRim.material = glassMaterial;
+        innerRim.parent = this.jarGroup;
 
-        // Inner rim (creates the opening)
-        const innerRimGeometry = new THREE.TorusGeometry(
-            1.8,  // slightly smaller radius for inner rim
-            0.15, // smaller tube radius
-            16,   // radial segments
-            48    // tubular segments
-        );
+        // Create opening bevel
+        const bevel = BABYLON.MeshBuilder.CreateDisc("jarBevel", {
+            radius: 2,
+            innerRadius: 1.8,
+            tessellation: 32
+        }, this.scene);
+        bevel.rotation.x = -Math.PI/2;
+        bevel.position.y = 2;
+        bevel.material = glassMaterial;
+        bevel.parent = this.jarGroup;
 
-        const rimMaterial = new THREE.MeshPhongMaterial({
-            color: 0xffffff,
-            transparent: true,
-            opacity: 0.4,
-            shininess: 100,
-            side: THREE.DoubleSide,
-            specular: 0x444444
-        });
+        // Create inner glow
+        const glowMaterial = new BABYLON.StandardMaterial("glowMaterial", this.scene);
+        glowMaterial.emissiveColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+        glowMaterial.alpha = 0.1;
+        glowMaterial.backFaceCulling = false;
 
-        const outerRimMesh = new THREE.Mesh(outerRimGeometry, rimMaterial);
-        const innerRimMesh = new THREE.Mesh(innerRimGeometry, rimMaterial);
-
-        // Position rims
-        outerRimMesh.position.y = 2;
-        innerRimMesh.position.y = 2;
-        outerRimMesh.rotation.x = Math.PI / 2;
-        innerRimMesh.rotation.x = Math.PI / 2;
-
-        this.jarGroup.add(outerRimMesh, innerRimMesh);
-    }
-
-    createBottom() {
-        const bottomGeometry = new THREE.CircleGeometry(2, 32);
-        const bottomMaterial = new THREE.MeshPhongMaterial({
-            color: 0xffffff,
-            transparent: true,
-            opacity: 0.3,
-            shininess: 100,
-            side: THREE.DoubleSide,
-            specular: 0x444444
-        });
-
-        const bottomMesh = new THREE.Mesh(bottomGeometry, bottomMaterial);
-        bottomMesh.rotation.x = Math.PI / 2;
-        bottomMesh.position.y = -2;
-
-        this.jarGroup.add(bottomMesh);
-    }
-
-    createInnerGlow() {
-        const glowGeometry = new THREE.CylinderGeometry(
-            1.95,  // slightly smaller for inner glow
-            1.95,
-            3.9,   // slightly shorter
-            32,
-            1,
-            true
-        );
-
-        const glowMaterial = new THREE.MeshBasicMaterial({
-            color: 0x666666,
-            transparent: true,
-            opacity: 0.1,
-            side: THREE.BackSide
-        });
-
-        const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
-        this.jarGroup.add(glowMesh);
-    }
-
-    createOpeningBevel() {
-        // Create a beveled edge for the opening
-        const bevelGeometry = new THREE.RingGeometry(
-            1.8,   // inner radius
-            2.0,   // outer radius
-            32,    // segments
-            1      // rings
-        );
-
-        const bevelMaterial = new THREE.MeshPhongMaterial({
-            color: 0xffffff,
-            transparent: true,
-            opacity: 0.4,
-            shininess: 100,
-            side: THREE.DoubleSide,
-            specular: 0x444444
-        });
-
-        const bevelMesh = new THREE.Mesh(bevelGeometry, bevelMaterial);
-        bevelMesh.rotation.x = -Math.PI / 2;
-        bevelMesh.position.y = 2;
-
-        this.jarGroup.add(bevelMesh);
+        const innerGlow = BABYLON.MeshBuilder.CreateCylinder("innerGlow", {
+            height: 3.9,
+            diameter: 3.9,
+            tessellation: 32,
+            cap: BABYLON.Mesh.NO_CAP
+        }, this.scene);
+        innerGlow.material = glowMaterial;
+        innerGlow.parent = this.jarGroup;
     }
 
     getMesh() {
@@ -147,13 +88,12 @@ export class LabJar {
     }
 
     dispose() {
-        this.jarGroup.traverse(child => {
-            if (child.geometry) {
-                child.geometry.dispose();
+        this.jarGroup.getChildMeshes().forEach(mesh => {
+            if (mesh.material) {
+                mesh.material.dispose();
             }
-            if (child.material) {
-                child.material.dispose();
-            }
+            mesh.dispose();
         });
+        this.jarGroup.dispose();
     }
 } 
