@@ -149,9 +149,15 @@ class SceneManager {
 
         // Position artery system relative to heart
         const arteryMesh = this.arterySim.getMesh();
-        arteryMesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);
+        arteryMesh.scaling = new BABYLON.Vector3(1, 1, 1);
         arteryMesh.position = heartMesh.position.clone();
-        arteryMesh.rotation = heartMesh.rotation.clone();
+        
+        // Make sure arteries are visible by adding them to the scene properly
+        this.arterySim.arteries.forEach(artery => {
+            if (artery.mesh && !artery.mesh.parent) {
+                this.scene.addMesh(artery.mesh);
+            }
+        });
 
         // Position flesh clumps
         const fleshMesh = this.fleshClumps.getMesh();

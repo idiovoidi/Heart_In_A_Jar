@@ -10,22 +10,20 @@ export class FluidSimulation {
         this.maxHeight = 3.5;
         
         this.createFluid();
-        this.createParticleSystem();
+        this.createBloodParticles();
     }
 
     createFluid() {
-        // Create fluid mesh
         const fluid = BABYLON.MeshBuilder.CreateCylinder("fluid", {
             height: 0.1,
             diameter: this.jarRadius * 2 * 0.95,
-            tessellation: 32,
-            subdivisions: 1
+            tessellation: 64,
+            subdivisions: 2
         }, this.scene);
 
-        // Create advanced shader material
-        const shaderMaterial = new BABYLON.ShaderMaterial("fluidShader", this.scene, {
-            vertex: "fluid",
-            fragment: "fluid",
+        const shaderMaterial = new BABYLON.ShaderMaterial("bloodShader", this.scene, {
+            vertex: "blood",
+            fragment: "blood",
         }, {
             attributes: ["position", "normal", "uv"],
             uniforms: ["world", "worldView", "worldViewProjection", "view", "projection", "time", "height", "cameraPosition"],
@@ -34,13 +32,13 @@ export class FluidSimulation {
             needAlphaTesting: false,
         });
 
-        // Set shader parameters
+        // Blood-specific parameters
         shaderMaterial.setFloat("time", 0);
         shaderMaterial.setFloat("height", 0.1);
-        shaderMaterial.setVector3("baseColor", new BABYLON.Vector3(0.7, 0.1, 0.1));
-        shaderMaterial.setFloat("transparency", 0.9);
-        shaderMaterial.setFloat("waveHeight", 0.03);
-        shaderMaterial.setFloat("waveFrequency", 3.0);
+        shaderMaterial.setVector3("bloodColor", new BABYLON.Vector3(0.6, 0.1, 0.1));
+        shaderMaterial.setFloat("viscosity", 2.0);
+        shaderMaterial.setFloat("surfaceTension", 0.8);
+        shaderMaterial.setFloat("transparency", 0.95);
         shaderMaterial.backFaceCulling = false;
 
         fluid.material = shaderMaterial;
@@ -50,114 +48,141 @@ export class FluidSimulation {
         this.fluidMesh = fluid;
         this.shaderMaterial = shaderMaterial;
 
-        // Enhanced vertex shader with better wave movement
-        BABYLON.Effect.ShadersStore["fluidVertexShader"] = `
+        // Enhanced blood shader with surface tension
+        BABYLON.Effect.ShadersStore["bloodVertexShader"] = `
             precision highp float;
 
-            // Attributes
             attribute vec3 position;
             attribute vec2 uv;
             attribute vec3 normal;
 
-            // Uniforms
             uniform mat4 worldViewProjection;
             uniform mat4 world;
             uniform vec3 cameraPosition;
             uniform float time;
             uniform float height;
-            uniform float waveHeight;
-            uniform float waveFrequency;
+            uniform float viscosity;
+            uniform float surfaceTension;
 
-            // Varying
             varying vec2 vUv;
             varying vec3 vPosition;
             varying vec3 vNormal;
             varying vec3 vViewDir;
+            varying float vHeight;
 
             void main(void) {
                 vUv = uv;
                 vPosition = position;
                 
-                // Create more complex wave movement
+                // Viscous fluid movement with surface tension
                 vec3 pos = position;
                 if (pos.y > 0.45) {
-                    float wave1 = sin(pos.x * waveFrequency + time) * cos(pos.z * waveFrequency + time * 0.7);
-                    float wave2 = cos(pos.x * waveFrequency * 1.5 + time * 0.8) * sin(pos.z * waveFrequency * 1.3 + time);
-                    pos.y += (wave1 + wave2) * waveHeight;
+                    float radius = length(pos.xz);
+                    float tensionFactor = smoothstep(0.8, 1.0, radius);
+                    
+                    // Slower waves for viscous blood
+                    float wave1 = sin(pos.x * 2.0 + time * 0.5) * cos(pos.z * 2.0 + time * 0.3) * 0.02;
+                    float wave2 = cos(pos.x * 3.0 + time * 0.3) * sin(pos.z * 2.5 + time * 0.4) * 0.015;
+                    
+                    // Apply surface tension at edges
+                    float surfaceDeformation = (wave1 + wave2) * (1.0 - tensionFactor * surfaceTension);
+                    pos.y += surfaceDeformation;
                 }
 
                 vec4 worldPos = world * vec4(pos, 1.0);
                 vViewDir = normalize(cameraPosition - worldPos.xyz);
                 vNormal = normalize(mat3(world) * normal);
+                vHeight = pos.y;
                 
                 gl_Position = worldViewProjection * vec4(pos, 1.0);
             }
         `;
 
-        // Enhanced fragment shader with better fluid effects
-        BABYLON.Effect.ShadersStore["fluidFragmentShader"] = `
+        BABYLON.Effect.ShadersStore["bloodFragmentShader"] = `
             precision highp float;
 
-            // Uniforms
             uniform float time;
-            uniform vec3 baseColor;
+            uniform vec3 bloodColor;
+            uniform float viscosity;
             uniform float transparency;
 
-            // Varying
             varying vec2 vUv;
             varying vec3 vPosition;
             varying vec3 vNormal;
             varying vec3 vViewDir;
+            varying float vHeight;
+
+            float random(vec2 st) {
+                return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+            }
 
             void main(void) {
-                // Create more complex swirling patterns
-                float swirl1 = sin(vPosition.x * 4.0 + time) * cos(vPosition.z * 4.0 + time * 0.5);
-                float swirl2 = cos(vPosition.x * 6.0 - time * 0.7) * sin(vPosition.z * 5.0 + time * 0.3);
-                float swirl = (swirl1 + swirl2) * 0.5;
+                // Blood cell effect
+                float cellPattern = random(vPosition.xz * 10.0 + time * 0.1) * 0.1;
                 
-                // Add depth-based color variation
-                float depth = vPosition.y * 0.5 + 0.5;
+                // Viscous swirling
+                float swirl1 = sin(vPosition.x * 2.0 + time * 0.3) * cos(vPosition.z * 2.0 + time * 0.2);
+                float swirl2 = cos(vPosition.x * 3.0 - time * 0.2) * sin(vPosition.z * 2.5 + time * 0.3);
+                float swirl = (swirl1 + swirl2) * 0.3;
                 
-                // Add fresnel effect
+                // Depth-based darkening
+                float depth = smoothstep(-1.0, 1.0, vHeight);
+                
+                // Fresnel effect for edge highlighting
                 float fresnelTerm = pow(1.0 - max(dot(vNormal, vViewDir), 0.0), 3.0);
                 
-                // Combine effects
-                vec3 color = baseColor * (0.8 + swirl * 0.4) * (0.7 + depth * 0.6);
-                color += vec3(0.3, 0.1, 0.1) * fresnelTerm; // Add reddish highlights
+                // Combine effects for final color
+                vec3 baseColor = bloodColor * (0.8 + cellPattern);
+                vec3 darkColor = bloodColor * 0.5;
+                vec3 color = mix(darkColor, baseColor, depth);
                 
-                // Add caustics-like effect
-                float caustics = pow(sin(vPosition.x * 10.0 + time) * cos(vPosition.z * 8.0 - time), 2.0);
-                color += vec3(0.2, 0.05, 0.05) * caustics;
-
-                // Calculate final alpha
-                float alpha = transparency * (0.8 + fresnelTerm * 0.2);
+                // Add viscous highlights
+                color += bloodColor * swirl * 0.2;
+                color += vec3(0.8, 0.2, 0.2) * fresnelTerm * 0.3;
+                
+                // Opacity variation
+                float alpha = transparency * (0.9 + fresnelTerm * 0.1);
                 
                 gl_FragColor = vec4(color, alpha);
             }
         `;
     }
 
-    createParticleSystem() {
-        this.particleSystem = new BABYLON.ParticleSystem("fluidParticles", 2000, this.scene);
-        this.particleSystem.particleTexture = this.particleTexture;
-        // Particle behavior
+    createBloodParticles() {
+        // Create particles for blood drops and splashes
+        this.particleSystem = new BABYLON.ParticleSystem("bloodParticles", 2000, this.scene);
+        
+        // Create blood particle texture
+        const particleTexture = new BABYLON.DynamicTexture("bloodParticle", 32, this.scene, true);
+        const ctx = particleTexture.getContext();
+        const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+        gradient.addColorStop(0, 'rgba(180, 20, 20, 1.0)');
+        gradient.addColorStop(0.8, 'rgba(120, 10, 10, 0.8)');
+        gradient.addColorStop(1, 'rgba(80, 0, 0, 0.0)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 32, 32);
+        particleTexture.update();
+        
+        this.particleSystem.particleTexture = particleTexture;
+        
+        // Particle behavior for viscous fluid
         this.particleSystem.minEmitBox = new BABYLON.Vector3(-0.5, 0, -0.5);
         this.particleSystem.maxEmitBox = new BABYLON.Vector3(0.5, 0, 0.5);
-        this.particleSystem.minSize = 0.03;
-        this.particleSystem.maxSize = 0.08;
-        this.particleSystem.minLifeTime = 0.5;
-        this.particleSystem.maxLifeTime = 1.5;
-        this.particleSystem.emitRate = 100;
-        this.particleSystem.gravity = new BABYLON.Vector3(0, -9.81, 0);
+        this.particleSystem.minSize = 0.05;
+        this.particleSystem.maxSize = 0.15;
+        this.particleSystem.minLifeTime = 1.0;
+        this.particleSystem.maxLifeTime = 2.0;
+        this.particleSystem.emitRate = 50;
+        this.particleSystem.gravity = new BABYLON.Vector3(0, -2.81, 0);
         this.particleSystem.direction1 = new BABYLON.Vector3(-0.2, -1, -0.2);
         this.particleSystem.direction2 = new BABYLON.Vector3(0.2, -1, 0.2);
-        this.particleSystem.minEmitPower = 0.5;
-        this.particleSystem.maxEmitPower = 1;
+        this.particleSystem.minEmitPower = 0.3;
+        this.particleSystem.maxEmitPower = 0.7;
         
-        // Particle color
+        // Blood-like coloring
         this.particleSystem.color1 = new BABYLON.Color4(0.7, 0.1, 0.1, 1.0);
-        this.particleSystem.color2 = new BABYLON.Color4(0.5, 0.1, 0.1, 1.0);
-        this.particleSystem.colorDead = new BABYLON.Color4(0.4, 0.1, 0.1, 0.0);
+        this.particleSystem.color2 = new BABYLON.Color4(0.5, 0.05, 0.05, 1.0);
+        this.particleSystem.colorDead = new BABYLON.Color4(0.4, 0.05, 0.05, 0.0);
         
         this.particleSystem.parent = this.fluidGroup;
     }
