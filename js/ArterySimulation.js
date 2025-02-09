@@ -1,5 +1,10 @@
 export class ArterySimulation {
     constructor(scene) {
+        if (!scene) {
+            console.error('Scene is required for ArterySimulation');
+            return;
+        }
+        
         console.log('Initializing ArterySimulation');
         this.scene = scene;
         this.arteryGroup = new BABYLON.TransformNode("arteryGroup", scene);
@@ -8,18 +13,20 @@ export class ArterySimulation {
         this.isGrowing = true;
         this.growthSpeed = 1;
         this.maxBranches = 50;
-        this.branchCount = 2;
+        this.branchCount = 0;  // Start from 0
         this.pulseSpeed = 4;
         this.pulseIntensity = 0.05;
         this.jarRadius = 4.8;
         this.jarHeight = 7;
 
-        // Create base material for all arteries
-        this.arteryMaterial = new BABYLON.StandardMaterial("arteryMaterial", scene);
-        this.arteryMaterial.diffuseColor = new BABYLON.Color3(0.8, 0.1, 0.1);
-        this.arteryMaterial.specularColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+        // Create PBR material for better visual quality
+        this.arteryMaterial = new BABYLON.PBRMaterial("arteryMaterial", scene);
+        this.arteryMaterial.albedoColor = new BABYLON.Color3(0.8, 0.1, 0.1);
+        this.arteryMaterial.roughness = 0.3;
+        this.arteryMaterial.metallic = 0.0;
+        this.arteryMaterial.subSurface.isTranslucencyEnabled = true;
+        this.arteryMaterial.subSurface.translucencyIntensity = 0.8;
         this.arteryMaterial.emissiveColor = new BABYLON.Color3(0.3, 0, 0);
-        this.arteryMaterial.specularPower = 32;
 
         // Start growing immediately
         this.createArterySystem();
@@ -37,72 +44,119 @@ export class ArterySimulation {
     }
 
     createInitialGrowthPoints(heartPosition) {
-        // Create multiple starting points around the heart
-        const numStartPoints = 6;
-        for (let i = 0; i < numStartPoints; i++) {
-            const angle = (i / numStartPoints) * Math.PI * 2;
+        console.log('Creating initial growth points at:', heartPosition);
+        
+        // Create main arteries first (aorta and pulmonary artery)
+        const mainArteryPoints = [
+            {
+                point: new BABYLON.Vector3(
+                    heartPosition.x - 0.2,
+                    heartPosition.y + 0.3,
+                    heartPosition.z
+                ),
+                direction: new BABYLON.Vector3(0, 1, 0).normalize(),
+                radius: 0.2,
+                isMain: true
+            },
+            {
+                point: new BABYLON.Vector3(
+                    heartPosition.x + 0.2,
+                    heartPosition.y + 0.3,
+                    heartPosition.z
+                ),
+                direction: new BABYLON.Vector3(0.2, 1, 0).normalize(),
+                radius: 0.18,
+                isMain: true
+            }
+        ];
+
+        // Add main arteries to growth queue
+        mainArteryPoints.forEach(point => {
+            this.growthQueue.push({
+                point: point.point,
+                direction: point.direction,
+                radius: point.radius,
+                parent: null,
+                isMain: point.isMain
+            });
+        });
+
+        // Add secondary growth points
+        const numSecondaryPoints = 4;
+        for (let i = 0; i < numSecondaryPoints; i++) {
+            const angle = (i / numSecondaryPoints) * Math.PI * 2;
             const startPoint = new BABYLON.Vector3(
                 heartPosition.x + Math.cos(angle) * 0.3,
                 heartPosition.y + 0.2,
                 heartPosition.z + Math.sin(angle) * 0.3
             );
 
-            // Calculate direction towards jar wall and up
             const directionToWall = new BABYLON.Vector3(
                 Math.cos(angle),
-                0.5, // Upward tendency
+                0.5,
                 Math.sin(angle)
             ).normalize();
 
             this.growthQueue.push({
                 point: startPoint,
                 direction: directionToWall,
-                radius: 0.15,
-                parent: null
+                radius: 0.12,
+                parent: null,
+                isMain: false
             });
         }
+
+        console.log(`Created ${this.growthQueue.length} initial growth points`);
     }
 
-    addArtery(startPoint, direction, radius, parent = null) {
-        console.log('Adding artery:', { startPoint, radius });
-        const length = 0.3 + Math.random() * 0.2;
+    addArtery(startPoint, direction, radius, parent = null, isMain = false) {
+        console.log('Adding artery:', { startPoint, radius, isMain });
+        
+        // Adjust length based on whether it's a main artery
+        const length = isMain ? 0.5 + Math.random() * 0.2 : 0.3 + Math.random() * 0.2;
         let endPoint = startPoint.add(direction.scale(length));
 
-        // Create path for the tube
+        // Create smoother path with more points for main arteries
+        const numPoints = isMain ? 15 : 10;
         const path = [];
-        const numPoints = 10;
+        
         for (let i = 0; i < numPoints; i++) {
             const t = i / (numPoints - 1);
             const point = BABYLON.Vector3.Lerp(startPoint, endPoint, t);
+            
+            // Add slight curve for more organic look
             if (i > 0 && i < numPoints - 1) {
-                point.x += (Math.random() - 0.5) * 0.05;
-                point.y += (Math.random() - 0.5) * 0.05;
-                point.z += (Math.random() - 0.5) * 0.05;
+                const curveAmount = isMain ? 0.03 : 0.05;
+                point.x += (Math.random() - 0.5) * curveAmount;
+                point.y += (Math.random() - 0.5) * curveAmount;
+                point.z += (Math.random() - 0.5) * curveAmount;
             }
             path.push(point);
         }
 
-        // Create artery mesh
+        // Create artery mesh with higher tessellation for main arteries
         const artery = BABYLON.MeshBuilder.CreateTube("artery", {
             path: path,
             radius: radius,
-            tessellation: 12,
+            tessellation: isMain ? 16 : 12,
             cap: BABYLON.Mesh.CAP_ALL,
             updatable: true
         }, this.scene);
 
-        // Clone material for this artery
+        // Clone and customize material
         const material = this.arteryMaterial.clone(`arteryMaterial_${this.branchCount}`);
         material.alpha = 1.0;
-        artery.material = material;
-
-        // Set proper parenting
-        artery.parent = this.arteryGroup;
         
-        // Make sure the mesh is added to the scene
-        if (!this.scene.meshes.includes(artery)) {
-            this.scene.addMesh(artery);
+        // Make main arteries slightly darker
+        if (isMain) {
+            material.albedoColor = new BABYLON.Color3(0.7, 0.05, 0.05);
         }
+        
+        artery.material = material;
+        artery.parent = this.arteryGroup;
+
+        // Ensure the mesh is properly added to the scene
+        this.scene.addMesh(artery);
 
         const arteryData = {
             mesh: artery,
@@ -111,7 +165,8 @@ export class ArterySimulation {
             direction: direction,
             radius: radius,
             children: [],
-            parent: parent
+            parent: parent,
+            isMain: isMain
         };
 
         this.arteries.push(arteryData);
@@ -121,6 +176,7 @@ export class ArterySimulation {
             parent.children.push(arteryData);
         }
 
+        // Add new growth points if not at max branches
         if (this.branchCount < this.maxBranches) {
             this.addGrowthPoints(arteryData);
         }
