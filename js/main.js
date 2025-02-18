@@ -7,6 +7,7 @@ import { FluidSimulation } from './FluidSimulation.js';
 import { LabEnvironment } from './LabEnvironment.js';
 import { FleshGoblin } from './FleshGoblin.js';
 import { SceneCamera } from './camera/SceneCamera.js';
+import { SceneLighting } from './lighting/SceneLighting.js';
 
 const canvas = document.getElementById("renderCanvas");
 const engine = new BABYLON.Engine(canvas, true);
@@ -23,6 +24,7 @@ class SceneManager {
         
         this.scene = this.createScene();
         this.camera = new SceneCamera(this.scene, canvas);
+        this.lighting = new SceneLighting(this.scene);
         this.setupEnvironment();
         
         // Add ButtonHandler initialization
@@ -76,22 +78,6 @@ class SceneManager {
         // Optimize engine settings
         engine.setHardwareScalingLevel(1.0);
         engine.enableOfflineSupport = false;
-        
-        // Setup lighting
-        const ambientLight = new BABYLON.HemisphericLight(
-            "ambientLight",
-            new BABYLON.Vector3(0, 1, 0),
-            scene
-        );
-        ambientLight.intensity = 0.6;
-        ambientLight.groundColor = new BABYLON.Color3(0.1, 0.1, 0.1);
-
-        const directionalLight = new BABYLON.DirectionalLight(
-            "directionalLight",
-            new BABYLON.Vector3(5, 5, 5),
-            scene
-        );
-        directionalLight.intensity = 0.8;
         
         // Enable engine optimizations
         scene.autoClear = false;
@@ -191,6 +177,9 @@ class SceneManager {
         }
         if (this.camera) {
             this.camera.dispose();
+        }
+        if (this.lighting) {
+            this.lighting.dispose();
         }
         this.scene.dispose();
     }
