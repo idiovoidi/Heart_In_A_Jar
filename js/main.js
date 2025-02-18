@@ -5,6 +5,8 @@ import { ArterySimulation } from './ArterySimulation.js';
 import { FleshClumps } from './FleshClumps.js';
 import { FluidSimulation } from './FluidSimulation.js';
 import { LabEnvironment } from './LabEnvironment.js';
+import { FleshGoblin } from './FleshGoblin.js';
+import { SceneCamera } from './camera/SceneCamera.js';
 
 const canvas = document.getElementById("renderCanvas");
 const engine = new BABYLON.Engine(canvas, true);
@@ -20,6 +22,7 @@ class SceneManager {
         };
         
         this.scene = this.createScene();
+        this.camera = new SceneCamera(this.scene, canvas);
         this.setupEnvironment();
         
         // Add ButtonHandler initialization
@@ -43,6 +46,9 @@ class SceneManager {
             }
             if (this.labEnvironment) {
                 this.labEnvironment.update(deltaTime);
+            }
+            if (this.fleshGoblin) {
+                this.fleshGoblin.update(deltaTime);
             }
             
             // Only render if the scene is ready
@@ -71,26 +77,7 @@ class SceneManager {
         engine.setHardwareScalingLevel(1.0);
         engine.enableOfflineSupport = false;
         
-        // Camera setup with adjusted position and optimized settings
-        const camera = new BABYLON.ArcRotateCamera(
-            "camera", 
-            0, Math.PI / 3, 12,
-            BABYLON.Vector3.Zero(),
-            scene
-        );
-        camera.attachControl(canvas, true);
-        camera.setPosition(new BABYLON.Vector3(0, 0, 10));
-        camera.setTarget(new BABYLON.Vector3(0, -1, 0));
-        
-        // Optimize camera settings
-        camera.minZ = 0.1;
-        camera.maxZ = 100;
-        camera.wheelPrecision = 50;
-        camera.pinchPrecision = 50;
-        camera.lowerRadiusLimit = 5;
-        camera.upperRadiusLimit = 20;
-        
-        // Lighting setup with optimized settings
+        // Setup lighting
         const ambientLight = new BABYLON.HemisphericLight(
             "ambientLight",
             new BABYLON.Vector3(0, 1, 0),
@@ -107,11 +94,9 @@ class SceneManager {
         directionalLight.intensity = 0.8;
         
         // Enable engine optimizations
-        scene.autoClear = false; // Manually clear the frame buffer
+        scene.autoClear = false;
         scene.autoClearDepthAndStencil = false;
         scene.skipPointerMovePicking = true;
-        
-        // Enable frustum culling
         scene.useRightHandedSystem = true;
         scene.useCameraFrustumCulling = true;
         
@@ -134,6 +119,11 @@ class SceneManager {
         
         // Setup post-processing
         this.setupPostProcessing();
+        
+        // Add flesh goblin
+        this.fleshGoblin = new FleshGoblin(this.scene);
+        const goblinMesh = this.fleshGoblin.getMesh();
+        goblinMesh.position = new BABYLON.Vector3(0, -1.5, 0);
     }
 
     positionComponents() {
@@ -198,6 +188,9 @@ class SceneManager {
         }
         if (this.labEnvironment) {
             this.labEnvironment.dispose();
+        }
+        if (this.camera) {
+            this.camera.dispose();
         }
         this.scene.dispose();
     }

@@ -151,10 +151,8 @@ export class ButtonHandler {
     }
 
     resetView() {
-        const camera = this.sceneManager.scene.activeCamera;
-        if (camera) {
-            camera.setPosition(new BABYLON.Vector3(0, 0, 10));
-            camera.setTarget(new BABYLON.Vector3(0, -1, 0));
+        if (this.sceneManager.camera) {
+            this.sceneManager.camera.resetView();
         }
     }
 
