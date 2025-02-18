@@ -8,6 +8,7 @@ import { LabEnvironment } from './LabEnvironment.js';
 import { FleshGoblin } from './FleshGoblin.js';
 import { SceneCamera } from './camera/SceneCamera.js';
 import { SceneLighting } from './lighting/SceneLighting.js';
+import { SceneDebug } from './debug/SceneDebug.js';
 
 const canvas = document.getElementById("renderCanvas");
 const engine = new BABYLON.Engine(canvas, true);
@@ -25,6 +26,8 @@ class SceneManager {
         this.scene = this.createScene();
         this.camera = new SceneCamera(this.scene, canvas);
         this.lighting = new SceneLighting(this.scene);
+        this.debug = new SceneDebug(this.scene);
+        
         this.setupEnvironment();
         
         // Add ButtonHandler initialization
@@ -180,6 +183,9 @@ class SceneManager {
         }
         if (this.lighting) {
             this.lighting.dispose();
+        }
+        if (this.debug) {
+            this.debug.dispose();
         }
         this.scene.dispose();
     }
