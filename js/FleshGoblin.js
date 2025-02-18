@@ -52,7 +52,7 @@ export class FleshGoblin {
         for (let i = 0; i < numTentacles; i++) {
             const points = [];
             const segments = 10;
-            const length = 0.2 + Math.random() * 0.1;
+            const length = 0.7 + Math.random() * 0.2;
             
             for (let j = 0; j <= segments; j++) {
                 const t = j / segments;
@@ -65,7 +65,7 @@ export class FleshGoblin {
 
             const tentacle = BABYLON.MeshBuilder.CreateTube("tentacle", {
                 path: points,
-                radius: 0.02,
+                radius: 0.07,
                 tessellation: 8,
                 cap: BABYLON.Mesh.CAP_ALL
             }, this.scene);
