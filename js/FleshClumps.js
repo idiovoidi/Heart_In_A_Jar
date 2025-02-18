@@ -3,13 +3,18 @@ export class FleshClumps {
         this.scene = scene;
         this.fleshClumpGroup = new BABYLON.TransformNode("fleshClumpGroup", scene);
         this.clumps = [];
+        
+        // Add size constraints
+        this.minSize = 0.05;
+        this.maxSize = 0.12;  // Reduced from 0.15
+        this.maxScaleChange = 0.1;  // Limit scale changes
+        this.baseScale = 0.3;  // Base scale for the entire group
+        
         this.createFleshClumps();
     }
 
     createFleshClumps() {
         const numClumps = 25;
-        const minSize = 0.05;
-        const maxSize = 0.15;
         const jarRadius = 1.8;
 
         // Create base material with subsurface scattering effect
@@ -19,7 +24,7 @@ export class FleshClumps {
         fleshMaterial.subSurface.translucencyIntensity = 1;
         fleshMaterial.roughness = 0.4;
         
-        // Distribute clumps in concentric rings
+        // Distribute clumps in concentric rings with size constraints
         const rings = 3;
         const clumpsPerRing = Math.floor(numClumps / rings);
         
@@ -32,7 +37,10 @@ export class FleshClumps {
             for (let i = 0; i < numInThisRing; i++) {
                 const angle = (i / numInThisRing) * Math.PI * 2;
                 const distance = ringRadius * (0.8 + Math.random() * 0.4);
-                const size = Math.random() * (maxSize - minSize) + minSize;
+                
+                // Constrain size based on ring position
+                const maxRingSize = this.maxSize * (1 - ring * 0.2);
+                const size = this.minSize + Math.random() * (maxRingSize - this.minSize);
 
                 const position = new BABYLON.Vector3(
                     Math.cos(angle) * distance,
@@ -109,23 +117,27 @@ export class FleshClumps {
         const time = performance.now() * 0.001;
         
         this.clumps.forEach((clump, index) => {
-            // Subtle pulsing animation
-            const pulseSpeed = 0.1 + Math.random() * 0.2;
-            const pulseAmount = 0.02 + Math.random() * 0.02;
+            // Constrained pulsing animation
+            const pulseSpeed = 0.5 + Math.random() * 0.2;  // Slower pulse
+            const pulseAmount = 0.01 + Math.random() * 0.01;  // Smaller pulse
             
-            const baseScale = clump.scaling.x;
-            const scale = baseScale * (1 + Math.sin(time * pulseSpeed + index) * pulseAmount);
+            const baseScale = clump.baseScale || this.baseScale;
+            const scaleChange = Math.sin(time * pulseSpeed + index) * pulseAmount;
+            
+            // Limit maximum scale change
+            const limitedScale = baseScale * (1 + Math.max(-this.maxScaleChange, 
+                Math.min(this.maxScaleChange, scaleChange)));
             
             clump.scaling = new BABYLON.Vector3(
-                scale,
-                scale * 0.7,
-                scale
+                limitedScale,
+                limitedScale * 0.7,
+                limitedScale
             );
             
             // Minimal rotation
-            clump.rotation.x += deltaTime * 0.02 * Math.sin(time * 0.3 + index);
-            clump.rotation.y += deltaTime * 0.02 * Math.cos(time * 0.2 + index);
-            clump.rotation.z += deltaTime * 0.02 * Math.sin(time * 0.4 + index);
+            clump.rotation.x += deltaTime * 0.01 * Math.sin(time * 0.3 + index);
+            clump.rotation.y += deltaTime * 0.01 * Math.cos(time * 0.2 + index);
+            clump.rotation.z += deltaTime * 0.01 * Math.sin(time * 0.4 + index);
         });
     }
 
