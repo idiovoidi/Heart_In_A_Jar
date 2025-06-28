@@ -9,6 +9,7 @@ import { FleshGoblin } from './FleshGoblin.js';
 import { SceneCamera } from './camera/SceneCamera.js';
 import { SceneLighting } from './lighting/SceneLighting.js';
 import { SceneDebug } from './debug/SceneDebug.js';
+import { ErrorDecorator } from './core/ErrorDecorator.js';
 
 const canvas = document.getElementById("renderCanvas");
 const engine = new BABYLON.Engine(canvas, true);
@@ -23,6 +24,7 @@ class SceneManager {
             antialias: true
         };
         
+        this.entities = new Map();
         this.scene = this.createScene();
         this.camera = new SceneCamera(this.scene, canvas);
         this.lighting = new SceneLighting(this.scene);
@@ -34,34 +36,8 @@ class SceneManager {
         this.buttonHandler = new ButtonHandler(this);
         
         // Start the render loop with optimized settings
-        engine.runRenderLoop(() => {
-            const deltaTime = engine.getDeltaTime();
-            
-            if (this.heartSim) {
-                this.heartSim.update(deltaTime / 1000);
-            }
-            if (this.arterySim) {
-                this.arterySim.update(deltaTime / 1000);
-            }
-            if (this.fleshClumps) {
-                this.fleshClumps.update(deltaTime / 1000);
-            }
-            if (this.fluidSim) {
-                this.fluidSim.update(deltaTime);
-            }
-            if (this.labEnvironment) {
-                this.labEnvironment.update(deltaTime);
-            }
-            if (this.fleshGoblin) {
-                this.fleshGoblin.update(deltaTime);
-            }
-            
-            // Only render if the scene is ready
-            if (this.scene.activeCamera) {
-                this.scene.render();
-            }
-        });
-
+        this.startRenderLoop();
+        
         // Handle window resize
         window.addEventListener("resize", () => {
             engine.resize();
@@ -93,91 +69,179 @@ class SceneManager {
     }
 
     setupEnvironment() {
-        console.log('Setting up environment...');
-        
-        // Initialize components in correct order
-        this.labJar = new LabJar(this.scene);
-        this.heartSim = new HeartSimulation(this.scene);
-        this.arterySim = new ArterySimulation(this.scene);
-        this.fleshClumps = new FleshClumps(this.scene);
-        this.fluidSim = new FluidSimulation(this.scene);
-        this.labEnvironment = new LabEnvironment(this.scene);
-        
-        // Position and scale components
-        this.positionComponents();
-        
-        // Setup post-processing
-        this.setupPostProcessing();
-        
-        // Add flesh goblin
-        this.fleshGoblin = new FleshGoblin(this.scene);
-        const goblinMesh = this.fleshGoblin.getMesh();
-        goblinMesh.position = new BABYLON.Vector3(0, -1.5, 0);
+        try {
+            console.log('Setting up environment...');
+            
+            // Initialize components with proper error handling
+            try {
+                // Create all entities and register them
+                this.registerEntity('labJar', new LabJar(this.scene));
+                this.registerEntity('heartSim', new HeartSimulation(this.scene));
+                this.registerEntity('arterySim', new ArterySimulation(this.scene));
+                
+                // Example of using the new configurable FleshClumps
+                this.registerEntity('fleshClumps', new FleshClumps(this.scene, {
+                    numClumps: 10,
+                    distribution: 'random', // 'rings' or 'random'
+                    animationStyle: 'noise', // 'pulse' or 'noise'
+                    minSize: 0.2,
+                    maxSize: 0.8,
+                    minPosition: new BABYLON.Vector3(-1.5, -2, -1.5),
+                    maxPosition: new BABYLON.Vector3(1.5, -1.5, 1.5)
+                }));
+                
+                this.registerEntity('fluidSim', new FluidSimulation(this.scene));
+                this.registerEntity('labEnvironment', new LabEnvironment(this.scene));
+                this.registerEntity('fleshGoblin', new FleshGoblin(this.scene));
+                
+                // Position and scale components
+                this.positionComponents();
+                
+                // Setup post-processing
+                this.setupPostProcessing();
+            } catch (error) {
+                console.error("Error setting up environment:", error);
+                // Implement fallback or recovery mechanism
+                ErrorDecorator.logError(error, "setupEnvironment");
+            }
+        } catch (error) {
+            console.error("Fatal error in setupEnvironment:", error);
+            ErrorDecorator.logError(error, "setupEnvironment");
+        }
+    }
+    
+    registerEntity(name, entity) {
+        this.entities.set(name, entity);
+        return entity;
+    }
+    
+    getEntity(name) {
+        return this.entities.get(name);
     }
 
     positionComponents() {
-        // Position jar higher on the table
-        this.labJar.getMesh().scaling = new BABYLON.Vector3(1.2, 1.2, 1.2);
-        this.labJar.getMesh().position.y = -1.4;
-
-        // Position heart
-        const heartMesh = this.heartSim.getMesh();
-        heartMesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);
-        heartMesh.position = new BABYLON.Vector3(0, -1.9, 0);
-        heartMesh.rotation = new BABYLON.Vector3(Math.PI * 0.15, 0, 0);
-
-        // Position artery system relative to heart
-        const arteryMesh = this.arterySim.getMesh();
-        arteryMesh.scaling = new BABYLON.Vector3(1, 1, 1);
-        arteryMesh.position = heartMesh.position.clone();
-        
-        // Make sure arteries are visible by adding them to the scene properly
-        this.arterySim.arteries.forEach(artery => {
-            if (artery.mesh && !artery.mesh.parent) {
-                this.scene.addMesh(artery.mesh);
+        try {
+            // Position jar higher on the table
+            const labJar = this.getEntity('labJar');
+            if (labJar) {
+                labJar.getMesh().scaling = new BABYLON.Vector3(1.2, 1.2, 1.2);
+                labJar.getMesh().position.y = -1.4;
             }
-        });
 
-        // Position flesh clumps
-        const fleshMesh = this.fleshClumps.getMesh();
-        fleshMesh.scaling = new BABYLON.Vector3(0.3, 0.3, 0.3);
-        fleshMesh.position = new BABYLON.Vector3(0, -2.35, 0);
+            // Position heart
+            const heartSim = this.getEntity('heartSim');
+            if (heartSim) {
+                const heartMesh = heartSim.getMesh();
+                heartMesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);
+                heartMesh.position = new BABYLON.Vector3(0, -1.9, 0);
+                heartMesh.rotation = new BABYLON.Vector3(Math.PI * 0.15, 0, 0);
+            }
 
-        // Position fluid
-        const fluidMesh = this.fluidSim.getMesh();
-        fluidMesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);
-        fluidMesh.position = new BABYLON.Vector3(0, -2.2, 0);
+            // Position artery system relative to heart
+            const arterySim = this.getEntity('arterySim');
+            if (arterySim && heartSim) {
+                const arteryMesh = arterySim.getMesh();
+                arteryMesh.scaling = new BABYLON.Vector3(1, 1, 1);
+                arteryMesh.position = heartSim.getMesh().position.clone();
+                
+                // Make sure arteries are visible by adding them to the scene properly
+                if (arterySim.arteries) {
+                    arterySim.arteries.forEach(artery => {
+                        if (artery.mesh && !artery.mesh.parent) {
+                            this.scene.addMesh(artery.mesh);
+                        }
+                    });
+                }
+            }
+
+            // Position flesh clumps
+            const fleshClumps = this.getEntity('fleshClumps');
+            if (fleshClumps) {
+                const fleshMesh = fleshClumps.getMesh();
+                fleshMesh.scaling = new BABYLON.Vector3(0.3, 0.3, 0.3);
+                fleshMesh.position = new BABYLON.Vector3(0, -2.35, 0);
+            }
+
+            // Position fluid
+            const fluidSim = this.getEntity('fluidSim');
+            if (fluidSim) {
+                const fluidMesh = fluidSim.getMesh();
+                fluidMesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);
+                fluidMesh.position = new BABYLON.Vector3(0, -2.2, 0);
+            }
+        } catch (error) {
+            console.error("Error in positionComponents:", error);
+            ErrorDecorator.logError(error, "positionComponents");
+        }
     }
 
     setupPostProcessing() {
-        const pipeline = new BABYLON.DefaultRenderingPipeline(
-            "defaultPipeline", 
-            true, 
-            this.scene,
-            [this.scene.activeCamera]
-        );
+        try {
+            const pipeline = new BABYLON.DefaultRenderingPipeline(
+                "defaultPipeline", 
+                true, 
+                this.scene,
+                [this.scene.activeCamera]
+            );
 
-        // Configure bloom effect
-        pipeline.bloomEnabled = true;
-        pipeline.bloomThreshold = 0.85;
-        pipeline.bloomWeight = 0.5;
-        pipeline.bloomKernel = 64;
-        pipeline.bloomScale = 0.5;
+            // Configure bloom effect
+            pipeline.bloomEnabled = true;
+            pipeline.bloomThreshold = 0.85;
+            pipeline.bloomWeight = 0.5;
+            pipeline.bloomKernel = 64;
+            pipeline.bloomScale = 0.5;
+            
+            // Add chromatic aberration for a more cinematic look
+            pipeline.chromaticAberrationEnabled = true;
+            pipeline.chromaticAberration.aberrationAmount = 1.0;
+            pipeline.chromaticAberration.radialIntensity = 0.5;
+            
+            // Add slight grain for texture
+            pipeline.grainEnabled = true;
+            pipeline.grain.intensity = 10;
+            pipeline.grain.animated = true;
+        } catch (error) {
+            console.error("Error in setupPostProcessing:", error);
+            ErrorDecorator.logError(error, "setupPostProcessing");
+        }
+    }
+    
+    startRenderLoop() {
+        engine.runRenderLoop(() => {
+            const deltaTime = engine.getDeltaTime();
+            
+            // Update all registered entities
+            this.entities.forEach(entity => {
+                if (entity && typeof entity.update === 'function') {
+                    try {
+                        entity.update(deltaTime / 1000);
+                    } catch (error) {
+                        console.error(`Error updating entity ${entity.name}:`, error);
+                    }
+                }
+            });
+            
+            // Only render if the scene is ready
+            if (this.scene.activeCamera) {
+                this.scene.render();
+            }
+        });
     }
 
     dispose() {
         if (this.buttonHandler) {
             this.buttonHandler.dispose();
         }
-        if (this.heartSim) {
-            this.heartSim.dispose();
-        }
-        if (this.labJar) {
-            this.labJar.dispose();
-        }
-        if (this.labEnvironment) {
-            this.labEnvironment.dispose();
-        }
+        
+        // Dispose all entities
+        this.entities.forEach(entity => {
+            if (entity && typeof entity.dispose === 'function') {
+                entity.dispose();
+            }
+        });
+        
+        this.entities.clear();
+        
         if (this.camera) {
             this.camera.dispose();
         }
