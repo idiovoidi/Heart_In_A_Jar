@@ -396,10 +396,15 @@ export class ParameterController {
                 heartSim.setBeating(value);
                 return true;
             case 'scale':
-                const heartMesh = heartSim.getMesh();
-                if (heartMesh) {
-                    heartMesh.scaling = new BABYLON.Vector3(value, value, value);
+                if (heartSim.setHeartScale) {
+                    heartSim.setHeartScale(value);
                     return true;
+                } else {
+                    const heartMesh = heartSim.getMesh();
+                    if (heartMesh) {
+                        heartMesh.scaling = new BABYLON.Vector3(value, value, value);
+                        return true;
+                    }
                 }
                 return false;
             case 'contractionIntensity':

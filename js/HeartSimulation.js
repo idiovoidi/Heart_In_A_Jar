@@ -648,4 +648,49 @@ export class HeartSimulation extends EntityBase {
     setContractionIntensity(intensity) {
         this.contractionIntensity = Math.max(0.1, Math.min(2.0, intensity));
     }
+
+    /**
+     * Get current heart phase for beat detection
+     * @returns {number} Current heart phase (-1 to 1)
+     */
+    getHeartPhase() {
+        if (!this.isBeating) return 0;
+        return Math.sin(this.time * 4);
+    }
+
+    /**
+     * Get heart statistics
+     * @returns {Object} Heart statistics
+     */
+    getHeartStats() {
+        return {
+            beatSpeed: this.beatSpeed,
+            isBeating: this.isBeating,
+            contractionIntensity: this.contractionIntensity,
+            currentPhase: this.getHeartPhase(),
+            time: this.time
+        };
+    }
+
+    /**
+     * Set heart scale (for size parameter)
+     * @param {number} scale - Scale multiplier
+     */
+    setHeartScale(scale) {
+        if (this.entityNode) {
+            const clampedScale = Math.max(0.3, Math.min(2.0, scale));
+            this.entityNode.scaling = new BABYLON.Vector3(clampedScale, clampedScale, clampedScale);
+        }
+    }
+
+    /**
+     * Get current heart scale
+     * @returns {number} Current scale
+     */
+    getHeartScale() {
+        if (this.entityNode && this.entityNode.scaling) {
+            return this.entityNode.scaling.x;
+        }
+        return 1.0;
+    }
 } 

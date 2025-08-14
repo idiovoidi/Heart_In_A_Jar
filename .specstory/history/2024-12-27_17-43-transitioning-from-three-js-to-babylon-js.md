@@ -35,6 +35,7 @@ I'll help you migrate from Three.js to Babylon.js. Here are the necessary change
 ```
 
 Key changes made:
+
 1. Removed the Three.js import map since we're switching to Babylon.js
 2. Added Babylon.js core and loaders CDN scripts
 3. Changed the `div#container` to `canvas#renderCanvas` which is required by Babylon.js
@@ -47,9 +48,9 @@ const engine = new BABYLON.Engine(canvas, true);
 
 const createScene = () => {
     const scene = new BABYLON.Scene(engine);
-    
+
     // Add a camera
-    const camera = new BABYLON.ArcRotateCamera("camera", 
+    const camera = new BABYLON.ArcRotateCamera("camera",
         0, Math.PI / 3, 10,
         BABYLON.Vector3.Zero(),
         scene
@@ -57,7 +58,7 @@ const createScene = () => {
     camera.attachControl(canvas, true);
 
     // Add lights
-    const light = new BABYLON.HemisphericLight("light", 
+    const light = new BABYLON.HemisphericLight("light",
         new BABYLON.Vector3(0, 1, 0),
         scene
     );
@@ -102,6 +103,7 @@ html, body {
 ```
 
 The main advantages of using Babylon.js for your artery simulation include:
+
 - Built-in physics engine
 - Better performance for complex medical visualizations
 - More comprehensive material system
@@ -131,7 +133,7 @@ class SceneManager {
     constructor() {
         this.scene = this.createScene();
         this.setupEnvironment();
-        
+
         // Start the render loop
         engine.runRenderLoop(() => {
             this.scene.render();
@@ -145,9 +147,9 @@ class SceneManager {
 
     createScene() {
         const scene = new BABYLON.Scene(engine);
-        
+
         // Camera setup
-        const camera = new BABYLON.ArcRotateCamera("camera", 
+        const camera = new BABYLON.ArcRotateCamera("camera",
             0, Math.PI / 3, 10,
             BABYLON.Vector3.Zero(),
             scene
@@ -155,7 +157,7 @@ class SceneManager {
         camera.attachControl(canvas, true);
         camera.setPosition(new BABYLON.Vector3(0, 0, 8));
         camera.setTarget(new BABYLON.Vector3(0, -1, 0));
-        
+
         // Lighting setup
         const ambientLight = new BABYLON.HemisphericLight(
             "ambientLight",
@@ -180,10 +182,10 @@ class SceneManager {
         this.heartSim = new HeartSimulation(this.scene);
         this.arterySim = new ArterySimulation(this.scene);
         this.fleshClumps = new FleshClumps(this.scene);
-        
+
         // Position and scale components
         this.positionComponents();
-        
+
         // Setup post-processing
         this.setupPostProcessing();
     }
@@ -213,8 +215,8 @@ class SceneManager {
 
     setupPostProcessing() {
         const pipeline = new BABYLON.DefaultRenderingPipeline(
-            "defaultPipeline", 
-            true, 
+            "defaultPipeline",
+            true,
             this.scene,
             [this.scene.activeCamera]
         );
@@ -262,7 +264,7 @@ export class HeartSimulation {
         this.time = 0;
         this.beatSpeed = 2;
         this.isBeating = true;
-        
+
         this.createAnatomicalHeart();
     }
 
@@ -309,7 +311,7 @@ export class HeartSimulation {
     createLeftVentricle() {
         const points = [];
         const resolution = 20;
-        
+
         // Create heart shape curve points
         for (let i = 0; i <= resolution; i++) {
             const t = i / resolution;
@@ -338,7 +340,7 @@ export class HeartSimulation {
     createRightVentricle() {
         const points = [];
         const resolution = 20;
-        
+
         // Create slightly different shape for right ventricle
         for (let i = 0; i <= resolution; i++) {
             const t = i / resolution;
@@ -391,14 +393,14 @@ export class HeartSimulation {
         if (!this.isBeating) return;
 
         this.time += deltaTime * this.beatSpeed;
-        
+
         // Calculate phases
         const ventriclePhase = Math.sin(this.time * 4);
         const atrialPhase = Math.sin(this.time * 4 - Math.PI * 0.5);
-        
+
         // Ventricle contraction
         const ventricleContract = Math.max(0, ventriclePhase);
-        
+
         // Update chamber scales
         if (this.chambers.leftVentricle) {
             const scale = 1 - ventricleContract * 0.15;
@@ -447,6 +449,7 @@ export class HeartSimulation {
 ```
 
 Key changes made in the conversion:
+
 1. Replaced THREE.Group with BABYLON.TransformNode for grouping objects
 2. Converted THREE.Mesh to BABYLON.Mesh
 3. Used BABYLON.MeshBuilder for creating geometries
@@ -456,6 +459,7 @@ Key changes made in the conversion:
 7. Updated the mesh deformation code to work with Babylon.js's vertex system
 
 I've included the core heart functionality with the chambers and basic animation. Would you like me to add the remaining methods for:
+
 1. Valves (createMitralValve, createTricuspidValve, createSemilunarValves)
 2. Blood vessels (createCoronaryVessels)
 3. Surface details (createSurfaceDetails, createMuscleFibers)
@@ -470,9 +474,9 @@ _**User**_
 Let's port the LabJar and get a basic demo running
 
 ReferenceError: LabJar is not defined
-    at SceneManager.setupEnvironment (main.js:53:27)
-    at new SceneManager (main.js:7:14)
-    at main.js:106:22
+at SceneManager.setupEnvironment (main.js:53:27)
+at new SceneManager (main.js:7:14)
+at main.js:106:22
 
 ---
 
@@ -597,7 +601,7 @@ class SceneManager {
     constructor() {
         this.scene = this.createScene();
         this.setupEnvironment();
-        
+
         // Start the render loop
         engine.runRenderLoop(() => {
             this.scene.render();
@@ -612,9 +616,9 @@ class SceneManager {
     createScene() {
         const scene = new BABYLON.Scene(engine);
         scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
-        
+
         // Camera setup
-        const camera = new BABYLON.ArcRotateCamera("camera", 
+        const camera = new BABYLON.ArcRotateCamera("camera",
             0, Math.PI / 3, 10,
             BABYLON.Vector3.Zero(),
             scene
@@ -622,7 +626,7 @@ class SceneManager {
         camera.attachControl(canvas, true);
         camera.setPosition(new BABYLON.Vector3(0, 0, 8));
         camera.setTarget(new BABYLON.Vector3(0, -1, 0));
-        
+
         // Lighting setup
         const ambientLight = new BABYLON.HemisphericLight(
             "ambientLight",
@@ -644,10 +648,10 @@ class SceneManager {
     setupEnvironment() {
         // Initialize jar only for now
         this.labJar = new LabJar(this.scene);
-        
+
         // Position and scale jar
         this.positionComponents();
-        
+
         // Setup post-processing
         this.setupPostProcessing();
     }
@@ -660,8 +664,8 @@ class SceneManager {
 
     setupPostProcessing() {
         const pipeline = new BABYLON.DefaultRenderingPipeline(
-            "defaultPipeline", 
-            true, 
+            "defaultPipeline",
+            true,
             this.scene,
             [this.scene.activeCamera]
         );
@@ -682,6 +686,7 @@ const sceneManager = new SceneManager();
 This should give you a basic scene with just the jar visible. I've commented out the other imports and initializations until we port those classes. The jar should appear as a transparent glass container with proper lighting and reflections.
 
 Key changes made:
+
 1. Converted the jar geometry to use Babylon.js's MeshBuilder
 2. Updated materials to use PBRMaterial for glass and StandardMaterial for glow
 3. Adjusted the scene setup to work with Babylon.js's rendering system
@@ -693,7 +698,7 @@ Once you confirm this is working, we can proceed with porting the other componen
 
 _**User**_
 
-Let's add the beating heart to the jar @HeartSimulation.js 
+Let's add the beating heart to the jar @HeartSimulation.js
 
 ---
 
@@ -707,10 +712,10 @@ setupEnvironment() {
     // Initialize components
     this.labJar = new LabJar(this.scene);
     this.heartSim = new HeartSimulation(this.scene);
-    
+
     // Position and scale components
     this.positionComponents();
-    
+
     // Setup post-processing
     this.setupPostProcessing();
 }
@@ -761,19 +766,19 @@ createRightAtrium() {
 
 createConnectingTissue() {
     const tissue = new BABYLON.TransformNode("connectingTissue", this.scene);
-    
+
     // Create left connection
     const leftConnection = BABYLON.MeshBuilder.CreateCylinder("leftConnection", {
         height: 1.5,
         diameter: 0.8,
         tessellation: 32
     }, this.scene);
-    
+
     const material = new BABYLON.StandardMaterial("tissuemat", this.scene);
     material.diffuseColor = new BABYLON.Color3(0.55, 0, 0);
     material.alpha = 0.7;
     material.backFaceCulling = false;
-    
+
     leftConnection.material = material;
     leftConnection.position = new BABYLON.Vector3(-0.8, 1.5, 0);
     leftConnection.parent = tissue;
@@ -789,7 +794,7 @@ createConnectingTissue() {
 
 createMitralValve() {
     const valveGroup = new BABYLON.TransformNode("mitralValve", this.scene);
-    
+
     const material = new BABYLON.StandardMaterial("valvemat", this.scene);
     material.diffuseColor = new BABYLON.Color3(0.94, 0.89, 0.88);
     material.alpha = 0.9;
@@ -823,7 +828,7 @@ createMitralValve() {
 
 createTricuspidValve() {
     const valveGroup = new BABYLON.TransformNode("tricuspidValve", this.scene);
-    
+
     const material = new BABYLON.StandardMaterial("valvemat", this.scene);
     material.diffuseColor = new BABYLON.Color3(0.94, 0.89, 0.88);
     material.alpha = 0.9;
@@ -852,7 +857,7 @@ createTricuspidValve() {
 
 createSemilunarValves() {
     const valveGroup = new BABYLON.TransformNode("semilunarValves", this.scene);
-    
+
     const material = new BABYLON.StandardMaterial("valvemat", this.scene);
     material.diffuseColor = new BABYLON.Color3(0.98, 0.98, 0.98);
     material.alpha = 0.85;
@@ -893,6 +898,7 @@ createSemilunarValves() {
 ```
 
 The heart should now appear inside the jar with a beating animation. The heart consists of:
+
 1. Left and right ventricles
 2. Left and right atria
 3. Connecting tissue
@@ -906,11 +912,11 @@ The update method we already have will handle the beating animation. Let me know
 _**User**_
 
 HeartSimulation.js:46 Uncaught TypeError: this.createCoronaryVessels is not a function
-    at HeartSimulation.createAnatomicalHeart (HeartSimulation.js:46:35)
-    at new HeartSimulation (HeartSimulation.js:9:14)
-    at SceneManager.setupEnvironment (main.js:60:25)
-    at new SceneManager (main.js:12:14)
-    at main.js:99:22
+at HeartSimulation.createAnatomicalHeart (HeartSimulation.js:46:35)
+at new HeartSimulation (HeartSimulation.js:9:14)
+at SceneManager.setupEnvironment (main.js:60:25)
+at new SceneManager (main.js:12:14)
+at main.js:99:22
 
 ---
 
@@ -923,7 +929,7 @@ Let's add the missing methods for the surface features. Here's the implementatio
 
 createCoronaryVessels() {
     const vesselGroup = new BABYLON.TransformNode("coronaryVessels", this.scene);
-    
+
     // Helper function to create vessel curves
     const createVessel = (points, radius, color) => {
         // Create a custom curve from points
@@ -988,7 +994,7 @@ createCoronaryVessels() {
 
 createMuscleFibers() {
     const fiberGroup = new BABYLON.TransformNode("muscleFibers", this.scene);
-    
+
     const createFiberLayer = (baseY, direction) => {
         const material = new BABYLON.StandardMaterial("fiberMat", this.scene);
         material.diffuseColor = new BABYLON.Color3(0.55, 0, 0);
@@ -998,7 +1004,7 @@ createMuscleFibers() {
         for (let i = 0; i < 12; i++) {
             const angle = (i / 12) * Math.PI * 2;
             const radius = 1.5 + Math.sin(angle) * 0.2;
-            
+
             // Create spiral points
             const points = [];
             const segments = 64;
@@ -1016,7 +1022,7 @@ createMuscleFibers() {
                 radius: 0.08,
                 tessellation: 8
             }, this.scene);
-            
+
             fiber.material = material;
             fiber.parent = fiberGroup;
         }
@@ -1033,7 +1039,7 @@ createMuscleFibers() {
 
 createSurfaceDetails() {
     const detailGroup = new BABYLON.TransformNode("surfaceDetails", this.scene);
-    
+
     // Create grooves (sulci)
     const createGroove = (points, width) => {
         const curve = BABYLON.Curve3.CreateCatmullRomSpline(points, 32);
@@ -1076,6 +1082,7 @@ createSurfaceDetails() {
 ```
 
 Key changes made:
+
 1. Added createCoronaryVessels() to create the blood vessel network using tubes along curves
 2. Added createMuscleFibers() to create spiral muscle fibers using tubes
 3. Added createSurfaceDetails() to create the grooves and surface features
@@ -1084,6 +1091,7 @@ Key changes made:
 6. Properly parented all elements to their respective structure groups
 
 These methods complete the heart model with:
+
 - Coronary arteries and veins
 - Muscle fiber layers with alternating directions
 - Surface details including grooves (sulci)
@@ -1117,7 +1125,7 @@ export class ButtonHandler {
 
         // Heart Controls Section
         this.createHeartControls(panel);
-        
+
         // View Controls Section
         this.createViewControls(panel);
     }
@@ -1132,7 +1140,7 @@ export class ButtonHandler {
         // Beat Speed Slider
         const speedContainer = document.createElement('div');
         speedContainer.className = 'slider-container';
-        
+
         const speedLabel = document.createElement('label');
         speedLabel.textContent = 'Beat Speed';
         speedContainer.appendChild(speedLabel);
@@ -1145,7 +1153,7 @@ export class ButtonHandler {
         speedSlider.value = '2';
         speedSlider.oninput = (e) => this.updateBeatSpeed(e.target.value);
         speedContainer.appendChild(speedSlider);
-        
+
         panel.appendChild(speedContainer);
     }
 
@@ -1272,10 +1280,10 @@ class SceneManager {
     constructor() {
         this.scene = this.createScene();
         this.setupEnvironment();
-        
+
         // Add ButtonHandler initialization
         this.buttonHandler = new ButtonHandler(this);
-        
+
         // Start the render loop
         engine.runRenderLoop(() => {
             // Add heart update
@@ -1309,6 +1317,7 @@ class SceneManager {
 ```
 
 These changes will:
+
 1. Add a control panel with a toggle heartbeat button and speed slider
 2. Add a reset view button to return to the default camera position
 3. Ensure the heart animation is updated in the render loop
@@ -1381,6 +1390,7 @@ Also, let's make sure your index.html has the correct module type and script ord
 ```
 
 The key changes are:
+
 1. Removed Three.js import from ButtonHandler.js
 2. Ensured all module imports use relative paths
 3. Added type="module" to the main script tag
@@ -1419,7 +1429,7 @@ export class ArterySimulation {
             // Create control points for natural curve
             const direction = endPoint.subtract(startPoint);
             const midPoint = BABYLON.Vector3.Lerp(startPoint, endPoint, 0.5);
-            
+
             // Add random offset to midpoint for more organic look
             midPoint.addInPlace(new BABYLON.Vector3(
                 (Math.random() - 0.5) * 0.2,
@@ -1429,7 +1439,7 @@ export class ArterySimulation {
 
             const points = [startPoint, midPoint, endPoint];
             const curve = BABYLON.Curve3.CreateCatmullRomSpline(points, 8);
-            
+
             const tube = BABYLON.MeshBuilder.CreateTube("branch", {
                 path: curve.getPoints(),
                 radius: radius,
@@ -1456,12 +1466,12 @@ export class ArterySimulation {
             Math.random() * 0.5 + 0.5, // Upward bias
             (Math.random() - 0.5) * 2
         );
-        
+
         // Add some influence from parent direction
         if (parentDir) {
             BABYLON.Vector3.LerpToRef(dir.normalize(), parentDir, 0.3, dir);
         }
-        
+
         // If near jar wall, try to grow along it
         const distanceFromCenter = Math.sqrt(currentPos.x * currentPos.x + currentPos.z * currentPos.z);
         if (distanceFromCenter > this.jarRadius * 0.7) {
@@ -1527,11 +1537,11 @@ export class ArterySimulation {
             );
 
             if (branchMesh) {
-                const material = branch.isArtery ? 
+                const material = branch.isArtery ?
                     new BABYLON.StandardMaterial("arteryMat", this.scene) :
                     new BABYLON.StandardMaterial("veinMat", this.scene);
 
-                material.diffuseColor = branch.isArtery ? 
+                material.diffuseColor = branch.isArtery ?
                     new BABYLON.Color3(1, 0.133, 0.133) :
                     new BABYLON.Color3(0.133, 0.133, 1);
                 material.emissiveColor = branch.isArtery ?
@@ -1601,10 +1611,10 @@ setupEnvironment() {
     this.labJar = new LabJar(this.scene);
     this.heartSim = new HeartSimulation(this.scene);
     this.arterySim = new ArterySimulation(this.scene);
-    
+
     // Position and scale components
     this.positionComponents();
-    
+
     // Setup post-processing
     this.setupPostProcessing();
 
@@ -1644,6 +1654,7 @@ engine.runRenderLoop(() => {
 ```
 
 Key changes made:
+
 1. Converted all Three.js vector operations to Babylon.js equivalents
 2. Updated material system to use Babylon.js materials
 3. Used Babylon.js's mesh creation and curve system
@@ -1675,7 +1686,7 @@ createControlPanel() {
 
     // Heart Controls Section
     this.createHeartControls(panel);
-    
+
     // View Controls Section
     this.createViewControls(panel);
 
@@ -1697,7 +1708,7 @@ createArteryControls(panel) {
     // Growth Speed Slider
     const speedContainer = document.createElement('div');
     speedContainer.className = 'slider-container';
-    
+
     const speedLabel = document.createElement('label');
     speedLabel.textContent = 'Growth Speed';
     speedContainer.appendChild(speedLabel);
@@ -1710,7 +1721,7 @@ createArteryControls(panel) {
     speedSlider.value = '100';
     speedSlider.oninput = (e) => this.updateGrowthSpeed(e.target.value);
     speedContainer.appendChild(speedSlider);
-    
+
     arteryContainer.appendChild(speedContainer);
     panel.appendChild(arteryContainer);
 }
@@ -1818,7 +1829,7 @@ processGrowthQueue() {
 
         if (branchMesh) {
             const material = new BABYLON.StandardMaterial("branchMat", this.scene);
-            material.diffuseColor = branch.isArtery ? 
+            material.diffuseColor = branch.isArtery ?
                 new BABYLON.Color3(1, 0.133, 0.133) :
                 new BABYLON.Color3(0.133, 0.133, 1);
             material.emissiveColor = branch.isArtery ?
@@ -1852,6 +1863,7 @@ processGrowthQueue() {
 ```
 
 These changes will:
+
 1. Add a button to start/stop artery growth
 2. Add a slider to control growth speed
 3. Start with growth disabled until the button is pressed
@@ -1899,9 +1911,9 @@ Also, let's adjust the camera position to better frame the larger heart:
 createScene() {
     const scene = new BABYLON.Scene(engine);
     scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
-    
+
     // Camera setup with adjusted position
-    const camera = new BABYLON.ArcRotateCamera("camera", 
+    const camera = new BABYLON.ArcRotateCamera("camera",
         0, Math.PI / 3, 12,  // Increased radius from 10 to 12
         BABYLON.Vector3.Zero(),
         scene
@@ -1909,7 +1921,7 @@ createScene() {
     camera.attachControl(canvas, true);
     camera.setPosition(new BABYLON.Vector3(0, 0, 10));  // Adjusted from 8 to 10
     camera.setTarget(new BABYLON.Vector3(0, -1, 0));
-    
+
     // Rest of the scene setup...
 }
 ```
@@ -1927,6 +1939,7 @@ resetView() {
 ```
 
 These changes will:
+
 1. Make the heart 60% larger
 2. Raise the heart position slightly in the jar
 3. Adjust the camera to better frame the larger heart
@@ -2039,7 +2052,7 @@ export class LabJar {
             tessellation: 48
         }, this.scene);
         edgeHighlight.position.y = 2;
-        
+
         const highlightMaterial = new BABYLON.StandardMaterial("highlightMaterial", this.scene);
         highlightMaterial.emissiveColor = new BABYLON.Color3(0.5, 0.5, 0.5);
         highlightMaterial.alpha = 0.3;
@@ -2064,6 +2077,7 @@ export class LabJar {
 ```
 
 Key changes made:
+
 1. Removed the top cap from the jar cylinder
 2. Improved glass material properties with better transparency and refraction
 3. Created a more defined rim at the top with two torus rings
@@ -2117,11 +2131,11 @@ export class FleshClumps {
                 -1.9, // Position near jar bottom
                 Math.sin(angle) * distance
             );
-            
+
             // Create deformed sphere for flesh clump
             const clump = this.createFleshClump(size, position);
             clump.material = fleshMaterial.clone(`fleshMaterial${i}`);
-            
+
             // Add some color variation
             const colorVar = Math.random() * 0.2;
             clump.material.diffuseColor = new BABYLON.Color3(
@@ -2143,7 +2157,7 @@ export class FleshClumps {
         // Deform the mesh
         const positions = clump.getVerticesData(BABYLON.VertexBuffer.PositionKind);
         const normals = clump.getVerticesData(BABYLON.VertexBuffer.NormalKind);
-        
+
         for (let i = 0; i < positions.length; i += 3) {
             // Add random displacement
             const displacement = new BABYLON.Vector3(
@@ -2163,7 +2177,7 @@ export class FleshClumps {
                 normals[i + 2]
             );
             normal.normalize();
-            
+
             normals[i] = normal.x;
             normals[i + 1] = normal.y;
             normals[i + 2] = normal.z;
@@ -2174,7 +2188,7 @@ export class FleshClumps {
 
         // Position the clump
         clump.position = position;
-        
+
         // Random rotation
         clump.rotation = new BABYLON.Vector3(
             Math.random() * Math.PI,
@@ -2188,15 +2202,15 @@ export class FleshClumps {
 
     update(deltaTime) {
         const time = performance.now() * 0.001;
-        
+
         this.fleshClumpGroup.getChildMeshes().forEach((clump, index) => {
             // Create subtle pulsing and movement
             const pulseSpeed = 0.5 + Math.random() * 0.5;
             const pulseAmount = 0.05 + Math.random() * 0.05;
-            
+
             const scale = 1 + Math.sin(time * pulseSpeed + index) * pulseAmount;
             clump.scaling = new BABYLON.Vector3(scale, scale, scale);
-            
+
             // Subtle rotation
             clump.rotation.x += deltaTime * 0.1 * Math.sin(time * 0.5 + index);
             clump.rotation.y += deltaTime * 0.1 * Math.cos(time * 0.3 + index);
@@ -2233,10 +2247,10 @@ setupEnvironment() {
     this.heartSim = new HeartSimulation(this.scene);
     this.arterySim = new ArterySimulation(this.scene);
     this.fleshClumps = new FleshClumps(this.scene);
-    
+
     // Position and scale components
     this.positionComponents();
-    
+
     // Setup post-processing
     this.setupPostProcessing();
 
@@ -2270,6 +2284,7 @@ engine.runRenderLoop(() => {
 ```
 
 Key changes made:
+
 1. Converted the mesh creation to use Babylon.js's MeshBuilder
 2. Updated material system to use Babylon.js materials
 3. Implemented mesh deformation using Babylon.js's vertex data system
@@ -2318,11 +2333,11 @@ export class FleshClumps {
         // Create clumps in concentric rings for better distribution
         const rings = 3;
         const clumpsPerRing = Math.floor(numClumps / rings);
-        
+
         for (let ring = 0; ring < rings; ring++) {
             const ringRadius = (ring + 1) * (jarRadius * 0.8 / rings);
-            const numInThisRing = ring === rings - 1 ? 
-                numClumps - (clumpsPerRing * (rings - 1)) : 
+            const numInThisRing = ring === rings - 1 ?
+                numClumps - (clumpsPerRing * (rings - 1)) :
                 clumpsPerRing;
 
             for (let i = 0; i < numInThisRing; i++) {
@@ -2336,10 +2351,10 @@ export class FleshClumps {
                     -2.0 + Math.random() * 0.15,  // Vary height slightly above bottom
                     Math.sin(angle) * distance + (Math.random() * 0.2 - 0.1)
                 );
-                
+
                 const clump = this.createFleshClump(size, position);
                 const material = fleshMaterial.clone(`fleshMaterial${ring}${i}`);
-                
+
                 // More varied color for organic look
                 const hueVar = Math.random() * 0.2 - 0.1;
                 const satVar = Math.random() * 0.3;
@@ -2353,7 +2368,7 @@ export class FleshClumps {
                     0,
                     0
                 );
-                
+
                 clump.material = material;
             }
         }
@@ -2370,7 +2385,7 @@ export class FleshClumps {
         // More aggressive deformation for organic look
         const positions = clump.getVerticesData(BABYLON.VertexBuffer.PositionKind);
         const normals = clump.getVerticesData(BABYLON.VertexBuffer.NormalKind);
-        
+
         for (let i = 0; i < positions.length; i += 3) {
             // More varied displacement
             const displacement = new BABYLON.Vector3(
@@ -2382,7 +2397,7 @@ export class FleshClumps {
             // Add bulges and dents
             const y = positions[i + 1];
             const bulgeAmount = Math.sin(y * 10) * 0.1;
-            
+
             positions[i] += displacement.x + bulgeAmount;
             positions[i + 1] += displacement.y * 0.7;  // Flatten slightly
             positions[i + 2] += displacement.z + bulgeAmount;
@@ -2394,7 +2409,7 @@ export class FleshClumps {
                 normals[i + 2]
             );
             normal.normalize();
-            
+
             normals[i] = normal.x;
             normals[i + 1] = normal.y;
             normals[i + 2] = normal.z;
@@ -2421,12 +2436,12 @@ export class FleshClumps {
 
     update(deltaTime) {
         const time = performance.now() * 0.001;
-        
+
         this.fleshClumpGroup.getChildMeshes().forEach((clump, index) => {
             // Slower, more organic pulsing
             const pulseSpeed = 0.2 + Math.random() * 0.3;
             const pulseAmount = 0.03 + Math.random() * 0.03;
-            
+
             const baseScale = clump.scaling.x;
             const scale = baseScale * (1 + Math.sin(time * pulseSpeed + index) * pulseAmount);
             clump.scaling = new BABYLON.Vector3(
@@ -2434,7 +2449,7 @@ export class FleshClumps {
                 scale * 0.8,  // Keep vertical scale slightly smaller
                 scale
             );
-            
+
             // Very subtle rotation
             clump.rotation.x += deltaTime * 0.05 * Math.sin(time * 0.3 + index);
             clump.rotation.y += deltaTime * 0.05 * Math.cos(time * 0.2 + index);
@@ -2473,6 +2488,7 @@ positionComponents() {
 ```
 
 Key changes made:
+
 1. Increased number of clumps and distributed them in concentric rings
 2. Added more variation in size and color
 3. Improved deformation for more organic appearance
@@ -2523,11 +2539,11 @@ export class FleshClumps {
         // Create clumps in concentric rings for better distribution
         const rings = 3;
         const clumpsPerRing = Math.floor(numClumps / rings);
-        
+
         for (let ring = 0; ring < rings; ring++) {
             const ringRadius = (ring + 1) * (jarRadius * 0.7 / rings); // Reduced from 0.8 to 0.7
-            const numInThisRing = ring === rings - 1 ? 
-                numClumps - (clumpsPerRing * (rings - 1)) : 
+            const numInThisRing = ring === rings - 1 ?
+                numClumps - (clumpsPerRing * (rings - 1)) :
                 clumpsPerRing;
 
             for (let i = 0; i < numInThisRing; i++) {
@@ -2541,10 +2557,10 @@ export class FleshClumps {
                     -2.0 + Math.random() * 0.1,  // Reduced height variation
                     Math.sin(angle) * distance + (Math.random() * 0.1 - 0.05)
                 );
-                
+
                 const clump = this.createFleshClump(size, position);
                 const material = fleshMaterial.clone(`fleshMaterial${ring}${i}`);
-                
+
                 // More varied color for organic look
                 const hueVar = Math.random() * 0.2 - 0.1;
                 const satVar = Math.random() * 0.3;
@@ -2558,7 +2574,7 @@ export class FleshClumps {
                     0,
                     0
                 );
-                
+
                 clump.material = material;
             }
         }
@@ -2575,7 +2591,7 @@ export class FleshClumps {
         // More aggressive deformation for organic look
         const positions = clump.getVerticesData(BABYLON.VertexBuffer.PositionKind);
         const normals = clump.getVerticesData(BABYLON.VertexBuffer.NormalKind);
-        
+
         for (let i = 0; i < positions.length; i += 3) {
             // More varied displacement
             const displacement = new BABYLON.Vector3(
@@ -2587,7 +2603,7 @@ export class FleshClumps {
             // Add bulges and dents
             const y = positions[i + 1];
             const bulgeAmount = Math.sin(y * 10) * 0.05; // Reduced from 0.1 to 0.05
-            
+
             positions[i] += displacement.x + bulgeAmount;
             positions[i + 1] += displacement.y * 0.7;
             positions[i + 2] += displacement.z + bulgeAmount;
@@ -2599,7 +2615,7 @@ export class FleshClumps {
                 normals[i + 2]
             );
             normal.normalize();
-            
+
             normals[i] = normal.x;
             normals[i + 1] = normal.y;
             normals[i + 2] = normal.z;
@@ -2626,12 +2642,12 @@ export class FleshClumps {
 
     update(deltaTime) {
         const time = performance.now() * 0.001;
-        
+
         this.fleshClumpGroup.getChildMeshes().forEach((clump, index) => {
             // Even slower, more subtle pulsing
             const pulseSpeed = 0.1 + Math.random() * 0.2; // Reduced from 0.2 + 0.3
             const pulseAmount = 0.02 + Math.random() * 0.02; // Reduced from 0.03 + 0.03
-            
+
             const baseScale = clump.scaling.x;
             const scale = baseScale * (1 + Math.sin(time * pulseSpeed + index) * pulseAmount);
             clump.scaling = new BABYLON.Vector3(
@@ -2639,7 +2655,7 @@ export class FleshClumps {
                 scale * 0.7, // Reduced vertical scale
                 scale
             );
-            
+
             // Minimal rotation
             clump.rotation.x += deltaTime * 0.02 * Math.sin(time * 0.3 + index);
             clump.rotation.y += deltaTime * 0.02 * Math.cos(time * 0.2 + index);
@@ -2678,6 +2694,7 @@ positionComponents() {
 ```
 
 Key changes made:
+
 1. Reduced individual clump sizes (minSize and maxSize)
 2. Reduced scaling variations
 3. Reduced deformation amounts
@@ -2713,7 +2730,7 @@ export class FluidSimulation {
         this.isFlowing = false;
         this.jarRadius = 1.8;
         this.maxHeight = 3.5;
-        
+
         this.createFluid();
         this.createParticleSystem();
     }
@@ -2808,13 +2825,13 @@ export class FluidSimulation {
             void main(void) {
                 // Create swirling patterns
                 float swirl = sin(vPosition.x * 4.0 + time) * cos(vPosition.z * 4.0 + time * 0.5) * 0.5 + 0.5;
-                
+
                 // Add depth-based color variation
                 float depth = vPosition.y * 0.5 + 0.5;
-                
+
                 // Combine effects
                 vec3 color = baseColor * (0.8 + swirl * 0.4) * (0.7 + depth * 0.6);
-                
+
                 // Add edge highlighting
                 float edge = 1.0 - pow(abs(dot(vNormal, vec3(0.0, 1.0, 0.0))), 2.0);
                 color += edge * 0.2;
@@ -2828,7 +2845,7 @@ export class FluidSimulation {
         // Create particle system for drips and splashes
         this.particleSystem = new BABYLON.ParticleSystem("fluidParticles", 2000, this.scene);
         this.particleSystem.particleTexture = new BABYLON.Texture("textures/fluidParticle.png", this.scene);
-        
+
         // Particle behavior
         this.particleSystem.minEmitBox = new BABYLON.Vector3(-0.5, 0, -0.5);
         this.particleSystem.maxEmitBox = new BABYLON.Vector3(0.5, 0, 0.5);
@@ -2842,12 +2859,12 @@ export class FluidSimulation {
         this.particleSystem.direction2 = new BABYLON.Vector3(0.2, -1, 0.2);
         this.particleSystem.minEmitPower = 0.5;
         this.particleSystem.maxEmitPower = 1;
-        
+
         // Particle color
         this.particleSystem.color1 = new BABYLON.Color4(0.7, 0.1, 0.1, 1.0);
         this.particleSystem.color2 = new BABYLON.Color4(0.5, 0.1, 0.1, 1.0);
         this.particleSystem.colorDead = new BABYLON.Color4(0.4, 0.1, 0.1, 0.0);
-        
+
         this.particleSystem.parent = this.fluidGroup;
     }
 
@@ -2870,7 +2887,7 @@ export class FluidSimulation {
 
         if (this.isFlowing && this.currentLevel < this.targetLevel) {
             this.currentLevel += this.fillSpeed * deltaTime;
-            
+
             // Update fluid mesh
             this.fluidMesh.scaling.y = this.currentLevel;
             this.shaderMaterial.setFloat("height", this.currentLevel);
@@ -2919,10 +2936,10 @@ setupEnvironment() {
     this.arterySim = new ArterySimulation(this.scene);
     this.fleshClumps = new FleshClumps(this.scene);
     this.fluidSim = new FluidSimulation(this.scene);
-    
+
     // Position and scale components
     this.positionComponents();
-    
+
     // Setup post-processing
     this.setupPostProcessing();
 
@@ -2943,7 +2960,7 @@ positionComponents() {
 // In render loop
 engine.runRenderLoop(() => {
     const deltaTime = engine.getDeltaTime();
-    
+
     if (this.heartSim) {
         this.heartSim.update(deltaTime / 1000);
     }
@@ -2998,6 +3015,7 @@ toggleFluidFilling() {
 ```
 
 This implementation includes:
+
 1. Custom shader-based fluid simulation with surface waves
 2. Particle system for drips and splashes
 3. Gradual filling mechanism
@@ -3078,7 +3096,7 @@ export class LabEnvironment {
     constructor(scene) {
         this.scene = scene;
         this.environmentGroup = new BABYLON.TransformNode("environmentGroup", scene);
-        
+
         this.setupFog();
         this.setupParticles();
         this.setupLighting();
@@ -3095,7 +3113,7 @@ export class LabEnvironment {
         // Create dust particles
         this.dustParticles = new BABYLON.ParticleSystem("dustParticles", 1000, this.scene);
         this.dustParticles.particleTexture = new BABYLON.Texture("textures/dust.png", this.scene);
-        
+
         // Particle behavior
         this.dustParticles.minEmitBox = new BABYLON.Vector3(-2, -2, -2);
         this.dustParticles.maxEmitBox = new BABYLON.Vector3(2, 2, 2);
@@ -3104,14 +3122,14 @@ export class LabEnvironment {
         this.dustParticles.minLifeTime = 5;
         this.dustParticles.maxLifeTime = 8;
         this.dustParticles.emitRate = 50;
-        
+
         // Slow upward drift
         this.dustParticles.gravity = new BABYLON.Vector3(0, 0.02, 0);
         this.dustParticles.direction1 = new BABYLON.Vector3(-0.1, 0.1, -0.1);
         this.dustParticles.direction2 = new BABYLON.Vector3(0.1, 0.1, 0.1);
         this.dustParticles.minEmitPower = 0.1;
         this.dustParticles.maxEmitPower = 0.3;
-        
+
         // Particle color
         this.dustParticles.color1 = new BABYLON.Color4(0.8, 0.8, 0.9, 0.1);
         this.dustParticles.color2 = new BABYLON.Color4(0.9, 0.9, 1.0, 0.15);
@@ -3136,19 +3154,19 @@ export class LabEnvironment {
 
         // Create multiple point lights for depth
         this.lights = [
-            createPointLight("topLight", 
-                new BABYLON.Vector3(0, 3, 0), 
-                0.4, 
+            createPointLight("topLight",
+                new BABYLON.Vector3(0, 3, 0),
+                0.4,
                 5
             ),
-            createPointLight("backLight", 
-                new BABYLON.Vector3(0, 0, -3), 
-                0.3, 
+            createPointLight("backLight",
+                new BABYLON.Vector3(0, 0, -3),
+                0.3,
                 4
             ),
-            createPointLight("frontLight", 
-                new BABYLON.Vector3(0, 0, 3), 
-                0.2, 
+            createPointLight("frontLight",
+                new BABYLON.Vector3(0, 0, 3),
+                0.2,
                 4
             )
         ];
@@ -3162,7 +3180,7 @@ export class LabEnvironment {
     update(deltaTime) {
         // Animate lights subtly
         const time = performance.now() * 0.001;
-        
+
         this.lights.forEach((light, index) => {
             const offset = index * Math.PI * 0.5;
             const intensity = 0.2 + Math.sin(time * 0.5 + offset) * 0.1;
@@ -3195,14 +3213,14 @@ class SceneManager {
     constructor() {
         this.scene = this.createScene();
         this.setupEnvironment();
-        
+
         // Add ButtonHandler initialization
         this.buttonHandler = new ButtonHandler(this);
-        
+
         // Start the render loop
         engine.runRenderLoop(() => {
             const deltaTime = engine.getDeltaTime();
-            
+
             if (this.heartSim) {
                 this.heartSim.update(deltaTime / 1000);
             }
@@ -3230,10 +3248,10 @@ class SceneManager {
         this.fleshClumps = new FleshClumps(this.scene);
         this.fluidSim = new FluidSimulation(this.scene);
         this.labEnvironment = new LabEnvironment(this.scene);
-        
+
         // Position and scale components
         this.positionComponents();
-        
+
         // Setup post-processing
         this.setupPostProcessing();
 
@@ -3260,6 +3278,7 @@ class SceneManager {
 ```
 
 Key features added:
+
 1. Volumetric fog with subtle animation
 2. Floating dust particles for atmosphere
 3. Dynamic point lights with color variations
@@ -3267,6 +3286,7 @@ Key features added:
 5. Proper cleanup and disposal methods
 
 The environment should now have a more atmospheric laboratory feel with:
+
 - Subtle fog effects
 - Floating dust particles
 - Dynamic lighting
@@ -3295,7 +3315,7 @@ export class LabEnvironment {
     constructor(scene) {
         this.scene = scene;
         this.environmentGroup = new BABYLON.TransformNode("environmentGroup", scene);
-        
+
         this.setupFog();
         this.setupParticles();
         this.setupLighting();
@@ -3305,6 +3325,7 @@ export class LabEnvironment {
 ```
 
 We don't need any imports since:
+
 1. Babylon.js is loaded globally through the script tag in index.html
 2. We're not using Three.js anymore
 3. The BABYLON namespace is available globally
@@ -3328,7 +3349,7 @@ export class LabEnvironment {
     constructor(scene) {
         this.scene = scene;
         this.environmentGroup = new BABYLON.TransformNode("environmentGroup", scene);
-        
+
         this.setupFog();
         this.setupParticles();
         this.setupLighting();
@@ -3452,7 +3473,7 @@ export class LabEnvironment {
             diameter: 0.4,
             tessellation: 32
         }, this.scene);
-        
+
         const metalMaterial = new BABYLON.PBRMaterial("metalMaterial", this.scene);
         metalMaterial.metallic = 0.8;
         metalMaterial.roughness = 0.4;
@@ -3476,15 +3497,15 @@ export class LabEnvironment {
     createFlame(burnerGroup) {
         const flameSystem = new BABYLON.ParticleSystem("flame", 200, this.scene);
         flameSystem.particleTexture = new BABYLON.Texture("textures/flame.png", this.scene);
-        
+
         flameSystem.emitter = new BABYLON.Vector3(0, 0.8, 0);
         flameSystem.minEmitBox = new BABYLON.Vector3(-0.1, 0, -0.1);
         flameSystem.maxEmitBox = new BABYLON.Vector3(0.1, 0.1, 0.1);
-        
+
         flameSystem.color1 = new BABYLON.Color4(1, 0.5, 0, 1.0);
         flameSystem.color2 = new BABYLON.Color4(1, 0.5, 0, 1.0);
         flameSystem.colorDead = new BABYLON.Color4(0, 0, 0, 0.0);
-        
+
         flameSystem.minSize = 0.1;
         flameSystem.maxSize = 0.3;
         flameSystem.minLifeTime = 0.1;
@@ -3493,7 +3514,7 @@ export class LabEnvironment {
         flameSystem.gravity = new BABYLON.Vector3(0, 2, 0);
         flameSystem.direction1 = new BABYLON.Vector3(0, 1, 0);
         flameSystem.direction2 = new BABYLON.Vector3(0, 1, 0);
-        
+
         flameSystem.parent = burnerGroup;
         flameSystem.start();
     }
@@ -3509,7 +3530,7 @@ export class LabEnvironment {
             height: 0.1,
             depth: 0.4
         }, this.scene);
-        
+
         const woodMaterial = new BABYLON.PBRMaterial("woodMaterial", this.scene);
         woodMaterial.albedoColor = new BABYLON.Color3(0.4, 0.2, 0.1);
         woodMaterial.metallic = 0.1;
@@ -3579,6 +3600,7 @@ export class LabEnvironment {
 You'll need to create a simple flame texture (a soft white/orange gradient) and save it as "textures/flame.png" for the Bunsen burner flame effect.
 
 Key features added:
+
 1. Wooden lab desk with legs
 2. Glass beakers with random colored liquids
 3. Bunsen burner with animated flame effect
@@ -3685,6 +3707,7 @@ positionComponents() {
 ```
 
 Key changes:
+
 1. Made the table significantly larger (12x6 units)
 2. Made the table thicker (0.4 units)
 3. Lowered the table surface
@@ -3742,7 +3765,7 @@ createBeaker(x, y, z, scale = 1.0) {
         }, this.scene);
 
         const liquidMaterial = new BABYLON.StandardMaterial("liquidMaterial", this.scene);
-        
+
         // Use a set of predefined laboratory-like colors
         const labColors = [
             new BABYLON.Color3(0.2, 0.6, 0.8),  // Blue solution
@@ -3752,7 +3775,7 @@ createBeaker(x, y, z, scale = 1.0) {
             new BABYLON.Color3(0.6, 0.2, 0.8),  // Purple solution
             new BABYLON.Color3(0.8, 0.4, 0.0)   // Orange solution
         ];
-        
+
         liquidMaterial.diffuseColor = labColors[Math.floor(Math.random() * labColors.length)];
         liquidMaterial.alpha = 0.8;
         liquid.material = liquidMaterial;
@@ -3797,7 +3820,7 @@ createTestTube(x, y, z, parent) {
             new BABYLON.Color3(0.6, 0.2, 0.8),  // Purple solution
             new BABYLON.Color3(0.8, 0.4, 0.0)   // Orange solution
         ];
-        
+
         liquidMaterial.diffuseColor = labColors[Math.floor(Math.random() * labColors.length)];
         liquidMaterial.alpha = 0.8;
         liquid.material = liquidMaterial;
@@ -3808,6 +3831,7 @@ createTestTube(x, y, z, parent) {
 ```
 
 Key changes made:
+
 1. Spread equipment around the jar in all directions
 2. Added more beakers and test tube racks
 3. Created a set of laboratory-appropriate liquid colors
@@ -3836,7 +3860,7 @@ export class LabEnvironment {
         this.scene = scene;
         this.environmentGroup = new BABYLON.TransformNode("environmentGroup", scene);
         this.isOverheadLightOn = true;
-        
+
         this.setupFog();
         this.setupParticles();
         this.setupLighting();
@@ -3857,7 +3881,7 @@ export class LabEnvironment {
             height: 0.2,
             depth: 0.6
         }, this.scene);
-        
+
         const metalMaterial = new BABYLON.PBRMaterial("fixtureMetal", this.scene);
         metalMaterial.metallic = 0.8;
         metalMaterial.roughness = 0.3;
@@ -3914,7 +3938,7 @@ export class LabEnvironment {
                 tessellation: 8
             }, this.scene);
             chain.position = new BABYLON.Vector3(x, 1, z);
-            
+
             const chainMaterial = new BABYLON.PBRMaterial("chainMetal", this.scene);
             chainMaterial.metallic = 0.9;
             chainMaterial.roughness = 0.4;
@@ -3932,10 +3956,10 @@ export class LabEnvironment {
 
     toggleOverheadLight() {
         this.isOverheadLightOn = !this.isOverheadLightOn;
-        
+
         // Toggle light intensity
         this.overheadLight.intensity = this.isOverheadLightOn ? 0.8 : 0;
-        
+
         // Toggle tube glow
         this.lightTubes.forEach(tube => {
             if (this.isOverheadLightOn) {
@@ -3951,14 +3975,14 @@ export class LabEnvironment {
     // Update the existing update method
     update(deltaTime) {
         const time = performance.now() * 0.001;
-        
+
         // Existing light and fog updates...
 
         // Add subtle flicker to overhead light when on
         if (this.isOverheadLightOn && this.overheadLight) {
             const flicker = 0.95 + Math.random() * 0.1;
             this.overheadLight.intensity = 0.8 * flicker;
-            
+
             // Subtle tube flicker
             this.lightTubes.forEach(tube => {
                 const tubeFlicker = 0.97 + Math.random() * 0.06;
@@ -4004,6 +4028,7 @@ toggleOverheadLight() {
 ```
 
 Key features added:
+
 1. Overhead fluorescent light fixture with two tubes
 2. Metal housing and suspension chains
 3. Realistic light emission and shadows
@@ -4019,9 +4044,8 @@ The overhead light should now provide additional atmospheric lighting to the sce
 
 _**User**_
 
-fluidParticle.png:1 
-        
-        
+fluidParticle.png:1
+
        GET http://127.0.0.1:5500/textures/fluidParticle.png 404 (Not Found)
 
 ---
@@ -4035,10 +4059,10 @@ Let's create a simple particle texture for the fluid and dust effects. First, we
 setupParticles() {
     // Create dust particles
     this.dustParticles = new BABYLON.ParticleSystem("dustParticles", 1000, this.scene);
-    
+
     // Create a base texture for particles
     const particleTexture = new BABYLON.Texture("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABCSURBVChTY/z//z8DEwMewAilcQIWKI0T4FXACIVhgBEIoGwUgE8BIxDDGAgAFfwHYiZkBXCArAAGmKA0dkCUAgYGAOjFFE2d8S2kAAAAAElFTkSuQmCC", this.scene);
-    
+
     this.dustParticles.particleTexture = particleTexture;
     // ... rest of the dust particle setup
 }
@@ -4050,10 +4074,10 @@ And update the FluidSimulation.js to use the same base texture:
 createParticleSystem() {
     // Create particle system for drips and splashes
     this.particleSystem = new BABYLON.ParticleSystem("fluidParticles", 2000, this.scene);
-    
+
     // Use the same base texture
     const particleTexture = new BABYLON.Texture("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABCSURBVChTY/z//z8DEwMewAilcQIWKI0T4FXACIVhgBEIoGwUgE8BIxDDGAgAFfwHYiZkBXCArAAGmKA0dkCUAgYGAOjFFE2d8S2kAAAAAElFTkSuQmCC", this.scene);
-    
+
     this.particleSystem.particleTexture = particleTexture;
     // ... rest of the particle system setup
 }
@@ -4066,16 +4090,17 @@ For the Bunsen burner flame, let's also create an inline texture:
 ```javascript:js/LabEnvironment.js
 createFlame(burnerGroup) {
     const flameSystem = new BABYLON.ParticleSystem("flame", 200, this.scene);
-    
+
     // Create a flame texture
     const flameTexture = new BABYLON.Texture("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABCSURBVChTY/z//z8DEwMewAilcQIWKI0T4FXACIVhgBEIoGwUgE8BIxDDGAgAFfwHYiZkBXCArAAGmKA0dkCUAgYGAOjFFE2d8S2kAAAAAElFTkSuQmCC", this.scene);
-    
+
     flameSystem.particleTexture = flameTexture;
     // ... rest of the flame setup
 }
 ```
 
 These changes will:
+
 1. Remove the need for external texture files
 2. Use embedded base64 textures for all particle effects
 3. Ensure the particles work without needing to manage texture files
@@ -4121,15 +4146,16 @@ And update FluidSimulation.js:
 createParticleSystem() {
     // Create particle system for drips and splashes
     this.particleSystem = new BABYLON.ParticleSystem("fluidParticles", 2000, this.scene);
-    
+
     const particleBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAKkSURBVFiF7ZdNiFVlGMd/z3vOvXfuODN3xhzNGU0tR0dtUBAUSSS6aBEGRlAQBEW0CRfRIoRoEYhREQTRB0SrWhQkFRgtIjAiEFMnpQ8dp9HJyWbmztz5uPec877Pi2YxH3fGO3NbRAv/q/M8/+f/4zzn5X3gP67QXeHx8fGSc+6gqj4NDAG9wE1gVkROqurR4eHhK90k7zQPVPX9RqPxjqr2O+eywDDwBBAC74rIe90A6AhAVd8UkY9FpCUi34vI26p6BngdmG+PfwR82g2IjgC893POuXestR+r6gsi8iJwWVWngIvAd8aYL4Dzqvr5/wZQVQ+cMsZ8ICJl4CxwbGBg4OL09HTFGFOKoujLJEkOqeqoMeZ4twBM+wvn3Ksick5Vp4wxn8RxPDk1NbXY398/FMfxd8aYd4F+4Kiq7u4GQNZ7f0xEvlfVl4wxHznnPrPWXs7n84U4jr+x1h4GbgKvAXNdAQAeAk4Aj6rqgVwud1hVR4F9wKyInATywB5VfbZbAKp6DrgNvBLH8aS1djKKopestYeAW8BxYAewD3iiGwBZVZ0DJowxR5xzE8BZYH8QBEeAaeAUkAPeUNUd3QAwwDTwE7DgnDuZJMlBa+2PwHfAz8ACcAaY6QaA996LyJSITDjnLuRyuYvOufPW2svAb8AFEZkQkV9V1XUFwHt/O5PJzOTz+Xq9Xj9TKpUWK5XKdLFYrNTr9bP5fL5eq9XOee9vdQWgWCxWGo3GRBAEs41G41S5XF4sl8vfBkEw12w2J4IgmK3VaueLxeJSVwDa5L0PDxw48P7u3bvfbLVaD+fz+b9rtdrpHTt2fNpsNh+p1+tPZbPZv5aXl08PDQ0tdp0c1gGw1v4J/GWtvbGO+Y31zG0L4D+vfwDd67QRZAYkqQAAAABJRU5ErkJggg==";
-    
+
     this.particleSystem.particleTexture = new BABYLON.Texture(particleBase64, this.scene);
     // ... rest of the particle system setup
 }
 ```
 
 This new texture is:
+
 1. A properly formatted 32x32 PNG with alpha channel
 2. Power-of-two dimensions (required for mipmapping)
 3. Properly encoded in base64 format
@@ -4142,13 +4168,13 @@ The texture should now load without WebGL errors and provide proper particle eff
 _**User**_
 
 LabEnvironment.js:285 Uncaught ReferenceError: particleBase64 is not defined
-    at LabEnvironment.createFlame (LabEnvironment.js:285:59)
-    at LabEnvironment.createBunsenBurner (LabEnvironment.js:280:14)
-    at LabEnvironment.createLabEquipment (LabEnvironment.js:176:14)
-    at new LabEnvironment (LabEnvironment.js:11:14)
-    at SceneManager.setupEnvironment (main.js:87:31)
-    at new SceneManager (main.js:15:14)
-    at main.js:161:22
+at LabEnvironment.createFlame (LabEnvironment.js:285:59)
+at LabEnvironment.createBunsenBurner (LabEnvironment.js:280:14)
+at LabEnvironment.createLabEquipment (LabEnvironment.js:176:14)
+at new LabEnvironment (LabEnvironment.js:11:14)
+at SceneManager.setupEnvironment (main.js:87:31)
+at new SceneManager (main.js:15:14)
+at main.js:161:22
 [.WebGL-0x2a8400d13800] GL_INVALID_OPERATION: Texture format does not support mipmap generation.
 
 ---
@@ -4163,10 +4189,10 @@ export class LabEnvironment {
         this.scene = scene;
         this.environmentGroup = new BABYLON.TransformNode("environmentGroup", scene);
         this.isOverheadLightOn = true;
-        
+
         // Define particle texture base64 at class level
         this.particleBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAKkSURBVFiF7ZdNiFVlGMd/z3vOvXfuODN3xhzNGU0tR0dtUBAUSSS6aBEGRlAQBEW0CRfRIoRoEYhREQTRB0SrWhQkFRgtIjAiEFMnpQ8dp9HJyWbmztz5uPec877Pi2YxH3fGO3NbRAv/q/M8/+f/4zzn5X3gP67QXeHx8fGSc+6gqj4NDAG9wE1gVkROqurR4eHhK90k7zQPVPX9RqPxjqr2O+eywDDwBBAC74rIe90A6AhAVd8UkY9FpCUi34vI26p6BngdmG+PfwR82g2IjgC893POuXestR+r6gsi8iJwWVWngIvAd8aYL4Dzqvr5/wZQVQ+cMsZ8ICJl4CxwbGBg4OL09HTFGFOKoujLJEkOqeqoMeZ4twBM+wvn3Ksick5Vp4wxn8RxPDk1NbXY398/FMfxd8aYd4F+4Kiq7u4GQNZ7f0xEvlfVl4wxHznnPrPWXs7n84U4jr+x1h4GbgKvAXNdAQAeAk4Aj6rqgVwud1hVR4F9wKyInATywB5VfbZbAKp6DrgNvBLH8aS1djKKopestYeAW8BxYAewD3iiGwBZVZ0DJowxR5xzE8BZYH8QBEeAaeAUkAPeUNUd3QAwwDTwE7DgnDuZJMlBa+2PwHfAz8ACcAaY6QaA996LyJSITDjnLuRyuYvOufPW2svAb8AFEZkQkV9V1XUFwHt/O5PJzOTz+Xq9Xj9TKpUWK5XKdLFYrNTr9bP5fL5eq9XOee9vdQWgWCxWGo3GRBAEs41G41S5XF4sl8vfBkEw12w2J4IgmK3VaueLxeJSVwDa5L0PDxw48P7u3bvfbLVaD+fz+b9rtdrpHTt2fNpsNh+p1+tPZbPZv5aXl08PDQ0tdp0c1gGw1v4J/GWtvbGO+Y31zG0L4D+vfwDd67QRZAYkqQAAAABJRU5ErkJggg==";
-        
+
         this.setupFog();
         this.setupParticles();
         this.setupLighting();
@@ -4205,10 +4231,10 @@ export class FluidSimulation {
         this.isFlowing = false;
         this.jarRadius = 1.8;
         this.maxHeight = 3.5;
-        
+
         // Define particle texture base64 at class level
         this.particleBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAKkSURBVFiF7ZdNiFVlGMd/z3vOvXfuODN3xhzNGU0tR0dtUBAUSSS6aBEGRlAQBEW0CRfRIoRoEYhREQTRB0SrWhQkFRgtIjAiEFMnpQ8dp9HJyWbmztz5uPec877Pi2YxH3fGO3NbRAv/q/M8/+f/4zzn5X3gP67QXeHx8fGSc+6gqj4NDAG9wE1gVkROqurR4eHhK90k7zQPVPX9RqPxjqr2O+eywDDwBBAC74rIe90A6AhAVd8UkY9FpCUi34vI26p6BngdmG+PfwR82g2IjgC893POuXestR+r6gsi8iJwWVWngIvAd8aYL4Dzqvr5/wZQVQ+cMsZ8ICJl4CxwbGBg4OL09HTFGFOKoujLJEkOqeqoMeZ4twBM+wvn3Ksick5Vp4wxn8RxPDk1NbXY398/FMfxd8aYd4F+4Kiq7u4GQNZ7f0xEvlfVl4wxHznnPrPWXs7n84U4jr+x1h4GbgKvAXNdAQAeAk4Aj6rqgVwud1hVR4F9wKyInATywB5VfbZbAKp6DrgNvBLH8aS1djKKopestYeAW8BxYAewD3iiGwBZVZ0DJowxR5xzE8BZYH8QBEeAaeAUkAPeUNUd3QAwwDTwE7DgnDuZJMlBa+2PwHfAz8ACcAaY6QaA996LyJSITDjnLuRyuYvOufPW2svAb8AFEZkQkV9V1XUFwHt/O5PJzOTz+Xq9Xj9TKpUWK5XKdLFYrNTr9bP5fL5eq9XOee9vdQWgWCxWGo3GRBAEs41G41S5XF4sl8vfBkEw12w2J4IgmK3VaueLxeJSVwDa5L0PDxw48P7u3bvfbLVaD+fz+b9rtdrpHTt2fNpsNh+p1+tPZbPZv5aXl08PDQ0tdp0c1gGw1v4J/GWtvbGO+Y31zG0L4D+vfwDd67QRZAYkqQAAAABJRU5ErkJggg==";
-        
+
         this.createFluid();
         this.createParticleSystem();
     }
@@ -4224,6 +4250,7 @@ export class FluidSimulation {
 ```
 
 The changes:
+
 1. Moved the base64 texture string to class level
 2. Made it accessible via `this.particleBase64`
 3. Updated all texture creation calls to use the class property
@@ -4247,20 +4274,20 @@ This warning is related to WebGL rendering fallback behavior in Chrome. To ensur
 createScene() {
     const scene = new BABYLON.Scene(engine);
     scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
-    
+
     // Add WebGL optimization settings
     const options = new BABYLON.SceneOptions();
     options.useGeometryUniqueIdsMap = true;
     options.useMaterialMeshMap = true;
     options.useClonedMeshMap = true;
-    
+
     // Optimize engine settings
     engine.setHardwareScalingLevel(1.0);
     engine.enableOfflineSupport = false;
-    
+
     // Camera setup with adjusted position and optimized settings
     const camera = new BABYLON.ArcRotateCamera(
-        "camera", 
+        "camera",
         0, Math.PI / 3, 12,
         BABYLON.Vector3.Zero(),
         scene
@@ -4268,7 +4295,7 @@ createScene() {
     camera.attachControl(canvas, true);
     camera.setPosition(new BABYLON.Vector3(0, 0, 10));
     camera.setTarget(new BABYLON.Vector3(0, -1, 0));
-    
+
     // Optimize camera settings
     camera.minZ = 0.1;
     camera.maxZ = 100;
@@ -4276,7 +4303,7 @@ createScene() {
     camera.pinchPrecision = 50;
     camera.lowerRadiusLimit = 5;
     camera.upperRadiusLimit = 20;
-    
+
     // Lighting setup with optimized settings
     const ambientLight = new BABYLON.HemisphericLight(
         "ambientLight",
@@ -4292,16 +4319,16 @@ createScene() {
         scene
     );
     directionalLight.intensity = 0.8;
-    
+
     // Enable engine optimizations
     scene.autoClear = false; // Manually clear the frame buffer
     scene.autoClearDepthAndStencil = false;
     scene.skipPointerMovePicking = true;
-    
+
     // Enable frustum culling
     scene.useRightHandedSystem = true;
     scene.useCameraFrustumCulling = true;
-    
+
     return scene;
 }
 
@@ -4313,17 +4340,17 @@ constructor() {
         disableWebGL2Support: false,
         antialias: true
     };
-    
+
     this.scene = this.createScene();
     this.setupEnvironment();
-    
+
     // Add ButtonHandler initialization
     this.buttonHandler = new ButtonHandler(this);
-    
+
     // Start the render loop with optimized settings
     engine.runRenderLoop(() => {
         const deltaTime = engine.getDeltaTime();
-        
+
         if (this.heartSim) {
             this.heartSim.update(deltaTime / 1000);
         }
@@ -4339,7 +4366,7 @@ constructor() {
         if (this.labEnvironment) {
             this.labEnvironment.update(deltaTime);
         }
-        
+
         // Only render if the scene is ready
         if (this.scene.activeCamera) {
             this.scene.render();
@@ -4349,6 +4376,7 @@ constructor() {
 ```
 
 These changes will:
+
 1. Optimize WebGL rendering settings
 2. Add performance-focused scene options
 3. Optimize camera and lighting settings
@@ -4364,9 +4392,9 @@ This should help prevent WebGL fallback warnings and improve overall performance
 _**User**_
 
 main.js:65 Uncaught TypeError: BABYLON.SceneOptions is not a constructor
-    at SceneManager.createScene (main.js:65:25)
-    at new SceneManager (main.js:22:27)
-    at main.js:202:22
+at SceneManager.createScene (main.js:65:25)
+at new SceneManager (main.js:22:27)
+at main.js:202:22
 
 ---
 
@@ -4382,16 +4410,16 @@ createScene() {
         useMaterialMeshMap: true,
         useClonedMeshMap: true
     });
-    
+
     scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
-    
+
     // Optimize engine settings
     engine.setHardwareScalingLevel(1.0);
     engine.enableOfflineSupport = false;
-    
+
     // Camera setup with adjusted position and optimized settings
     const camera = new BABYLON.ArcRotateCamera(
-        "camera", 
+        "camera",
         0, Math.PI / 3, 12,
         BABYLON.Vector3.Zero(),
         scene
@@ -4399,7 +4427,7 @@ createScene() {
     camera.attachControl(canvas, true);
     camera.setPosition(new BABYLON.Vector3(0, 0, 10));
     camera.setTarget(new BABYLON.Vector3(0, -1, 0));
-    
+
     // Optimize camera settings
     camera.minZ = 0.1;
     camera.maxZ = 100;
@@ -4407,7 +4435,7 @@ createScene() {
     camera.pinchPrecision = 50;
     camera.lowerRadiusLimit = 5;
     camera.upperRadiusLimit = 20;
-    
+
     // Lighting setup with optimized settings
     const ambientLight = new BABYLON.HemisphericLight(
         "ambientLight",
@@ -4423,21 +4451,22 @@ createScene() {
         scene
     );
     directionalLight.intensity = 0.8;
-    
+
     // Enable engine optimizations
     scene.autoClear = false; // Manually clear the frame buffer
     scene.autoClearDepthAndStencil = false;
     scene.skipPointerMovePicking = true;
-    
+
     // Enable frustum culling
     scene.useRightHandedSystem = true;
     scene.useCameraFrustumCulling = true;
-    
+
     return scene;
 }
 ```
 
 The changes:
+
 1. Removed the incorrect `SceneOptions` constructor
 2. Moved optimization options directly into the Scene constructor
 3. Kept all other optimizations and settings intact
@@ -4462,10 +4491,10 @@ export class LabEnvironment {
         this.scene = scene;
         this.environmentGroup = new BABYLON.TransformNode("environmentGroup", scene);
         this.isOverheadLightOn = true;
-        
+
         // Create particle texture programmatically
         this.particleTexture = this.createParticleTexture();
-        
+
         this.setupFog();
         this.setupParticles();
         this.setupLighting();
@@ -4478,19 +4507,19 @@ export class LabEnvironment {
         const size = 32;
         const texture = new BABYLON.DynamicTexture("particleTexture", size, this.scene, true);
         const ctx = texture.getContext();
-        
+
         // Create a radial gradient for a soft particle
         const gradient = ctx.createRadialGradient(
             size/2, size/2, 0,
             size/2, size/2, size/2
         );
-        
+
         gradient.addColorStop(0, 'white');
         gradient.addColorStop(1, 'transparent');
-        
+
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, size, size);
-        
+
         texture.update();
         return texture;
     }
@@ -4525,10 +4554,10 @@ export class FluidSimulation {
         this.isFlowing = false;
         this.jarRadius = 1.8;
         this.maxHeight = 3.5;
-        
+
         // Create particle texture
         this.particleTexture = this.createParticleTexture();
-        
+
         this.createFluid();
         this.createParticleSystem();
     }
@@ -4537,19 +4566,19 @@ export class FluidSimulation {
         const size = 32;
         const texture = new BABYLON.DynamicTexture("particleTexture", size, this.scene, true);
         const ctx = texture.getContext();
-        
+
         // Create a radial gradient for a soft particle
         const gradient = ctx.createRadialGradient(
             size/2, size/2, 0,
             size/2, size/2, size/2
         );
-        
+
         gradient.addColorStop(0, 'white');
         gradient.addColorStop(1, 'transparent');
-        
+
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, size, size);
-        
+
         texture.update();
         return texture;
     }
@@ -4565,6 +4594,7 @@ export class FluidSimulation {
 ```
 
 Key changes:
+
 1. Created a programmatic particle texture using DynamicTexture
 2. Used radial gradient for soft particle edges
 3. Proper power-of-two texture size (32x32)
@@ -4655,16 +4685,16 @@ export class ArterySimulation {
     addGrowthPoints(artery) {
         // Add 1-3 potential branch points along the artery
         const numPoints = 1 + Math.floor(Math.random() * 2);
-        
+
         for (let i = 0; i < numPoints; i++) {
             const t = 0.3 + Math.random() * 0.4; // Position along artery (30-70%)
             const point = BABYLON.Vector3.Lerp(artery.startPoint, artery.endPoint, t);
-            
+
             // Create random branch direction
             const baseDirection = artery.direction;
             const randomAngle = (Math.random() - 0.5) * Math.PI * 0.8; // ±72 degrees
             const branchDirection = this.rotateVector(baseDirection, randomAngle);
-            
+
             this.growthQueue.push({
                 point: point,
                 direction: branchDirection,
@@ -4677,10 +4707,10 @@ export class ArterySimulation {
     rotateVector(vector, angle) {
         // Create rotation matrix around random axis perpendicular to growth direction
         const randomPerpendicular = BABYLON.Vector3.Cross(
-            vector, 
+            vector,
             new BABYLON.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
         ).normalize();
-        
+
         const rotationMatrix = BABYLON.Matrix.RotationAxis(randomPerpendicular, angle);
         return BABYLON.Vector3.TransformNormal(vector.clone(), rotationMatrix).normalize();
     }
@@ -4724,6 +4754,7 @@ export class ArterySimulation {
 ```
 
 Key changes:
+
 1. Added proper artery growth system with branching
 2. Implemented queue-based growth processing
 3. Added randomization for branch positions and directions
@@ -4733,6 +4764,7 @@ Key changes:
 7. Improved material settings for arteries
 
 The arteries should now:
+
 - Start growing from a single main artery
 - Branch randomly as they grow
 - Pulse with a heartbeat-like animation
@@ -4741,6 +4773,7 @@ The arteries should now:
 - Stop growing after reaching maximum branches
 
 Make sure the growth is started by calling:
+
 ```javascript
 arterySim.isGrowing = true;
 arterySim.processGrowthQueue();
@@ -4791,8 +4824,8 @@ export class ArterySimulation {
 
     addArtery(startPoint, direction, radius, parent = null, isMainArtery = false) {
         // Vary length based on whether it's a main artery
-        const length = isMainArtery ? 
-            0.5 + Math.random() * 0.3 : 
+        const length = isMainArtery ?
+            0.5 + Math.random() * 0.3 :
             0.2 + Math.random() * 0.2;
 
         const endPoint = startPoint.add(direction.scale(length));
@@ -4800,7 +4833,7 @@ export class ArterySimulation {
         // Create curved path for more organic look
         const controlPoint1 = startPoint.add(direction.scale(length * 0.33));
         const controlPoint2 = startPoint.add(direction.scale(length * 0.66));
-        
+
         // Add slight random offset to control points for natural curve
         const randomOffset = 0.1;
         controlPoint1.addInPlace(new BABYLON.Vector3(
@@ -4837,7 +4870,7 @@ export class ArterySimulation {
         material.subSurface.translucencyIntensity = 0.8;
         material.roughness = 0.4;
         material.metallic = 0.0;
-        
+
         artery.material = material;
         artery.parent = this.arteryGroup;
 
@@ -4870,19 +4903,19 @@ export class ArterySimulation {
 
     addGrowthPoints(artery) {
         // More branches for main arteries, fewer for smaller ones
-        const numPoints = artery.isMainArtery ? 
-            2 + Math.floor(Math.random() * 2) : 
+        const numPoints = artery.isMainArtery ?
+            2 + Math.floor(Math.random() * 2) :
             1 + Math.floor(Math.random() * 2);
-        
+
         for (let i = 0; i < numPoints; i++) {
             const t = 0.3 + Math.random() * 0.4;
             const point = BABYLON.Vector3.Lerp(artery.startPoint, artery.endPoint, t);
-            
+
             // Create branching angle based on parent direction
             const baseDirection = artery.direction;
             const branchAngle = (Math.random() - 0.5) * Math.PI * 0.6; // Reduced angle range
             const branchDirection = this.rotateVector(baseDirection, branchAngle);
-            
+
             this.growthQueue.push({
                 point: point,
                 direction: branchDirection,
@@ -4894,15 +4927,15 @@ export class ArterySimulation {
 
     update(deltaTime) {
         const time = performance.now() * 0.001;
-        
+
         // Create realistic heartbeat pulse pattern
         const pulse = Math.pow(Math.sin(time * this.pulseSpeed), 2) * this.pulseIntensity;
-        
+
         this.arteries.forEach((artery, index) => {
             // Add delay based on distance from heart for wave-like effect
             const distanceDelay = index * 0.1;
             const delayedPulse = Math.pow(Math.sin((time - distanceDelay) * this.pulseSpeed), 2) * this.pulseIntensity;
-            
+
             // Scale more on x/z axes for realistic vessel expansion
             const scale = 1 + delayedPulse;
             artery.mesh.scaling = new BABYLON.Vector3(scale, 1, scale);
@@ -4914,6 +4947,7 @@ export class ArterySimulation {
 ```
 
 Key improvements inspired by the Babylon.js Heart demo:
+
 1. Added more realistic artery curvature using Catmull-Rom splines
 2. Implemented PBR materials with subsurface scattering for more realistic vessel appearance
 3. Created a wave-like pulse animation that propagates through the system
@@ -4961,7 +4995,7 @@ export class ArterySimulation {
         this.createAorta();
         this.createPulmonaryArtery();
         this.createCoronaryArteries();
-        
+
         this.isGrowing = true;
         this.processGrowthQueue();
     }
@@ -5003,7 +5037,7 @@ export class ArterySimulation {
         material.subSurface.translucencyIntensity = 0.8;
         material.roughness = 0.4;
         material.metallic = 0.0;
-        
+
         aorticArch.material = material;
         aorticArch.parent = this.arteryGroup;
     }
@@ -5064,6 +5098,7 @@ export class ArterySimulation {
 ```
 
 Key anatomical improvements:
+
 1. Added proper aortic arch structure
 2. Added pulmonary trunk with left and right branches
 3. Added coronary arteries (left and right)
@@ -5105,10 +5140,10 @@ export class ArterySimulation {
     createArterySystem() {
         // Start positions relative to heart position
         const heartPosition = new BABYLON.Vector3(0, -1.8, 0);
-        
+
         // Create initial growth points from heart surface
         this.createInitialGrowthPoints(heartPosition);
-        
+
         this.isGrowing = true;
         this.processGrowthQueue();
     }
@@ -5159,7 +5194,7 @@ export class ArterySimulation {
                 endPoint.y,
                 normalizedPos.z * this.jarRadius * 0.85
             );
-            
+
             // Adjust direction to follow jar wall
             direction = new BABYLON.Vector3(
                 direction.x * 0.2, // Reduce horizontal movement
@@ -5171,7 +5206,7 @@ export class ArterySimulation {
         // Create curved path
         const controlPoint1 = startPoint.add(direction.scale(length * 0.33));
         const controlPoint2 = startPoint.add(direction.scale(length * 0.66));
-        
+
         // Add organic movement
         const randomOffset = 0.1;
         controlPoint1.addInPlace(new BABYLON.Vector3(
@@ -5201,7 +5236,7 @@ export class ArterySimulation {
         material.subSurface.translucencyIntensity = 0.8;
         material.roughness = 0.4;
         material.metallic = 0.0;
-        
+
         artery.material = material;
         artery.parent = this.arteryGroup;
 
@@ -5232,30 +5267,30 @@ export class ArterySimulation {
 
     addGrowthPoints(artery) {
         const numPoints = 1 + Math.floor(Math.random() * 2);
-        
+
         for (let i = 0; i < numPoints; i++) {
             const t = 0.3 + Math.random() * 0.4;
             const point = BABYLON.Vector3.Lerp(artery.startPoint, artery.endPoint, t);
-            
+
             // Calculate direction with upward tendency and wall awareness
             let direction = artery.direction.clone();
-            
+
             // Add upward bias
             direction.y += 0.3;
-            
+
             // Add tendency to grow towards jar wall if not already near it
             const distanceFromCenter = new BABYLON.Vector3(point.x, 0, point.z).length();
             if (distanceFromCenter < this.jarRadius * 0.6) {
                 const towardWall = new BABYLON.Vector3(point.x, 0, point.z).normalize();
                 direction.addInPlace(towardWall.scale(0.3));
             }
-            
+
             direction.normalize();
-            
+
             // Add random variation
             const randomAngle = (Math.random() - 0.5) * Math.PI * 0.4;
             direction = this.rotateVector(direction, randomAngle);
-            
+
             this.growthQueue.push({
                 point: point,
                 direction: direction,
@@ -5270,6 +5305,7 @@ export class ArterySimulation {
 ```
 
 Key changes:
+
 1. Arteries now start growing from the heart's position
 2. Added jar wall awareness - arteries will follow the jar's contours
 3. Increased upward growth tendency
@@ -5280,6 +5316,7 @@ Key changes:
 8. More organic branching patterns
 
 The arteries should now:
+
 1. Emerge from the heart
 2. Spread outward to reach jar walls
 3. Climb upward along the walls
@@ -5332,7 +5369,7 @@ export class ArterySimulation {
         this.arteries = [];
         this.growthQueue = [];
         this.branchCount = 0;
-        
+
         // Restart growth
         this.isGrowing = true;
         this.createArterySystem();
@@ -5354,7 +5391,7 @@ createArteryControls(panel) {
         if (this.sceneManager.arterySim) {
             this.sceneManager.arterySim.isGrowing = !this.sceneManager.arterySim.isGrowing;
             toggleGrowthBtn.textContent = this.sceneManager.arterySim.isGrowing ? 'Pause Growth' : 'Resume Growth';
-            
+
             if (this.sceneManager.arterySim.isGrowing) {
                 this.sceneManager.arterySim.processGrowthQueue();
             }
@@ -5375,7 +5412,7 @@ createArteryControls(panel) {
     // Growth Speed Slider
     const speedContainer = document.createElement('div');
     speedContainer.className = 'slider-container';
-    
+
     const speedLabel = document.createElement('label');
     speedLabel.textContent = 'Growth Speed';
     speedContainer.appendChild(speedLabel);
@@ -5388,7 +5425,7 @@ createArteryControls(panel) {
     speedSlider.value = '100';
     speedSlider.oninput = (e) => this.updateGrowthSpeed(e.target.value);
     speedContainer.appendChild(speedSlider);
-    
+
     arteryContainer.appendChild(speedContainer);
     panel.appendChild(arteryContainer);
 }
@@ -5412,6 +5449,7 @@ setupEnvironment() {
 ```
 
 Key changes:
+
 1. Arteries start growing immediately upon creation
 2. Added reset functionality
 3. Changed button to toggle between Pause/Resume
@@ -5420,6 +5458,7 @@ Key changes:
 6. Button handler now properly manages growth state
 
 The arteries should now:
+
 1. Start growing as soon as the scene loads
 2. Allow pausing/resuming via button
 3. Allow complete reset via new button
@@ -5446,7 +5485,7 @@ class SceneManager {
 
     setupEnvironment() {
         console.log('Setting up environment...');
-        
+
         // Create heart
         this.heartSim = new HeartSimulation(this.scene);
         const heartMesh = this.heartSim.getMesh();
@@ -5502,7 +5541,7 @@ export class ArterySimulation {
         console.log('Creating artery system...');
         const heartPosition = new BABYLON.Vector3(0, -1.8, 0);
         this.createInitialGrowthPoints(heartPosition);
-        
+
         console.log(`Initial growth queue size: ${this.growthQueue.length}`);
         this.isGrowing = true;
         this.processGrowthQueue();
@@ -5510,7 +5549,7 @@ export class ArterySimulation {
 
     processGrowthQueue() {
         console.log(`Processing growth queue. Size: ${this.growthQueue.length}, Growing: ${this.isGrowing}, Branches: ${this.branchCount}`);
-        
+
         if (!this.isGrowing || this.growthQueue.length === 0 || this.branchCount >= this.maxBranches) {
             console.log('Growth stopped:', {
                 isGrowing: this.isGrowing,
@@ -5551,7 +5590,7 @@ addArtery(startPoint, direction, radius, parent = null) {
     material.emissiveColor = new BABYLON.Color3(0.3, 0, 0);
     material.specularColor = new BABYLON.Color3(0.5, 0.5, 0.5);
     material.alpha = 1.0;
-    
+
     artery.material = material;
     artery.parent = this.arteryGroup;
 
@@ -5560,6 +5599,7 @@ addArtery(startPoint, direction, radius, parent = null) {
 ```
 
 These changes will:
+
 1. Add debug logging to track artery creation and growth
 2. Ensure arteries are properly positioned relative to the heart
 3. Make arteries more visible with adjusted materials
@@ -5573,7 +5613,6 @@ _**User**_
 
 Also, let's make sure the arteries are visible by adjusting their material:
 
-
 ---
 
 _**Assistant**_
@@ -5583,7 +5622,7 @@ Let me help you fix the artery visibility issue. First, let's update the main.js
 ```javascript:js/main.js
 setupEnvironment() {
     console.log('Setting up environment...');
-    
+
     // Initialize components in correct order
     this.labJar = new LabJar(this.scene);
     this.heartSim = new HeartSimulation(this.scene);
@@ -5591,10 +5630,10 @@ setupEnvironment() {
     this.fleshClumps = new FleshClumps(this.scene);
     this.fluidSim = new FluidSimulation(this.scene);
     this.labEnvironment = new LabEnvironment(this.scene);
-    
+
     // Position and scale components
     this.positionComponents();
-    
+
     // Setup post-processing
     this.setupPostProcessing();
 }
@@ -5647,10 +5686,10 @@ export class ArterySimulation {
         console.log('Creating artery system...');
         // Start positions relative to heart position
         const heartPosition = new BABYLON.Vector3(0, -1.9, 0);
-        
+
         // Create initial growth points from heart surface
         this.createInitialGrowthPoints(heartPosition);
-        
+
         console.log(`Initial growth queue size: ${this.growthQueue.length}`);
         this.processGrowthQueue();
     }
@@ -5677,7 +5716,7 @@ export class ArterySimulation {
         material.specularColor = new BABYLON.Color3(1, 1, 1);
         material.specularPower = 32;
         material.alpha = 1.0;
-        
+
         artery.material = material;
         artery.parent = this.arteryGroup;
 
@@ -5708,7 +5747,7 @@ export class ArterySimulation {
 
     processGrowthQueue() {
         console.log(`Processing growth queue. Size: ${this.growthQueue.length}, Growing: ${this.isGrowing}, Branches: ${this.branchCount}`);
-        
+
         if (!this.isGrowing || this.growthQueue.length === 0 || this.branchCount >= this.maxBranches) {
             return;
         }
@@ -5728,6 +5767,7 @@ export class ArterySimulation {
 ```
 
 Key changes:
+
 1. Simplified artery creation to ensure visibility
 2. Brighter materials with higher contrast
 3. Proper positioning relative to heart
@@ -5761,7 +5801,7 @@ export class FluidSimulation {
         this.isFlowing = false;
         this.jarRadius = 4.8;  // Match jar radius
         this.maxHeight = 3.5;
-        
+
         this.createFluid();
         this.createParticleSystem();
     }
@@ -5830,7 +5870,7 @@ export class FluidSimulation {
             void main(void) {
                 vUv = uv;
                 vPosition = position;
-                
+
                 // Create more complex wave movement
                 vec3 pos = position;
                 if (pos.y > 0.45) {
@@ -5842,7 +5882,7 @@ export class FluidSimulation {
                 vec4 worldPos = world * vec4(pos, 1.0);
                 vViewDir = normalize(cameraPosition - worldPos.xyz);
                 vNormal = normalize(mat3(world) * normal);
-                
+
                 gl_Position = worldViewProjection * vec4(pos, 1.0);
             }
         `;
@@ -5867,24 +5907,24 @@ export class FluidSimulation {
                 float swirl1 = sin(vPosition.x * 4.0 + time) * cos(vPosition.z * 4.0 + time * 0.5);
                 float swirl2 = cos(vPosition.x * 6.0 - time * 0.7) * sin(vPosition.z * 5.0 + time * 0.3);
                 float swirl = (swirl1 + swirl2) * 0.5;
-                
+
                 // Add depth-based color variation
                 float depth = vPosition.y * 0.5 + 0.5;
-                
+
                 // Add fresnel effect
                 float fresnelTerm = pow(1.0 - max(dot(vNormal, vViewDir), 0.0), 3.0);
-                
+
                 // Combine effects
                 vec3 color = baseColor * (0.8 + swirl * 0.4) * (0.7 + depth * 0.6);
                 color += vec3(0.3, 0.1, 0.1) * fresnelTerm; // Add reddish highlights
-                
+
                 // Add caustics-like effect
                 float caustics = pow(sin(vPosition.x * 10.0 + time) * cos(vPosition.z * 8.0 - time), 2.0);
                 color += vec3(0.2, 0.05, 0.05) * caustics;
 
                 // Calculate final alpha
                 float alpha = transparency * (0.8 + fresnelTerm * 0.2);
-                
+
                 gl_FragColor = vec4(color, alpha);
             }
         `;
@@ -5895,6 +5935,7 @@ export class FluidSimulation {
 ```
 
 Key improvements:
+
 1. More complex wave patterns using multiple frequencies
 2. Added fresnel effect for better edge highlights
 3. Enhanced swirling patterns with multiple layers
@@ -5905,6 +5946,7 @@ Key improvements:
 8. Added view-dependent effects
 
 The fluid should now look more organic and blood-like with:
+
 - Better surface movement
 - More realistic light interaction
 - Enhanced depth perception
@@ -5947,15 +5989,15 @@ export class FleshClumps {
         fleshMaterial.subSurface.isTranslucencyEnabled = true;
         fleshMaterial.subSurface.translucencyIntensity = 1;
         fleshMaterial.roughness = 0.4;
-        
+
         // Distribute clumps in concentric rings
         const rings = 3;
         const clumpsPerRing = Math.floor(numClumps / rings);
-        
+
         for (let ring = 0; ring < rings; ring++) {
             const ringRadius = (ring + 1) * (jarRadius * 0.7 / rings);
-            const numInThisRing = ring === rings - 1 ? 
-                numClumps - (clumpsPerRing * (rings - 1)) : 
+            const numInThisRing = ring === rings - 1 ?
+                numClumps - (clumpsPerRing * (rings - 1)) :
                 clumpsPerRing;
 
             for (let i = 0; i < numInThisRing; i++) {
@@ -5968,7 +6010,7 @@ export class FleshClumps {
                     -2.0 + Math.random() * 0.1,
                     Math.sin(angle) * distance
                 );
-                
+
                 this.createFleshClump(size, position, fleshMaterial.clone(`fleshMaterial${ring}${i}`));
             }
         }
@@ -6003,7 +6045,7 @@ export class FleshClumps {
                 normals[i + 1],
                 normals[i + 2]
             ).normalize();
-            
+
             normals[i] = normal.x;
             normals[i + 1] = normal.y;
             normals[i + 2] = normal.z;
@@ -6036,21 +6078,21 @@ export class FleshClumps {
 
     update(deltaTime) {
         const time = performance.now() * 0.001;
-        
+
         this.clumps.forEach((clump, index) => {
             // Subtle pulsing animation
             const pulseSpeed = 0.1 + Math.random() * 0.2;
             const pulseAmount = 0.02 + Math.random() * 0.02;
-            
+
             const baseScale = clump.scaling.x;
             const scale = baseScale * (1 + Math.sin(time * pulseSpeed + index) * pulseAmount);
-            
+
             clump.scaling = new BABYLON.Vector3(
                 scale,
                 scale * 0.7,
                 scale
             );
-            
+
             // Minimal rotation
             clump.rotation.x += deltaTime * 0.02 * Math.sin(time * 0.3 + index);
             clump.rotation.y += deltaTime * 0.02 * Math.cos(time * 0.2 + index);
@@ -6075,6 +6117,7 @@ export class FleshClumps {
 ```
 
 Key improvements:
+
 1. Switched from Three.js to Babylon.js for consistency
 2. Added PBR materials with subsurface scattering for more realistic flesh appearance
 3. Improved organic deformation using noise
@@ -6109,7 +6152,7 @@ export class FluidSimulation {
         this.isFlowing = false;
         this.jarRadius = 4.8;
         this.maxHeight = 3.5;
-        
+
         this.createFluid();
         this.createBloodParticles();
         this.createSurfaceTension();
@@ -6175,19 +6218,19 @@ export class FluidSimulation {
             void main(void) {
                 vUv = uv;
                 vPosition = position;
-                
+
                 // Viscous fluid movement
                 vec3 pos = position;
                 if (pos.y > 0.45) {
                     // Slower, more viscous waves
                     float wave1 = sin(pos.x * 2.0 + time * 0.5) * cos(pos.z * 2.0 + time * 0.3) * 0.02;
                     float wave2 = cos(pos.x * 3.0 + time * 0.3) * sin(pos.z * 2.5 + time * 0.4) * 0.015;
-                    
+
                     // Surface tension effect
                     float surfaceHeight = length(pos.xz);
                     float tensionFactor = smoothstep(0.8, 1.0, surfaceHeight);
                     float tension = surfaceTension * tensionFactor;
-                    
+
                     pos.y += (wave1 + wave2) * (1.0 - tension);
                 }
 
@@ -6195,7 +6238,7 @@ export class FluidSimulation {
                 vViewDir = normalize(cameraPosition - worldPos.xyz);
                 vNormal = normalize(mat3(world) * normal);
                 vHeight = pos.y;
-                
+
                 gl_Position = worldViewProjection * vec4(pos, 1.0);
             }
         `;
@@ -6221,30 +6264,30 @@ export class FluidSimulation {
             void main(void) {
                 // Blood cell effect
                 float cellPattern = random(vPosition.xz * 10.0 + time * 0.1) * 0.1;
-                
+
                 // Viscous swirling
                 float swirl1 = sin(vPosition.x * 2.0 + time * 0.3) * cos(vPosition.z * 2.0 + time * 0.2);
                 float swirl2 = cos(vPosition.x * 3.0 - time * 0.2) * sin(vPosition.z * 2.5 + time * 0.3);
                 float swirl = (swirl1 + swirl2) * 0.3;
-                
+
                 // Depth-based darkening
                 float depth = smoothstep(-1.0, 1.0, vHeight);
-                
+
                 // Fresnel effect for edge highlighting
                 float fresnelTerm = pow(1.0 - max(dot(vNormal, vViewDir), 0.0), 3.0);
-                
+
                 // Combine effects for final color
                 vec3 baseColor = bloodColor * (0.8 + cellPattern);
                 vec3 darkColor = bloodColor * 0.5;
                 vec3 color = mix(darkColor, baseColor, depth);
-                
+
                 // Add viscous highlights
                 color += bloodColor * swirl * 0.2;
                 color += vec3(0.8, 0.2, 0.2) * fresnelTerm * 0.3;
-                
+
                 // Opacity variation
                 float alpha = transparency * (0.9 + fresnelTerm * 0.1);
-                
+
                 gl_FragColor = vec4(color, alpha);
             }
         `;
@@ -6253,7 +6296,7 @@ export class FluidSimulation {
     createBloodParticles() {
         // Create particles for blood drops and splashes
         this.particleSystem = new BABYLON.ParticleSystem("bloodParticles", 2000, this.scene);
-        
+
         // Create blood particle texture
         const particleTexture = new BABYLON.DynamicTexture("bloodParticle", 32, this.scene, true);
         const ctx = particleTexture.getContext();
@@ -6264,9 +6307,9 @@ export class FluidSimulation {
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, 32, 32);
         particleTexture.update();
-        
+
         this.particleSystem.particleTexture = particleTexture;
-        
+
         // Particle behavior for viscous fluid
         this.particleSystem.minEmitBox = new BABYLON.Vector3(-0.5, 0, -0.5);
         this.particleSystem.maxEmitBox = new BABYLON.Vector3(0.5, 0, 0.5);
@@ -6280,12 +6323,12 @@ export class FluidSimulation {
         this.particleSystem.direction2 = new BABYLON.Vector3(0.2, -1, 0.2);
         this.particleSystem.minEmitPower = 0.3;
         this.particleSystem.maxEmitPower = 0.7;
-        
+
         // Blood-like coloring
         this.particleSystem.color1 = new BABYLON.Color4(0.7, 0.1, 0.1, 1.0);
         this.particleSystem.color2 = new BABYLON.Color4(0.5, 0.05, 0.05, 1.0);
         this.particleSystem.colorDead = new BABYLON.Color4(0.4, 0.05, 0.05, 0.0);
-        
+
         this.particleSystem.parent = this.fluidGroup;
     }
 
@@ -6294,6 +6337,7 @@ export class FluidSimulation {
 ```
 
 Key improvements:
+
 1. More realistic blood-like coloring and opacity
 2. Added viscosity simulation in shaders
 3. Surface tension effects at edges
@@ -6306,6 +6350,7 @@ Key improvements:
 10. Better particle behavior for thick liquid
 
 The fluid should now look and behave more like blood with:
+
 - Darker, richer red coloring
 - Viscous movement
 - Surface tension at edges
@@ -6317,7 +6362,7 @@ The fluid should now look and behave more like blood with:
 
 _**User**_
 
-Arteries@ArterySimulation.js appear to be being generated but they are not being displyed? @scene.js 
+Arteries@ArterySimulation.js appear to be being generated but they are not being displyed? @scene.js
 
 ---
 
@@ -6356,10 +6401,10 @@ export class ArterySimulation {
     createArterySystem() {
         console.log('Creating artery system...');
         const heartPosition = new BABYLON.Vector3(0, -1.9, 0);
-        
+
         // Create initial growth points from heart surface
         this.createInitialGrowthPoints(heartPosition);
-        
+
         console.log(`Initial growth queue size: ${this.growthQueue.length}`);
         this.processGrowthQueue();
     }
@@ -6429,7 +6474,7 @@ export class ArterySimulation {
 
     processGrowthQueue() {
         console.log(`Processing growth queue. Size: ${this.growthQueue.length}, Growing: ${this.isGrowing}, Branches: ${this.branchCount}`);
-        
+
         if (!this.isGrowing || this.growthQueue.length === 0 || this.branchCount >= this.maxBranches) {
             return;
         }
@@ -6466,7 +6511,7 @@ positionComponents() {
     const arteryMesh = this.arterySim.getMesh();
     arteryMesh.scaling = new BABYLON.Vector3(1, 1, 1); // Changed from 0.4 to 1
     arteryMesh.position = heartMesh.position.clone();
-    
+
     // Ensure arteries are visible in scene
     this.scene.removeMesh(arteryMesh);
     this.scene.addMesh(arteryMesh);
@@ -6474,6 +6519,7 @@ positionComponents() {
 ```
 
 Key changes:
+
 1. Added proper material setup with full opacity
 2. Improved tube creation with more tessellation points
 3. Added path interpolation for smoother arteries
@@ -6491,10 +6537,10 @@ The arteries should now be visible and growing properly from the heart position.
 _**User**_
 
 FluidSimulation.js:14 Uncaught TypeError: this.createSurfaceTension is not a function
-    at new FluidSimulation (FluidSimulation.js:14:14)
-    at SceneManager.setupEnvironment (main.js:129:25)
-    at new SceneManager (main.js:23:14)
-    at main.js:194:22
+at new FluidSimulation (FluidSimulation.js:14:14)
+at SceneManager.setupEnvironment (main.js:129:25)
+at new SceneManager (main.js:23:14)
+at main.js:194:22
 
 ---
 
@@ -6513,7 +6559,7 @@ export class FluidSimulation {
         this.isFlowing = false;
         this.jarRadius = 4.8;
         this.maxHeight = 3.5;
-        
+
         this.createFluid();
         this.createBloodParticles();
     }
@@ -6579,17 +6625,17 @@ export class FluidSimulation {
             void main(void) {
                 vUv = uv;
                 vPosition = position;
-                
+
                 // Viscous fluid movement with surface tension
                 vec3 pos = position;
                 if (pos.y > 0.45) {
                     float radius = length(pos.xz);
                     float tensionFactor = smoothstep(0.8, 1.0, radius);
-                    
+
                     // Slower waves for viscous blood
                     float wave1 = sin(pos.x * 2.0 + time * 0.5) * cos(pos.z * 2.0 + time * 0.3) * 0.02;
                     float wave2 = cos(pos.x * 3.0 + time * 0.3) * sin(pos.z * 2.5 + time * 0.4) * 0.015;
-                    
+
                     // Apply surface tension at edges
                     float surfaceDeformation = (wave1 + wave2) * (1.0 - tensionFactor * surfaceTension);
                     pos.y += surfaceDeformation;
@@ -6599,7 +6645,7 @@ export class FluidSimulation {
                 vViewDir = normalize(cameraPosition - worldPos.xyz);
                 vNormal = normalize(mat3(world) * normal);
                 vHeight = pos.y;
-                
+
                 gl_Position = worldViewProjection * vec4(pos, 1.0);
             }
         `;
@@ -6612,6 +6658,7 @@ export class FluidSimulation {
 ```
 
 Key changes:
+
 1. Removed the separate createSurfaceTension call
 2. Integrated surface tension effects into the vertex shader
 3. Added surface tension parameters to the shader material
@@ -6624,12 +6671,12 @@ The fluid should now show proper surface tension effects at the edges while main
 
 _**User**_
 
-Uncaught TypeError: e._resyncLightSources is not a function
-    at e.addMesh (scene.ts:2662:17)
-    at SceneManager.positionComponents (main.js:157:20)
-    at SceneManager.setupEnvironment (main.js:133:14)
-    at new SceneManager (main.js:23:14)
-    at main.js:194:22
+Uncaught TypeError: e.\_resyncLightSources is not a function
+at e.addMesh (scene.ts:2662:17)
+at SceneManager.positionComponents (main.js:157:20)
+at SceneManager.setupEnvironment (main.js:133:14)
+at new SceneManager (main.js:23:14)
+at main.js:194:22
 
 ---
 
@@ -6653,7 +6700,7 @@ positionComponents() {
     const arteryMesh = this.arterySim.getMesh();
     arteryMesh.scaling = new BABYLON.Vector3(1, 1, 1);
     arteryMesh.position = heartMesh.position.clone();
-    
+
     // Make sure arteries are visible by adding them to the scene properly
     this.arterySim.arteries.forEach(artery => {
         if (artery.mesh && !artery.mesh.parent) {
@@ -6711,7 +6758,7 @@ addArtery(startPoint, direction, radius, parent = null) {
 
     // Set proper parenting
     artery.parent = this.arteryGroup;
-    
+
     // Make sure the mesh is added to the scene
     if (!this.scene.meshes.includes(artery)) {
         this.scene.addMesh(artery);
@@ -6743,9 +6790,10 @@ addArtery(startPoint, direction, radius, parent = null) {
 ```
 
 These changes should:
+
 1. Properly handle mesh visibility in the scene
 2. Ensure arteries are added to both their parent group and the scene
-3. Fix the _resyncLightSources error by properly managing mesh addition
+3. Fix the \_resyncLightSources error by properly managing mesh addition
 4. Maintain proper scene hierarchy
 
 The arteries should now be visible and properly integrated into the scene graph.
@@ -6754,7 +6802,7 @@ The arteries should now be visible and properly integrated into the scene graph.
 
 _**User**_
 
-Are the growing arteries correctly initialized? @ArterySimulation.js 
+Are the growing arteries correctly initialized? @ArterySimulation.js
 
 ---
 
@@ -6770,7 +6818,7 @@ constructor(scene) {
         console.error('Scene is required for ArterySimulation');
         return;
     }
-    
+
     console.log('Initializing ArterySimulation');
     this.scene = scene;
     this.arteryGroup = new BABYLON.TransformNode("arteryGroup", scene);
@@ -6800,7 +6848,7 @@ constructor(scene) {
 
 createInitialGrowthPoints(heartPosition) {
     console.log('Creating initial growth points at:', heartPosition);
-    
+
     // Create main arteries first (aorta and pulmonary artery)
     const mainArteryPoints = [
         {
@@ -6870,7 +6918,7 @@ createInitialGrowthPoints(heartPosition) {
 ```javascript:js/ArterySimulation.js
 addArtery(startPoint, direction, radius, parent = null, isMain = false) {
     console.log('Adding artery:', { startPoint, radius, isMain });
-    
+
     // Adjust length based on whether it's a main artery
     const length = isMain ? 0.5 + Math.random() * 0.2 : 0.3 + Math.random() * 0.2;
     let endPoint = startPoint.add(direction.scale(length));
@@ -6878,11 +6926,11 @@ addArtery(startPoint, direction, radius, parent = null, isMain = false) {
     // Create smoother path with more points for main arteries
     const numPoints = isMain ? 15 : 10;
     const path = [];
-    
+
     for (let i = 0; i < numPoints; i++) {
         const t = i / (numPoints - 1);
         const point = BABYLON.Vector3.Lerp(startPoint, endPoint, t);
-        
+
         // Add slight curve for more organic look
         if (i > 0 && i < numPoints - 1) {
             const curveAmount = isMain ? 0.03 : 0.05;
@@ -6905,12 +6953,12 @@ addArtery(startPoint, direction, radius, parent = null, isMain = false) {
     // Clone and customize material
     const material = this.arteryMaterial.clone(`arteryMaterial_${this.branchCount}`);
     material.alpha = 1.0;
-    
+
     // Make main arteries slightly darker
     if (isMain) {
         material.albedoColor = new BABYLON.Color3(0.7, 0.05, 0.05);
     }
-    
+
     artery.material = material;
     artery.parent = this.arteryGroup;
 
@@ -6945,6 +6993,7 @@ addArtery(startPoint, direction, radius, parent = null, isMain = false) {
 ```
 
 These changes should:
+
 1. Properly initialize the artery system with main arteries (aorta and pulmonary)
 2. Create more visible and anatomically correct arteries
 3. Ensure proper mesh creation and scene addition
@@ -7000,65 +7049,65 @@ export class FleshGoblin {
         // Define shader code
         BABYLON.Effect.ShadersStore["goblinVertexShader"] = `
             precision highp float;
-            
+
             attribute vec3 position;
             attribute vec3 normal;
             attribute vec2 uv;
-            
+
             uniform mat4 world;
             uniform mat4 worldViewProjection;
             uniform float time;
-            
+
             varying vec3 vPosition;
             varying vec3 vNormal;
             varying vec2 vUV;
-            
+
             void main() {
                 vec3 pos = position;
-                
+
                 // Add organic movement
-                float displacement = sin(pos.x * 4.0 + time) * 
-                                   cos(pos.y * 4.0 + time * 0.7) * 
+                float displacement = sin(pos.x * 4.0 + time) *
+                                   cos(pos.y * 4.0 + time * 0.7) *
                                    sin(pos.z * 4.0 + time * 0.5) * 0.05;
-                
+
                 pos += normal * displacement;
-                
+
                 vPosition = (world * vec4(pos, 1.0)).xyz;
                 vNormal = (world * vec4(normal, 0.0)).xyz;
                 vUV = uv;
-                
+
                 gl_Position = worldViewProjection * vec4(pos, 1.0);
             }
         `;
 
         BABYLON.Effect.ShadersStore["goblinFragmentShader"] = `
             precision highp float;
-            
+
             varying vec3 vPosition;
             varying vec3 vNormal;
             varying vec2 vUV;
-            
+
             uniform float time;
-            
+
             void main() {
                 vec3 normal = normalize(vNormal);
-                
+
                 // Create pulsing flesh color
                 float pulse = sin(time * 2.0) * 0.5 + 0.5;
                 vec3 fleshColor = vec3(0.8, 0.2, 0.2) * (0.8 + pulse * 0.2);
-                
+
                 // Add veins
                 float veins = sin(vUV.x * 20.0 + time) * sin(vUV.y * 20.0 - time);
                 veins = smoothstep(0.8, 1.0, veins);
                 vec3 veinColor = vec3(0.4, 0.0, 0.0);
-                
+
                 // Combine colors
                 vec3 color = mix(fleshColor, veinColor, veins * 0.5);
-                
+
                 // Add subsurface scattering effect
                 float sss = pow(1.0 - abs(dot(normal, vec3(0.0, 0.0, 1.0))), 4.0);
                 color += vec3(0.9, 0.2, 0.1) * sss * 0.5;
-                
+
                 gl_FragColor = vec4(color, 1.0);
             }
         `;
@@ -7082,16 +7131,16 @@ export class FleshGoblin {
                 diameter: 0.05,
                 segments: 16
             }, this.scene);
-            
+
             eye.position = new BABYLON.Vector3(
                 (i === 0 ? -0.08 : 0.08),
                 0.05,
                 0.12
             );
-            
+
             eye.material = eyeMaterial;
             eye.parent = this.goblinGroup;
-            
+
             // Store eye references for animation
             if (i === 0) this.leftEye = eye;
             else this.rightEye = eye;
@@ -7109,7 +7158,7 @@ export class FleshGoblin {
 
     update(deltaTime) {
         const time = performance.now();
-        
+
         // Update shader time
         if (this.goblinShader) {
             this.goblinShader.setFloat("time", time * 0.001);
@@ -7129,12 +7178,12 @@ export class FleshGoblin {
         // Move towards target
         const direction = this.targetPosition.subtract(this.currentPosition);
         const distance = direction.length();
-        
+
         if (distance > 0.01) {
             direction.normalize();
             this.currentPosition.addInPlace(direction.scale(this.moveSpeed * deltaTime));
             this.goblinGroup.position = this.currentPosition;
-            
+
             // Look in movement direction
             const lookAt = Math.atan2(direction.z, direction.x);
             this.goblinGroup.rotation.y = lookAt + Math.PI / 2;
@@ -7145,7 +7194,7 @@ export class FleshGoblin {
             const eyeTime = time * 0.001;
             const blinkFrequency = Math.sin(eyeTime * 2) * 0.5 + 0.5;
             const scale = 0.8 + blinkFrequency * 0.4;
-            
+
             this.leftEye.scaling.y = scale;
             this.rightEye.scaling.y = scale;
         }
@@ -7174,6 +7223,7 @@ export class FleshGoblin {
 ```
 
 This FleshGoblin class creates a small, organic-looking creature with:
+
 1. Custom vertex and fragment shaders for pulsing flesh effects
 2. Subsurface scattering simulation
 3. Animated veins
@@ -7187,12 +7237,12 @@ To integrate it, add this to your SceneManager's setupEnvironment method:
 ```javascript:js/main.js
 setupEnvironment() {
     // ... existing setup code ...
-    
+
     // Add flesh goblin
     this.fleshGoblin = new FleshGoblin(this.scene);
     const goblinMesh = this.fleshGoblin.getMesh();
     goblinMesh.position = new BABYLON.Vector3(0, -1.5, 0);
-    
+
     // ... rest of setup code ...
 }
 
@@ -7264,7 +7314,7 @@ createGoblin() {
         const points = [];
         const segments = 10;
         const length = 0.2 + Math.random() * 0.1;
-        
+
         for (let j = 0; j <= segments; j++) {
             const t = j / segments;
             points.push(new BABYLON.Vector3(
@@ -7295,40 +7345,40 @@ createGoblin() {
     // Enhanced shader code for more organic movement
     BABYLON.Effect.ShadersStore["goblinVertexShader"] = `
         precision highp float;
-        
+
         attribute vec3 position;
         attribute vec3 normal;
         attribute vec2 uv;
-        
+
         uniform mat4 world;
         uniform mat4 worldViewProjection;
         uniform float time;
-        
+
         varying vec3 vPosition;
         varying vec3 vNormal;
         varying vec2 vUV;
-        
+
         void main() {
             vec3 pos = position;
-            
+
             // Multiple layers of organic movement
-            float displacement = 
-                sin(pos.x * 4.0 + time) * 
-                cos(pos.y * 4.0 + time * 0.7) * 
+            float displacement =
+                sin(pos.x * 4.0 + time) *
+                cos(pos.y * 4.0 + time * 0.7) *
                 sin(pos.z * 4.0 + time * 0.5) * 0.05 +
-                sin(pos.x * 8.0 - time * 0.5) * 
-                sin(pos.y * 8.0 + time * 0.3) * 
+                sin(pos.x * 8.0 - time * 0.5) *
+                sin(pos.y * 8.0 + time * 0.3) *
                 cos(pos.z * 8.0 + time * 0.6) * 0.025;
-            
+
             // Add pulsing
             float pulse = sin(time * 1.5) * 0.05 + 1.0;
             pos *= pulse;
             pos += normal * displacement;
-            
+
             vPosition = (world * vec4(pos, 1.0)).xyz;
             vNormal = (world * vec4(normal, 0.0)).xyz;
             vUV = uv;
-            
+
             gl_Position = worldViewProjection * vec4(pos, 1.0);
         }
     `;
@@ -7336,44 +7386,44 @@ createGoblin() {
     // Enhanced fragment shader for more grotesque appearance
     BABYLON.Effect.ShadersStore["goblinFragmentShader"] = `
         precision highp float;
-        
+
         varying vec3 vPosition;
         varying vec3 vNormal;
         varying vec2 vUV;
-        
+
         uniform float time;
-        
+
         float noise(vec2 st) {
             return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
         }
-        
+
         void main() {
             vec3 normal = normalize(vNormal);
-            
+
             // Create pulsing flesh color with more variation
             float pulse = sin(time * 2.0) * 0.5 + 0.5;
             vec3 fleshColor = vec3(0.8, 0.2, 0.2) * (0.8 + pulse * 0.2);
-            
+
             // Add more detailed veins
             float veins = sin(vUV.x * 20.0 + time) * sin(vUV.y * 20.0 - time);
             veins += sin(vUV.x * 15.0 - time * 0.7) * sin(vUV.y * 15.0 + time * 0.8) * 0.5;
             veins = smoothstep(0.8, 1.0, veins);
             vec3 veinColor = vec3(0.4, 0.0, 0.0);
-            
+
             // Add flesh texture
             float fleshNoise = noise(vUV * 10.0 + time * 0.1) * 0.1;
-            
+
             // Combine colors with more complex mixing
             vec3 color = mix(fleshColor, veinColor, veins * 0.5);
             color = mix(color, color * 0.7, fleshNoise);
-            
+
             // Enhanced subsurface scattering
             float sss = pow(1.0 - abs(dot(normal, vec3(0.0, 0.0, 1.0))), 4.0);
             color += vec3(0.9, 0.2, 0.1) * sss * 0.5;
-            
+
             // Add slight transparency at edges
             float alpha = 0.95 - sss * 0.3;
-            
+
             gl_FragColor = vec4(color, alpha);
         }
     `;
@@ -7405,22 +7455,22 @@ createEyes() {
     // Create multiple small eyes
     const numEyes = 6;
     this.eyes = [];
-    
+
     for (let i = 0; i < numEyes; i++) {
         const eye = BABYLON.MeshBuilder.CreateSphere("eye", {
             diameter: 0.02 + Math.random() * 0.02,
             segments: 16
         }, this.scene);
-        
+
         const angle = (i / numEyes) * Math.PI * 1.5 - Math.PI * 0.25;
         const radius = 0.08 + Math.random() * 0.03;
-        
+
         eye.position = new BABYLON.Vector3(
             Math.cos(angle) * radius,
             0.05 + Math.random() * 0.03,
             Math.sin(angle) * radius
         );
-        
+
         eye.material = eyeMaterial;
         eye.parent = this.goblinGroup;
         this.eyes.push(eye);
@@ -7433,7 +7483,7 @@ And update the animation in the update method:
 ```javascript:js/FleshGoblin.js
 update(deltaTime) {
     const time = performance.now() * 0.001;
-    
+
     // Update shader time
     if (this.goblinShader) {
         this.goblinShader.setFloat("time", time);
@@ -7455,7 +7505,7 @@ update(deltaTime) {
             const blinkTime = (time + offset) * 2;
             const blink = Math.sin(blinkTime) * 0.5 + 0.5;
             eye.scaling.y = 0.7 + blink * 0.3;
-            
+
             // Random eye movements
             if (Math.random() < 0.01) {
                 eye.position.y += (Math.random() - 0.5) * 0.01;
@@ -7468,6 +7518,7 @@ update(deltaTime) {
 ```
 
 These changes will create a more disturbing and organic-looking flesh goblin with:
+
 1. Asymmetric growths and bulges
 2. Writhing tentacles
 3. Multiple blinking eyes
@@ -7502,19 +7553,19 @@ export class SceneCamera {
     setupCamera() {
         // Create and configure camera
         const camera = new BABYLON.ArcRotateCamera(
-            "mainCamera", 
+            "mainCamera",
             0, Math.PI / 3, 12,
             BABYLON.Vector3.Zero(),
             this.scene
         );
-        
+
         // Attach camera controls
         camera.attachControl(this.canvas, true);
-        
+
         // Set initial position and target
         camera.setPosition(new BABYLON.Vector3(0, 0, 10));
         camera.setTarget(new BABYLON.Vector3(0, -1, 0));
-        
+
         // Configure camera constraints
         camera.minZ = 0.1;
         camera.maxZ = 100;
@@ -7522,7 +7573,7 @@ export class SceneCamera {
         camera.pinchPrecision = 50;
         camera.lowerRadiusLimit = 5;
         camera.upperRadiusLimit = 20;
-        
+
         // Store camera reference
         this.camera = camera;
     }
@@ -7553,11 +7604,11 @@ import { SceneCamera } from './camera/SceneCamera.js';
 class SceneManager {
     constructor() {
         // ... other initialization code ...
-        
+
         this.scene = this.createScene();
         this.camera = new SceneCamera(this.scene, canvas);
         this.setupEnvironment();
-        
+
         // ... rest of constructor ...
     }
 
@@ -7567,13 +7618,13 @@ class SceneManager {
             useMaterialMeshMap: true,
             useClonedMeshMap: true
         });
-        
+
         scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
-        
+
         // Optimize engine settings
         engine.setHardwareScalingLevel(1.0);
         engine.enableOfflineSupport = false;
-        
+
         // Setup lighting
         const ambientLight = new BABYLON.HemisphericLight(
             "ambientLight",
@@ -7589,14 +7640,14 @@ class SceneManager {
             scene
         );
         directionalLight.intensity = 0.8;
-        
+
         // Enable engine optimizations
         scene.autoClear = false;
         scene.autoClearDepthAndStencil = false;
         scene.skipPointerMovePicking = true;
         scene.useRightHandedSystem = true;
         scene.useCameraFrustumCulling = true;
-        
+
         return scene;
     }
 
@@ -7622,6 +7673,7 @@ resetView() {
 ```
 
 This refactoring:
+
 1. Creates a dedicated camera module with its own configuration
 2. Improves code organization and maintainability
 3. Encapsulates camera-specific functionality
@@ -7635,6 +7687,7 @@ The camera settings are now centralized and can be easily modified or extended i
 _**User**_
 
 Overall, the main areas for cleanup are:
+
 1. Camera System: Ensure the SceneCamera handles all camera configurations, removing redundant active camera references.
 2. Lighting Setup: Centralize lighting in a new file instead of main.js.
 
@@ -7676,7 +7729,7 @@ export class SceneLighting {
     updateLighting(deltaTime) {
         // Add any dynamic lighting updates here
         const time = performance.now() * 0.001;
-        
+
         this.lights.forEach((light, index) => {
             // Subtle intensity variations
             if (light.intensity) {
@@ -7705,12 +7758,12 @@ import { SceneLighting } from './lighting/SceneLighting.js';
 class SceneManager {
     constructor() {
         // ... other initialization code ...
-        
+
         this.scene = this.createScene();
         this.camera = new SceneCamera(this.scene, canvas);
         this.lighting = new SceneLighting(this.scene);
         this.setupEnvironment();
-        
+
         // ... rest of constructor ...
     }
 
@@ -7720,20 +7773,20 @@ class SceneManager {
             useMaterialMeshMap: true,
             useClonedMeshMap: true
         });
-        
+
         scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
-        
+
         // Optimize engine settings
         engine.setHardwareScalingLevel(1.0);
         engine.enableOfflineSupport = false;
-        
+
         // Enable engine optimizations
         scene.autoClear = false;
         scene.autoClearDepthAndStencil = false;
         scene.skipPointerMovePicking = true;
         scene.useRightHandedSystem = true;
         scene.useCameraFrustumCulling = true;
-        
+
         return scene;
     }
 
@@ -7764,6 +7817,7 @@ class SceneManager {
 ```
 
 This refactoring:
+
 1. Creates a dedicated lighting module
 2. Encapsulates all lighting-related code
 3. Allows for dynamic lighting updates
@@ -7776,7 +7830,7 @@ Would you like me to continue with any other cleanup tasks?
 
 _**User**_
 
-Let's add the Babylon.js debug 
+Let's add the Babylon.js debug
 
 ---
 
@@ -7841,18 +7895,18 @@ import { SceneDebug } from './debug/SceneDebug.js';
 class SceneManager {
     constructor() {
         // ... other initialization code ...
-        
+
         this.scene = this.createScene();
         this.camera = new SceneCamera(this.scene, canvas);
         this.lighting = new SceneLighting(this.scene);
-        
+
         // Initialize debug layer in development
         if (process.env.NODE_ENV !== 'production') {
             this.debug = new SceneDebug(this.scene);
         }
-        
+
         this.setupEnvironment();
-        
+
         // ... rest of constructor ...
     }
 
@@ -7862,7 +7916,7 @@ class SceneManager {
             useMaterialMeshMap: true,
             useClonedMeshMap: true
         });
-        
+
         // Add debug stats
         if (process.env.NODE_ENV !== 'production') {
             scene.debugLayer.show({
@@ -7872,9 +7926,9 @@ class SceneManager {
                 showInspector: false
             });
         }
-        
+
         // ... rest of scene setup ...
-        
+
         return scene;
     }
 
@@ -7914,6 +7968,7 @@ And update index.html to include the debug layer script:
 ```
 
 This implementation:
+
 1. Creates a dedicated debug module
 2. Adds keyboard shortcut (Ctrl + Alt + D) to toggle debug layer
 3. Shows performance stats in development
@@ -7922,6 +7977,7 @@ This implementation:
 6. Only loads debug features in development mode
 
 The debug layer will help with:
+
 - Performance monitoring
 - Scene inspection
 - Material debugging
@@ -7934,9 +7990,9 @@ The debug layer will help with:
 _**User**_
 
 Uncaught ReferenceError: process is not defined
-    at SceneManager.createScene (main.js:97:9)
-    at new SceneManager (main.js:26:27)
-    at main.js:209:22
+at SceneManager.createScene (main.js:97:9)
+at new SceneManager (main.js:26:27)
+at main.js:209:22
 
 ---
 
@@ -8004,14 +8060,14 @@ import { SceneDebug } from './debug/SceneDebug.js';
 class SceneManager {
     constructor() {
         // ... other initialization code ...
-        
+
         this.scene = this.createScene();
         this.camera = new SceneCamera(this.scene, canvas);
         this.lighting = new SceneLighting(this.scene);
         this.debug = new SceneDebug(this.scene);
-        
+
         this.setupEnvironment();
-        
+
         // ... rest of constructor ...
     }
 
@@ -8021,20 +8077,20 @@ class SceneManager {
             useMaterialMeshMap: true,
             useClonedMeshMap: true
         });
-        
+
         scene.clearColor = new BABYLON.Color4(0, 0, 0, 1);
-        
+
         // Optimize engine settings
         engine.setHardwareScalingLevel(1.0);
         engine.enableOfflineSupport = false;
-        
+
         // Enable engine optimizations
         scene.autoClear = false;
         scene.autoClearDepthAndStencil = false;
         scene.skipPointerMovePicking = true;
         scene.useRightHandedSystem = true;
         scene.useCameraFrustumCulling = true;
-        
+
         return scene;
     }
 
@@ -8043,6 +8099,7 @@ class SceneManager {
 ```
 
 Key changes:
+
 1. Removed process.env checks
 2. Always initialize debug layer
 3. Simplified debug layer setup
@@ -8064,20 +8121,24 @@ _**Assistant**_
 Looking at the files, we already have the debug inspector set up with:
 
 1. The inspector script in index.html:
+
 ```html
 <script src="https://cdn.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
 ```
 
 2. The SceneDebug class that handles the inspector functionality:
+
 ```javascript
 // Press Ctrl + Alt + D to toggle the inspector
 ```
 
 The debug inspector is already working and can be accessed by:
+
 1. Pressing Ctrl + Alt + D to toggle the full inspector view
 2. The basic stats overlay is always visible
 
 You can use the inspector to:
+
 - View scene hierarchy
 - Inspect and modify object properties
 - Debug materials and shaders
@@ -8106,13 +8167,13 @@ export class FleshClumps {
         this.scene = scene;
         this.fleshClumpGroup = new BABYLON.TransformNode("fleshClumpGroup", scene);
         this.clumps = [];
-        
+
         // Add size constraints
         this.minSize = 0.05;
         this.maxSize = 0.12;  // Reduced from 0.15
         this.maxScaleChange = 0.1;  // Limit scale changes
         this.baseScale = 0.3;  // Base scale for the entire group
-        
+
         this.createFleshClumps();
     }
 
@@ -8126,21 +8187,21 @@ export class FleshClumps {
         fleshMaterial.subSurface.isTranslucencyEnabled = true;
         fleshMaterial.subSurface.translucencyIntensity = 1;
         fleshMaterial.roughness = 0.4;
-        
+
         // Distribute clumps in concentric rings with size constraints
         const rings = 3;
         const clumpsPerRing = Math.floor(numClumps / rings);
-        
+
         for (let ring = 0; ring < rings; ring++) {
             const ringRadius = (ring + 1) * (jarRadius * 0.7 / rings);
-            const numInThisRing = ring === rings - 1 ? 
-                numClumps - (clumpsPerRing * (rings - 1)) : 
+            const numInThisRing = ring === rings - 1 ?
+                numClumps - (clumpsPerRing * (rings - 1)) :
                 clumpsPerRing;
 
             for (let i = 0; i < numInThisRing; i++) {
                 const angle = (i / numInThisRing) * Math.PI * 2;
                 const distance = ringRadius * (0.8 + Math.random() * 0.4);
-                
+
                 // Constrain size based on ring position
                 const maxRingSize = this.maxSize * (1 - ring * 0.2);
                 const size = this.minSize + Math.random() * (maxRingSize - this.minSize);
@@ -8150,7 +8211,7 @@ export class FleshClumps {
                     -2.0 + Math.random() * 0.1,
                     Math.sin(angle) * distance
                 );
-                
+
                 this.createFleshClump(size, position, fleshMaterial.clone(`fleshMaterial${ring}${i}`));
             }
         }
@@ -8158,25 +8219,25 @@ export class FleshClumps {
 
     update(deltaTime) {
         const time = performance.now() * 0.001;
-        
+
         this.clumps.forEach((clump, index) => {
             // Constrained pulsing animation
             const pulseSpeed = 0.5 + Math.random() * 0.2;  // Slower pulse
             const pulseAmount = 0.01 + Math.random() * 0.01;  // Smaller pulse
-            
+
             const baseScale = clump.baseScale || this.baseScale;
             const scaleChange = Math.sin(time * pulseSpeed + index) * pulseAmount;
-            
+
             // Limit maximum scale change
-            const limitedScale = baseScale * (1 + Math.max(-this.maxScaleChange, 
+            const limitedScale = baseScale * (1 + Math.max(-this.maxScaleChange,
                 Math.min(this.maxScaleChange, scaleChange)));
-            
+
             clump.scaling = new BABYLON.Vector3(
                 limitedScale,
                 limitedScale * 0.7,
                 limitedScale
             );
-            
+
             // Minimal rotation
             clump.rotation.x += deltaTime * 0.01 * Math.sin(time * 0.3 + index);
             clump.rotation.y += deltaTime * 0.01 * Math.cos(time * 0.2 + index);
@@ -8189,6 +8250,7 @@ export class FleshClumps {
 ```
 
 Key changes:
+
 1. Reduced maximum size limit
 2. Added scale change constraints
 3. Implemented size gradation based on ring position
@@ -8199,6 +8261,7 @@ Key changes:
 8. Improved size distribution logic
 
 These changes should prevent the flesh clumps from growing too large while maintaining their organic movement. The clumps will now:
+
 - Stay within reasonable size limits
 - Have more controlled pulsing
 - Maintain better proportions relative to the jar
@@ -8266,7 +8329,7 @@ createGoblin() {
         const points = [];
         const segments = 10;
         const length = 0.7 + Math.random() * 0.2;
-        
+
         for (let j = 0; j <= segments; j++) {
             const t = j / segments;
             points.push(new BABYLON.Vector3(
@@ -8309,16 +8372,16 @@ createGoblin() {
             diameter: 0.04 + Math.random() * 0.03,  // Increased size
             segments: 16
         }, this.scene);
-        
+
         const angle = (i / numEyes) * Math.PI * 1.5 - Math.PI * 0.25;
         const radius = 0.15 + Math.random() * 0.05;  // Adjusted radius
-        
+
         eye.position = new BABYLON.Vector3(
             Math.cos(angle) * radius,
             0.1 + Math.random() * 0.05,  // Raised position
             Math.sin(angle) * radius
         );
-        
+
         eye.material = eyeMaterial;
         eye.parent = this.goblinMesh;
         this.eyes.push(eye);
@@ -8327,6 +8390,7 @@ createGoblin() {
 ```
 
 Key changes:
+
 1. Switched to PBR material for better visibility
 2. Increased core body size
 3. Made growths larger and more visible
@@ -8343,11 +8407,11 @@ The flesh goblin should now be much more visible with a larger core body and bet
 _**User**_
 
 FleshGoblin.js:86 Uncaught TypeError: Cannot read properties of undefined (reading 'push')
-    at FleshGoblin.createGoblin (FleshGoblin.js:86:28)
-    at new FleshGoblin (FleshGoblin.js:5:14)
-    at SceneManager.setupEnvironment (main.js:113:28)
-    at new SceneManager (main.js:31:14)
-    at main.js:195:22
+at FleshGoblin.createGoblin (FleshGoblin.js:86:28)
+at new FleshGoblin (FleshGoblin.js:5:14)
+at SceneManager.setupEnvironment (main.js:113:28)
+at new SceneManager (main.js:31:14)
+at main.js:195:22
 
 ---
 
@@ -8414,7 +8478,7 @@ export class FleshGoblin {
             const points = [];
             const segments = 10;
             const length = 0.7 + Math.random() * 0.2;
-            
+
             for (let j = 0; j <= segments; j++) {
                 const t = j / segments;
                 points.push(new BABYLON.Vector3(
@@ -8456,16 +8520,16 @@ export class FleshGoblin {
                 diameter: 0.04 + Math.random() * 0.03,
                 segments: 16
             }, this.scene);
-            
+
             const angle = (i / numEyes) * Math.PI * 1.5 - Math.PI * 0.25;
             const radius = 0.15 + Math.random() * 0.05;
-            
+
             eye.position = new BABYLON.Vector3(
                 Math.cos(angle) * radius,
                 0.1 + Math.random() * 0.05,
                 Math.sin(angle) * radius
             );
-            
+
             eye.material = eyeMaterial;
             eye.parent = this.goblinMesh;
             this.eyes.push(eye);
@@ -8477,6 +8541,7 @@ export class FleshGoblin {
 ```
 
 Key changes:
+
 1. Added initialization of the tentacles array in the constructor
 2. Added initialization of the eyes array in the constructor
 3. Kept all other improvements to the goblin's appearance
@@ -8486,9 +8551,7 @@ This should resolve the TypeError and the flesh goblin should now be fully visib
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
@@ -8501,6 +8564,7 @@ Let's improve the existing models and code for a more modern and stylish approac
 _**Assistant**_
 
 <think>Based on the provided codebase and instructions, I'll focus on improving the existing models and code for a more modern, stylish approach. I need to analyze what's there currently and make improvements while following best practices like:
+
 - Favoring composition over inheritance
 - Using decorators for error checking
 - Organizing exceptions in a hierarchy
@@ -8525,109 +8589,89 @@ Let's start by improving the `FleshGoblin.js` file with a more modular, composit
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
+_\*\*\*\*_
 
 Now I'll create the necessary supporting base classes and components for the improved architecture:
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
+_\*\*\*\*_
 
 Now let's create the error decorator system:
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
+_\*\*\*\*_
 
 Now let's create the component classes needed for our modular architecture:
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
+_\*\*\*\*_
 
 Now let's modernize the existing FleshClumps.js file to better match our new architecture:
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
+_\*\*\*\*_
 
 Now, let's create a module to convert the Three.js FleshClumpSimulation to Babylon.js for consistency:
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
+_\*\*\*\*_
 
 Now, to make our new architecture work properly, we need to update the main.js file to use our improved components:
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
+_\*\*\*\*_
 
 Now I'll create a new improved HeartSimulation class that leverages our component-based architecture:
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
+_\*\*\*\*_
 
 ## Modernization and Architecture Improvements
 
@@ -8636,21 +8680,25 @@ I've implemented a comprehensive set of improvements to your Artery Simulation p
 ### Key Architectural Improvements
 
 1. **Component-Based Architecture**
+
    - Implemented a proper entity-component system where entities have pluggable components
    - Components handle specific responsibilities like materials, animations, and movement
    - Entities focus on composition rather than inheritance for better flexibility
 
 2. **Decorator-Based Error Handling**
+
    - Created a robust error handling system using method decorators
    - Organized exceptions in a proper hierarchy (SimulationError, RenderError, etc.)
    - Centralized error logging and fallback mechanisms
 
 3. **Modernized Material System**
+
    - Created a dedicated MaterialComponent that manages all material creation
    - Added support for PBR (Physically Based Rendering) materials
    - Enhanced subsurface scattering effects for more realistic organic materials
 
 4. **Animation Improvements**
+
    - Dedicated AnimationComponent for standardized animation handling
    - Better animation timing and control
    - More natural organic movement using noise-based animations
@@ -8663,10 +8711,12 @@ I've implemented a comprehensive set of improvements to your Artery Simulation p
 ### Visual and Functional Improvements
 
 1. **Enhanced Post-Processing**
+
    - Added chromatic aberration and grain effects for a more cinematic look
    - Improved bloom settings for better atmosphere
 
 2. **Better FleshGoblin Implementation**
+
    - Complete rewrite with a more organic, detailed design
    - Multiple tentacles with realistic motion
    - Pulsing, glowing eyes with independent animation
@@ -8703,85 +8753,71 @@ The error is occurring because JavaScript decorators are still an experimental f
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
+_\*\*\*\*_
 
 Now, let's also fix the FleshGoblin.js file to remove the decorator syntax and use a more compatible approach:
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
+_\*\*\*\*_
 
 Now, let's also update the ErrorDecorator.js file to work without using the decorator syntax:
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
+_\*\*\*\*_
 
 Now let's update the MaterialComponent.js to work without decorators:
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
+_\*\*\*\*_
 
 Let's also update the AnimationComponent.js to work without decorators:
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
+_\*\*\*\*_
 
 Finally, let's update the MovementComponent.js to work without decorators:
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
+_\*\*\*\*_
 
 Let's also update the EntityBase.js to ensure it's compatible with our changes:
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
+_\*\*\*\*_
 
 ## Fixing JavaScript Decorator Syntax Issues
 
@@ -8790,14 +8826,17 @@ I've made several important changes to fix the syntax error in your code and imp
 ### What Was Fixed
 
 1. **Removed Experimental Decorator Syntax**
+
    - JavaScript decorators (`@decorator`) are still an experimental feature and not widely supported in browsers without transpilation
    - Replaced all decorator usage with a more compatible function-wrapping approach
 
 2. **Implemented Error Handling Without Decorators**
+
    - Created a new `wrapWithErrorHandler` method in the ErrorDecorator class
    - This method provides the same functionality but works in all JavaScript environments
 
 3. **Updated Component Architecture**
+
    - Modified all components to use the new error handling approach
    - Ensured proper method binding to maintain 'this' context
 
@@ -8808,21 +8847,25 @@ I've made several important changes to fix the syntax error in your code and imp
 ### Key Changes in Each File
 
 1. **main.js**
+
    - Removed `@ErrorDecorator.logAndHandle()` decorators
    - Wrapped critical methods with try/catch blocks
    - Added proper error handling for entity updates
 
 2. **FleshGoblin.js**
+
    - Replaced all decorators with direct try/catch blocks
    - Maintained the same component-based architecture
    - Added explicit error handling for each method
 
 3. **ErrorDecorator.js**
+
    - Added a new `wrapWithErrorHandler` function that provides the same functionality as decorators
    - Kept the original decorator method for backward compatibility
    - Enhanced error logging capabilities
 
 4. **Component Classes**
+
    - Updated all component classes to use the new error handling approach
    - Wrapped critical methods at construction time
    - Maintained the same API for easier integration
@@ -8849,37 +8892,31 @@ I'll fix the syntax error in HeartSimulation.js. The error is occurring at line 
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
+_\*\*\*\*_
 
 Now let's check if there are any other files that might still have the decorator syntax and need to be fixed. Let's update the FleshClumps.js file:
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
+_\*\*\*\*_
 
 Let's also check the FleshClumpSimulation.js file to make sure it's compatible:
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
+_\*\*\*\*_
 
 ## Fixed JavaScript Syntax Errors
 
@@ -8888,12 +8925,14 @@ I've fixed the syntax errors in your code by removing all instances of the exper
 ### What Was Fixed
 
 1. **HeartSimulation.js**
+
    - Removed all `@ErrorDecorator.logAndHandle()` decorators
    - Added try/catch blocks to each method
    - Added proper error handling with context information
    - Added fallback return values (null) for methods that create objects
 
 2. **FleshClumps.js**
+
    - Removed decorator syntax
    - Added try/catch blocks with error logging
    - Maintained the same functionality but with standard JavaScript
@@ -8906,11 +8945,13 @@ I've fixed the syntax errors in your code by removing all instances of the exper
 ### Why This Approach Works Better
 
 1. **Browser Compatibility**
+
    - JavaScript decorators are still an experimental feature (Stage 3 proposal)
    - Many browsers don't support them natively without transpilation
    - Our approach works in all JavaScript environments without special configuration
 
 2. **Error Handling**
+
    - The try/catch approach provides more explicit error handling
    - Each method now has its own error context for better debugging
    - We maintain the same error logging functionality
@@ -8945,13 +8986,11 @@ I'll update the HeartSimulation.js file to use the ErrorDecorator.wrapWithErrorH
 
 ---
 
-_****_
-
-
+_\*\*\*\*_
 
 ---
 
-_****_
+_\*\*\*\*_
 
 I've fixed the syntax error in HeartSimulation.js by removing all instances of the experimental decorator syntax (`@ErrorDecorator.logAndHandle()`) and replacing them with try/catch blocks and proper error handling.
 
@@ -8979,11 +9018,6 @@ Uncaught SyntaxError: Unexpected token '}' (at FleshClumps.js:235:1)Understand t
 
 _**Assistant**_
 
-
-
 ---
 
-
-
 ---
-

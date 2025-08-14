@@ -1,5 +1,17 @@
 import { ParameterController } from './ParameterController.js';
 import { ParameterEventSystem } from './ParameterEventSystem.js';
+import { HeartControlSystem } from './HeartControlSystem.js';
+import { ArteryControlSystem } from './ArteryControlSystem.js';
+import { FluidControlSystem } from './FluidControlSystem.js';
+import { EnvironmentControlSystem } from './EnvironmentControlSystem.js';
+import { PresetManager } from './PresetManager.js';
+import { PresetUI } from './PresetUI.js';
+import { ParameterLinkingSystem } from './ParameterLinkingSystem.js';
+import { AdvancedValidationSystem } from './AdvancedValidationSystem.js';
+import { KeyboardShortcutSystem } from './KeyboardShortcutSystem.js';
+import { ErrorHandlingSystem } from './ErrorHandlingSystem.js';
+import { GracefulFallbackSystem } from './GracefulFallbackSystem.js';
+import { ErrorLoggingSystem } from './ErrorLoggingSystem.js';
 import { ErrorDecorator } from '../core/ErrorDecorator.js';
 
 /**
@@ -11,11 +23,28 @@ export class ControlPanelManager {
         this.sceneManager = sceneManager;
         this.parameterController = new ParameterController(sceneManager);
         this.eventSystem = new ParameterEventSystem();
+        this.heartControlSystem = new HeartControlSystem(sceneManager, this.parameterController, this.eventSystem);
+        this.arteryControlSystem = new ArteryControlSystem(sceneManager, this.parameterController, this.eventSystem);
+        this.fluidControlSystem = new FluidControlSystem(sceneManager, this.parameterController, this.eventSystem);
+        this.environmentControlSystem = new EnvironmentControlSystem(sceneManager, this.parameterController, this.eventSystem);
+        this.presetManager = new PresetManager(this.parameterController, this.eventSystem);
+        this.presetUI = new PresetUI(this.presetManager, this.eventSystem);
+        
+        // Advanced features
+        this.parameterLinkingSystem = new ParameterLinkingSystem(this.parameterController, this.eventSystem);
+        this.validationSystem = new AdvancedValidationSystem(this.parameterController, this.eventSystem);
+        this.keyboardShortcuts = new KeyboardShortcutSystem(this, this.parameterController, this.eventSystem);
+        
+        // Error handling and recovery systems
+        this.errorLoggingSystem = new ErrorLoggingSystem();
+        this.gracefulFallbackSystem = new GracefulFallbackSystem(sceneManager, this);
+        this.errorHandlingSystem = new ErrorHandlingSystem(this);
         
         this.controlPanel = null;
         this.controlSections = new Map();
         this.activeControls = new Map();
         this.updateCallbacks = new Map();
+        this.transitionQueue = new Map();
         
         // Configuration
         this.config = {
@@ -23,7 +52,15 @@ export class ControlPanelManager {
             showTooltips: true,
             showValues: true,
             animateChanges: true,
-            collapsibleSections: true
+            collapsibleSections: true,
+            enableParameterLinking: true,
+            enableAdvancedValidation: true,
+            enableKeyboardShortcuts: true,
+            enableErrorHandling: true,
+            enableGracefulFallbacks: true,
+            enableErrorLogging: true,
+            smoothTransitions: true,
+            transitionDuration: 300
         };
         
         this.init();
@@ -161,13 +198,30 @@ export class ControlPanelManager {
         section.appendChild(header);
         section.appendChild(content);
         
-        // Setup section toggle
+        // Setup section toggle with enhanced animations
         const toggleBtn = header.querySelector('.section-toggle');
         toggleBtn.addEventListener('click', () => {
-            const isCollapsed = content.style.display === 'none';
-            content.style.display = isCollapsed ? 'block' : 'none';
-            toggleBtn.textContent = isCollapsed ? '−' : '+';
-            section.classList.toggle('collapsed', !isCollapsed);
+            const isCollapsed = section.classList.contains('collapsed');
+            
+            if (isCollapsed) {
+                // Expanding
+                section.classList.add('expanding');
+                section.classList.remove('collapsed');
+                toggleBtn.textContent = '−';
+                
+                setTimeout(() => {
+                    section.classList.remove('expanding');
+                }, 400);
+            } else {
+                // Collapsing
+                section.classList.add('collapsing');
+                section.classList.add('collapsed');
+                toggleBtn.textContent = '+';
+                
+                setTimeout(() => {
+                    section.classList.remove('collapsing');
+                }, 400);
+            }
         });
         
         return section;
@@ -360,6 +414,9 @@ export class ControlPanelManager {
                     <button class="action-button reset-arteries" title="Reset and restart artery growth">
                         🔄 Reset Arteries
                     </button>
+                    <button class="action-button force-growth" title="Force restart artery growth (debug)">
+                        ⚡ Force Growth
+                    </button>
                     <button class="action-button drain-blood" title="Drain all blood from the jar">
                         🚰 Drain Blood
                     </button>
@@ -369,20 +426,32 @@ export class ControlPanelManager {
                     <button class="action-button reset-all" title="Reset all parameters to defaults">
                         🏠 Reset All
                     </button>
+                    <button class="action-button advanced-settings" title="Open advanced settings">
+                        ⚙️ Advanced
+                    </button>
+                    <button class="action-button system-diagnostics" title="Show system diagnostics">
+                        🔍 Diagnostics
+                    </button>
                 </div>
             </div>
         `;
 
         // Setup action button listeners
         const resetArteriesBtn = section.querySelector('.reset-arteries');
+        const forceGrowthBtn = section.querySelector('.force-growth');
         const drainBloodBtn = section.querySelector('.drain-blood');
         const resetViewBtn = section.querySelector('.reset-view');
         const resetAllBtn = section.querySelector('.reset-all');
+        const advancedBtn = section.querySelector('.advanced-settings');
+        const diagnosticsBtn = section.querySelector('.system-diagnostics');
 
         resetArteriesBtn.addEventListener('click', () => this.resetArteries());
+        forceGrowthBtn.addEventListener('click', () => this.forceGrowthRestart());
         drainBloodBtn.addEventListener('click', () => this.drainBlood());
         resetViewBtn.addEventListener('click', () => this.resetView());
         resetAllBtn.addEventListener('click', () => this.resetAllParameters());
+        advancedBtn.addEventListener('click', () => this.showAdvancedSettings());
+        diagnosticsBtn.addEventListener('click', () => this.showSystemDiagnostics());
 
         parentElement.appendChild(section);
     }
@@ -401,10 +470,28 @@ export class ControlPanelManager {
             this.handleValidationFeedback(event.data.parameter, event.data.isValid, event.data.error);
         });
 
-        // Window resize listener
+        // Window resize listener with debouncing
+        let resizeTimeout;
         window.addEventListener('resize', () => {
-            this.adjustPanelLayout();
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                this.adjustPanelLayout();
+            }, 150);
         });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            this.handleKeyboardShortcuts(e);
+        });
+
+        // Touch and mouse interaction improvements
+        this.setupTouchInteractions();
+        
+        // Accessibility enhancements
+        this.setupAccessibilityFeatures();
+        
+        // Performance monitoring
+        this.setupPerformanceMonitoring();
     }
 
     /**
@@ -426,12 +513,47 @@ export class ControlPanelManager {
     }
 
     /**
-     * Apply a parameter change
+     * Apply a parameter change with advanced features
      * @param {string} paramName - Parameter name
      * @param {any} value - New value
      * @param {string} source - Source of change
      */
     applyParameterChange(paramName, value, source = 'ui') {
+        // Pre-validation with advanced validation system
+        if (this.config.enableAdvancedValidation) {
+            const allParams = this.getCurrentParameterValues();
+            const validationResult = this.validationSystem.validateParameter(paramName, value, allParams);
+            
+            if (!validationResult.valid) {
+                this.showParameterFeedback(paramName, 'error');
+                this.showValidationMessage(validationResult);
+                this.updateControlDisplay(paramName, this.parameterController.getCurrentValue(paramName));
+                return false;
+            }
+            
+            // Show warnings if present
+            if (validationResult.warning) {
+                this.showValidationMessage(validationResult, 'warning');
+            }
+        }
+
+        // Apply with smooth transition if enabled
+        if (this.config.smoothTransitions && source !== 'transition') {
+            this.applyWithSmoothTransition(paramName, value, source);
+        } else {
+            this.applyParameterImmediate(paramName, value, source);
+        }
+        
+        return true;
+    }
+
+    /**
+     * Apply parameter immediately without transition
+     * @param {string} paramName - Parameter name
+     * @param {any} value - New value
+     * @param {string} source - Source of change
+     */
+    applyParameterImmediate(paramName, value, source) {
         const success = this.parameterController.applyParameter(paramName, value);
         
         if (success) {
@@ -450,6 +572,74 @@ export class ControlPanelManager {
             // Revert UI to current value
             this.updateControlDisplay(paramName, this.parameterController.getCurrentValue(paramName));
         }
+    }
+
+    /**
+     * Apply parameter with smooth transition
+     * @param {string} paramName - Parameter name
+     * @param {any} targetValue - Target value
+     * @param {string} source - Source of change
+     */
+    applyWithSmoothTransition(paramName, targetValue, source) {
+        const param = this.parameterController.getParameter(paramName);
+        if (!param || param.type !== 'slider') {
+            // Non-slider parameters don't need transitions
+            this.applyParameterImmediate(paramName, targetValue, source);
+            return;
+        }
+
+        // Cancel existing transition for this parameter
+        if (this.transitionQueue.has(paramName)) {
+            clearInterval(this.transitionQueue.get(paramName).intervalId);
+        }
+
+        const currentValue = this.parameterController.getCurrentValue(paramName);
+        const valueDiff = targetValue - currentValue;
+        
+        // Skip transition for very small changes
+        if (Math.abs(valueDiff) < (param.step || 0.01)) {
+            this.applyParameterImmediate(paramName, targetValue, source);
+            return;
+        }
+
+        const steps = Math.max(10, Math.abs(valueDiff) * 50);
+        const stepSize = valueDiff / steps;
+        const stepDuration = this.config.transitionDuration / steps;
+
+        let currentStep = 0;
+        const intervalId = setInterval(() => {
+            currentStep++;
+            const progress = currentStep / steps;
+            
+            // Use easing function for smooth transition
+            const easedProgress = this.easeInOutCubic(progress);
+            const newValue = currentValue + (valueDiff * easedProgress);
+
+            // Apply the intermediate value
+            this.applyParameterImmediate(paramName, newValue, 'transition');
+
+            // Complete transition
+            if (currentStep >= steps) {
+                clearInterval(intervalId);
+                this.transitionQueue.delete(paramName);
+                this.applyParameterImmediate(paramName, targetValue, source);
+            }
+        }, stepDuration);
+
+        this.transitionQueue.set(paramName, {
+            intervalId,
+            targetValue,
+            startTime: Date.now()
+        });
+    }
+
+    /**
+     * Cubic easing function for smooth transitions
+     * @param {number} t - Progress (0-1)
+     * @returns {number} Eased progress
+     */
+    easeInOutCubic(t) {
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     }
 
     /**
@@ -491,7 +681,26 @@ export class ControlPanelManager {
         const controlContainer = document.querySelector(`[data-parameter="${paramName}"]`);
         if (!controlContainer) return;
 
+        // Add parameter-specific feedback
         controlContainer.classList.add(`feedback-${type}`);
+        
+        // Add section-level feedback
+        const sectionElement = controlContainer.closest('.control-section');
+        if (sectionElement) {
+            sectionElement.classList.add('parameter-changing');
+            setTimeout(() => {
+                sectionElement.classList.remove('parameter-changing');
+            }, 1200);
+        }
+        
+        // Add value updating animation
+        const valueDisplay = controlContainer.querySelector('.control-value');
+        if (valueDisplay) {
+            valueDisplay.classList.add('updating');
+            setTimeout(() => {
+                valueDisplay.classList.remove('updating');
+            }, 600);
+        }
         
         setTimeout(() => {
             controlContainer.classList.remove(`feedback-${type}`);
@@ -584,18 +793,22 @@ export class ControlPanelManager {
      * Action methods
      */
     resetArteries() {
-        const arterySim = this.sceneManager.getEntity('arterySim');
-        if (arterySim && arterySim.reset) {
-            arterySim.reset();
+        if (this.arteryControlSystem) {
+            this.arteryControlSystem.resetArterySystem();
             this.showGlobalFeedback('Arteries reset successfully', 'success');
         }
     }
 
+    forceGrowthRestart() {
+        if (this.arteryControlSystem) {
+            this.arteryControlSystem.forceGrowthRestart();
+            this.showGlobalFeedback('Artery growth restarted', 'success');
+        }
+    }
+
     drainBlood() {
-        const fluidSim = this.sceneManager.getEntity('fluidSim');
-        if (fluidSim) {
-            fluidSim.currentLevel = 0;
-            fluidSim.stopFilling();
+        if (this.fluidControlSystem) {
+            this.fluidControlSystem.drainBlood();
             this.showGlobalFeedback('Blood drained successfully', 'success');
         }
     }
@@ -656,10 +869,35 @@ export class ControlPanelManager {
         if (!this.controlPanel) return;
 
         const width = window.innerWidth;
+        const height = window.innerHeight;
+        
+        // Mobile layout adjustments
         if (width < 768) {
             this.controlPanel.classList.add('mobile');
+            
+            // Adjust for landscape mobile
+            if (width > height && width < 768) {
+                this.controlPanel.classList.add('landscape-mobile');
+            } else {
+                this.controlPanel.classList.remove('landscape-mobile');
+            }
         } else {
-            this.controlPanel.classList.remove('mobile');
+            this.controlPanel.classList.remove('mobile', 'landscape-mobile');
+        }
+        
+        // Ultra-wide screen adjustments
+        if (width >= 1920) {
+            this.controlPanel.classList.add('ultra-wide');
+        } else {
+            this.controlPanel.classList.remove('ultra-wide');
+        }
+        
+        // Adjust content height based on available space
+        const content = this.controlPanel.querySelector('.panel-content');
+        if (content) {
+            const headerHeight = this.controlPanel.querySelector('.panel-header').offsetHeight;
+            const maxHeight = Math.min(height * 0.7, height - headerHeight - 40);
+            content.style.maxHeight = `${maxHeight}px`;
         }
     }
 
@@ -687,20 +925,1022 @@ export class ControlPanelManager {
     }
 
     /**
+     * Handle keyboard shortcuts
+     * @param {KeyboardEvent} e - Keyboard event
+     */
+    handleKeyboardShortcuts(e) {
+        // Only handle shortcuts when control panel is focused or no input is focused
+        const activeElement = document.activeElement;
+        const isInputFocused = activeElement && (
+            activeElement.tagName === 'INPUT' || 
+            activeElement.tagName === 'TEXTAREA' ||
+            activeElement.contentEditable === 'true'
+        );
+        
+        if (isInputFocused && !this.controlPanel.contains(activeElement)) {
+            return;
+        }
+
+        // Toggle panel visibility (Ctrl/Cmd + H)
+        if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+            e.preventDefault();
+            this.togglePanelVisibility();
+            return;
+        }
+
+        // Reset all parameters (Ctrl/Cmd + R)
+        if ((e.ctrlKey || e.metaKey) && e.key === 'r' && e.shiftKey) {
+            e.preventDefault();
+            this.resetAllParameters();
+            return;
+        }
+
+        // Toggle heart beating (Space)
+        if (e.key === ' ' && !isInputFocused) {
+            e.preventDefault();
+            const heartBeating = this.parameterController.getCurrentValue('heartBeating');
+            this.applyParameterChange('heartBeating', !heartBeating, 'keyboard');
+            return;
+        }
+
+        // Quick parameter adjustments with arrow keys
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            const focusedSlider = document.activeElement;
+            if (focusedSlider && focusedSlider.classList.contains('parameter-slider')) {
+                e.preventDefault();
+                const paramName = focusedSlider.dataset.param;
+                const param = this.parameterController.getParameter(paramName);
+                const currentValue = parseFloat(focusedSlider.value);
+                const step = param.step || 1;
+                const newValue = e.key === 'ArrowUp' ? 
+                    Math.min(param.max, currentValue + step) : 
+                    Math.max(param.min, currentValue - step);
+                
+                focusedSlider.value = newValue;
+                this.applyParameterChange(paramName, newValue, 'keyboard');
+            }
+        }
+    }
+
+    /**
+     * Toggle panel visibility
+     */
+    togglePanelVisibility() {
+        if (!this.controlPanel) return;
+        
+        const isHidden = this.controlPanel.style.display === 'none';
+        this.controlPanel.style.display = isHidden ? 'block' : 'none';
+        
+        if (isHidden) {
+            this.controlPanel.classList.add('enhanced');
+            this.showGlobalFeedback('Control panel shown', 'success');
+        } else {
+            this.showGlobalFeedback('Control panel hidden (Ctrl+H to show)', 'info');
+        }
+    }
+
+    /**
+     * Setup touch interactions for mobile devices
+     */
+    setupTouchInteractions() {
+        if (!('ontouchstart' in window)) return;
+
+        // Add touch-friendly classes
+        this.controlPanel.classList.add('touch-device');
+
+        // Improve slider interactions on touch devices
+        const sliders = this.controlPanel.querySelectorAll('.parameter-slider');
+        sliders.forEach(slider => {
+            let touchStartValue = null;
+            
+            slider.addEventListener('touchstart', (e) => {
+                touchStartValue = parseFloat(slider.value);
+                slider.classList.add('touching');
+            });
+            
+            slider.addEventListener('touchend', () => {
+                slider.classList.remove('touching');
+                const currentValue = parseFloat(slider.value);
+                if (touchStartValue !== currentValue) {
+                    const paramName = slider.dataset.param;
+                    this.applyParameterChange(paramName, currentValue, 'touch');
+                }
+            });
+        });
+
+        // Add haptic feedback for supported devices
+        if ('vibrate' in navigator) {
+            this.controlPanel.addEventListener('touchstart', (e) => {
+                if (e.target.classList.contains('parameter-button') || 
+                    e.target.classList.contains('action-button')) {
+                    navigator.vibrate(10); // Short vibration
+                }
+            });
+        }
+    }
+
+    /**
+     * Setup accessibility features
+     */
+    setupAccessibilityFeatures() {
+        // Add ARIA labels and descriptions
+        this.controlPanel.setAttribute('role', 'region');
+        this.controlPanel.setAttribute('aria-label', 'Heart Simulation Controls');
+
+        // Add keyboard navigation support
+        const focusableElements = this.controlPanel.querySelectorAll(
+            'input, button, [tabindex]:not([tabindex="-1"])'
+        );
+        
+        focusableElements.forEach((element, index) => {
+            element.setAttribute('tabindex', index === 0 ? '0' : '-1');
+        });
+
+        // Add focus management
+        this.controlPanel.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                this.handleTabNavigation(e, focusableElements);
+            }
+        });
+
+        // Add screen reader announcements for parameter changes
+        this.eventSystem.addEventListener('change', '*', (event) => {
+            this.announceParameterChange(event.data.parameter, event.data.newValue);
+        });
+    }
+
+    /**
+     * Handle tab navigation within the control panel
+     * @param {KeyboardEvent} e - Keyboard event
+     * @param {NodeList} focusableElements - Focusable elements
+     */
+    handleTabNavigation(e, focusableElements) {
+        const currentIndex = Array.from(focusableElements).indexOf(document.activeElement);
+        let nextIndex;
+
+        if (e.shiftKey) {
+            nextIndex = currentIndex <= 0 ? focusableElements.length - 1 : currentIndex - 1;
+        } else {
+            nextIndex = currentIndex >= focusableElements.length - 1 ? 0 : currentIndex + 1;
+        }
+
+        e.preventDefault();
+        focusableElements[nextIndex].focus();
+    }
+
+    /**
+     * Announce parameter changes for screen readers
+     * @param {string} paramName - Parameter name
+     * @param {any} newValue - New value
+     */
+    announceParameterChange(paramName, newValue) {
+        const param = this.parameterController.getParameter(paramName);
+        if (!param) return;
+
+        const formattedValue = this.parameterController.formatValue(paramName, newValue);
+        const announcement = `${param.displayName} changed to ${formattedValue}`;
+        
+        // Create or update live region for screen readers
+        let liveRegion = document.getElementById('control-panel-live-region');
+        if (!liveRegion) {
+            liveRegion = document.createElement('div');
+            liveRegion.id = 'control-panel-live-region';
+            liveRegion.setAttribute('aria-live', 'polite');
+            liveRegion.setAttribute('aria-atomic', 'true');
+            liveRegion.style.position = 'absolute';
+            liveRegion.style.left = '-10000px';
+            liveRegion.style.width = '1px';
+            liveRegion.style.height = '1px';
+            liveRegion.style.overflow = 'hidden';
+            document.body.appendChild(liveRegion);
+        }
+        
+        liveRegion.textContent = announcement;
+    }
+
+    /**
+     * Setup performance monitoring
+     */
+    setupPerformanceMonitoring() {
+        // Monitor animation performance
+        let animationFrameCount = 0;
+        let lastFrameTime = performance.now();
+        
+        const monitorPerformance = () => {
+            const currentTime = performance.now();
+            const deltaTime = currentTime - lastFrameTime;
+            
+            if (deltaTime > 16.67) { // More than 60fps threshold
+                // Reduce animations if performance is poor
+                this.controlPanel.classList.add('reduced-animations');
+            } else {
+                this.controlPanel.classList.remove('reduced-animations');
+            }
+            
+            lastFrameTime = currentTime;
+            animationFrameCount++;
+            
+            if (animationFrameCount % 60 === 0) { // Check every 60 frames
+                requestAnimationFrame(monitorPerformance);
+            }
+        };
+        
+        // Start monitoring when animations are active
+        this.controlPanel.addEventListener('animationstart', () => {
+            requestAnimationFrame(monitorPerformance);
+        });
+    }
+
+    /**
+     * Add loading state to the panel
+     * @param {boolean} isLoading - Loading state
+     */
+    setLoadingState(isLoading) {
+        if (!this.controlPanel) return;
+        
+        if (isLoading) {
+            this.controlPanel.classList.add('loading');
+        } else {
+            this.controlPanel.classList.remove('loading');
+        }
+    }
+
+    /**
+     * Batch update multiple controls efficiently
+     * @param {Object} updates - Parameter updates
+     */
+    batchUpdateControls(updates) {
+        // Use requestAnimationFrame for smooth updates
+        requestAnimationFrame(() => {
+            Object.entries(updates).forEach(([paramName, value]) => {
+                this.updateControlDisplay(paramName, value);
+            });
+        });
+    }
+
+    /**
+     * Show validation message to user
+     * @param {Object} validationResult - Validation result
+     * @param {string} type - Message type override
+     */
+    showValidationMessage(validationResult, type = null) {
+        const messageType = type || (validationResult.valid ? 'warning' : 'error');
+        const message = validationResult.error || validationResult.warning;
+        
+        if (message) {
+            this.showGlobalFeedback(message, messageType);
+            
+            // Show suggestion if available
+            if (validationResult.suggestion) {
+                setTimeout(() => {
+                    this.showGlobalFeedback(`Tip: ${validationResult.suggestion}`, 'info');
+                }, 2000);
+            }
+        }
+    }
+
+    /**
+     * Toggle parameter linking system
+     * @param {boolean} enabled - Enable state
+     */
+    setParameterLinkingEnabled(enabled) {
+        this.config.enableParameterLinking = enabled;
+        this.parameterLinkingSystem.setLinkingEnabled(enabled);
+        
+        this.showGlobalFeedback(
+            `Parameter linking ${enabled ? 'enabled' : 'disabled'}`, 
+            'info'
+        );
+    }
+
+    /**
+     * Toggle advanced validation
+     * @param {boolean} enabled - Enable state
+     */
+    setAdvancedValidationEnabled(enabled) {
+        this.config.enableAdvancedValidation = enabled;
+        
+        this.showGlobalFeedback(
+            `Advanced validation ${enabled ? 'enabled' : 'disabled'}`, 
+            'info'
+        );
+    }
+
+    /**
+     * Toggle keyboard shortcuts
+     * @param {boolean} enabled - Enable state
+     */
+    setKeyboardShortcutsEnabled(enabled) {
+        this.config.enableKeyboardShortcuts = enabled;
+        this.keyboardShortcuts.setEnabled(enabled);
+        
+        this.showGlobalFeedback(
+            `Keyboard shortcuts ${enabled ? 'enabled' : 'disabled'}`, 
+            'info'
+        );
+    }
+
+    /**
+     * Toggle smooth transitions
+     * @param {boolean} enabled - Enable state
+     */
+    setSmoothTransitionsEnabled(enabled) {
+        this.config.smoothTransitions = enabled;
+        
+        // Cancel all active transitions if disabling
+        if (!enabled) {
+            this.transitionQueue.forEach(transition => {
+                clearInterval(transition.intervalId);
+            });
+            this.transitionQueue.clear();
+        }
+        
+        this.showGlobalFeedback(
+            `Smooth transitions ${enabled ? 'enabled' : 'disabled'}`, 
+            'info'
+        );
+    }
+
+    /**
+     * Set transition duration
+     * @param {number} duration - Duration in milliseconds
+     */
+    setTransitionDuration(duration) {
+        this.config.transitionDuration = Math.max(100, Math.min(1000, duration));
+        this.parameterLinkingSystem.setTransitionDuration(this.config.transitionDuration);
+        
+        this.showGlobalFeedback(
+            `Transition duration set to ${this.config.transitionDuration}ms`, 
+            'info'
+        );
+    }
+
+    /**
+     * Get advanced system status
+     * @returns {Object} System status
+     */
+    getAdvancedSystemStatus() {
+        return {
+            parameterLinking: this.parameterLinkingSystem.getSystemStatus(),
+            validation: this.validationSystem.getValidationStats(),
+            keyboardShortcuts: this.keyboardShortcuts.getSystemStatus(),
+            config: this.config,
+            activeTransitions: this.transitionQueue.size,
+            performance: {
+                totalParameters: this.parameterController.getAllParameters().size,
+                activeControls: this.activeControls.size,
+                updateCallbacks: this.updateCallbacks.size
+            }
+        };
+    }
+
+    /**
+     * Force update all linked parameters
+     */
+    updateAllLinkedParameters() {
+        if (this.config.enableParameterLinking) {
+            this.parameterLinkingSystem.updateAllLinkedParameters();
+            this.showGlobalFeedback('Updated all linked parameters', 'success');
+        }
+    }
+
+    /**
+     * Export current configuration
+     * @returns {Object} Configuration export
+     */
+    exportConfiguration() {
+        return {
+            parameters: this.getCurrentParameterValues(),
+            config: this.config,
+            parameterLinks: this.parameterLinkingSystem.getAllLinks().map(link => ({
+                source: link.source,
+                target: link.target,
+                type: link.config.type,
+                enabled: link.isActive
+            })),
+            validationRules: this.validationSystem.exportRules(),
+            timestamp: new Date().toISOString()
+        };
+    }
+
+    /**
+     * Import configuration
+     * @param {Object} configData - Configuration to import
+     */
+    importConfiguration(configData) {
+        try {
+            // Apply parameters
+            if (configData.parameters) {
+                this.applyParameterValues(configData.parameters, 'import');
+            }
+            
+            // Apply config settings
+            if (configData.config) {
+                Object.assign(this.config, configData.config);
+            }
+            
+            // Apply parameter link states
+            if (configData.parameterLinks) {
+                configData.parameterLinks.forEach(linkData => {
+                    this.parameterLinkingSystem.setLinkEnabled(
+                        linkData.source, 
+                        linkData.target, 
+                        linkData.enabled
+                    );
+                });
+            }
+            
+            this.showGlobalFeedback('Configuration imported successfully', 'success');
+            
+        } catch (error) {
+            console.error('Error importing configuration:', error);
+            this.showGlobalFeedback('Error importing configuration', 'error');
+        }
+    }
+
+    /**
+     * Create advanced settings panel
+     */
+    createAdvancedSettingsPanel() {
+        const panel = document.createElement('div');
+        panel.className = 'advanced-settings-panel';
+        panel.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 15, 20, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            padding: 24px;
+            min-width: 400px;
+            z-index: 10001;
+            display: none;
+        `;
+        
+        panel.innerHTML = `
+            <h3 style="margin-top: 0; color: #60a5fa;">Advanced Settings</h3>
+            
+            <div style="margin: 16px 0;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="enable-linking" ${this.config.enableParameterLinking ? 'checked' : ''}>
+                    <span>Enable Parameter Linking</span>
+                </label>
+                <small style="color: rgba(255,255,255,0.6); margin-left: 24px;">
+                    Links heart rate to artery pulse speed and other realistic connections
+                </small>
+            </div>
+            
+            <div style="margin: 16px 0;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="enable-validation" ${this.config.enableAdvancedValidation ? 'checked' : ''}>
+                    <span>Enable Advanced Validation</span>
+                </label>
+                <small style="color: rgba(255,255,255,0.6); margin-left: 24px;">
+                    Provides detailed error messages and parameter suggestions
+                </small>
+            </div>
+            
+            <div style="margin: 16px 0;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="enable-shortcuts" ${this.config.enableKeyboardShortcuts ? 'checked' : ''}>
+                    <span>Enable Keyboard Shortcuts</span>
+                </label>
+                <small style="color: rgba(255,255,255,0.6); margin-left: 24px;">
+                    Press F1 to see available shortcuts
+                </small>
+            </div>
+            
+            <div style="margin: 16px 0;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="enable-transitions" ${this.config.smoothTransitions ? 'checked' : ''}>
+                    <span>Enable Smooth Transitions</span>
+                </label>
+                <small style="color: rgba(255,255,255,0.6); margin-left: 24px;">
+                    Smooth parameter changes to prevent jarring effects
+                </small>
+            </div>
+            
+            <div style="margin: 16px 0;">
+                <label style="display: block; margin-bottom: 8px;">Transition Duration: ${this.config.transitionDuration}ms</label>
+                <input type="range" id="transition-duration" min="100" max="1000" step="50" 
+                       value="${this.config.transitionDuration}" style="width: 100%;">
+            </div>
+            
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button id="apply-settings" style="flex: 1; background: #60a5fa; border: none; color: white; 
+                                                   padding: 10px; border-radius: 6px; cursor: pointer;">
+                    Apply Settings
+                </button>
+                <button id="close-settings" style="flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); 
+                                                   color: white; padding: 10px; border-radius: 6px; cursor: pointer;">
+                    Close
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(panel);
+        
+        // Setup event listeners
+        panel.querySelector('#apply-settings').addEventListener('click', () => {
+            this.applyAdvancedSettings(panel);
+        });
+        
+        panel.querySelector('#close-settings').addEventListener('click', () => {
+            panel.style.display = 'none';
+        });
+        
+        return panel;
+    }
+
+    /**
+     * Apply advanced settings from panel
+     * @param {HTMLElement} panel - Settings panel
+     */
+    applyAdvancedSettings(panel) {
+        const linking = panel.querySelector('#enable-linking').checked;
+        const validation = panel.querySelector('#enable-validation').checked;
+        const shortcuts = panel.querySelector('#enable-shortcuts').checked;
+        const transitions = panel.querySelector('#enable-transitions').checked;
+        const duration = parseInt(panel.querySelector('#transition-duration').value);
+        
+        this.setParameterLinkingEnabled(linking);
+        this.setAdvancedValidationEnabled(validation);
+        this.setKeyboardShortcutsEnabled(shortcuts);
+        this.setSmoothTransitionsEnabled(transitions);
+        this.setTransitionDuration(duration);
+        
+        panel.style.display = 'none';
+        this.showGlobalFeedback('Advanced settings applied', 'success');
+    }
+
+    /**
+     * Show advanced settings panel
+     */
+    showAdvancedSettings() {
+        let panel = document.querySelector('.advanced-settings-panel');
+        if (!panel) {
+            panel = this.createAdvancedSettingsPanel();
+        }
+        panel.style.display = 'block';
+    }
+
+    /**
+     * Handle system error with comprehensive recovery
+     * @param {Error} error - Error object
+     * @param {string} context - Error context
+     * @param {Object} metadata - Additional metadata
+     */
+    handleSystemError(error, context, metadata = {}) {
+        if (this.config.enableErrorHandling && this.errorHandlingSystem) {
+            return this.errorHandlingSystem.handleError(error, context, metadata);
+        } else {
+            // Fallback error handling
+            console.error(`System error in ${context}:`, error);
+            this.showGlobalFeedback('A system error occurred. Please try again.', 'error');
+            return null;
+        }
+    }
+
+    /**
+     * Check system health and component availability
+     * @returns {Object} System health report
+     */
+    checkSystemHealth() {
+        const healthReport = {
+            timestamp: new Date().toISOString(),
+            overall: 'healthy',
+            components: {},
+            errors: [],
+            warnings: [],
+            recommendations: []
+        };
+
+        try {
+            // Check error handling system
+            if (this.config.enableErrorHandling && this.errorHandlingSystem) {
+                const errorHealth = this.errorHandlingSystem.getSystemHealth();
+                healthReport.components.errorHandling = {
+                    status: errorHealth.status,
+                    errors: errorHealth.errors,
+                    warnings: errorHealth.warnings,
+                    recoveries: errorHealth.recoveries
+                };
+
+                if (errorHealth.status !== 'healthy') {
+                    healthReport.overall = errorHealth.status;
+                    healthReport.warnings.push(`Error handling system status: ${errorHealth.status}`);
+                }
+            }
+
+            // Check graceful fallback system
+            if (this.config.enableGracefulFallbacks && this.gracefulFallbackSystem) {
+                const fallbackStatus = this.gracefulFallbackSystem.getSystemStatus();
+                healthReport.components.gracefulFallbacks = fallbackStatus;
+
+                if (fallbackStatus.criticalMissing > 0) {
+                    healthReport.overall = 'critical';
+                    healthReport.errors.push(`${fallbackStatus.criticalMissing} critical components missing`);
+                } else if (fallbackStatus.missingComponents > 0) {
+                    if (healthReport.overall === 'healthy') {
+                        healthReport.overall = 'degraded';
+                    }
+                    healthReport.warnings.push(`${fallbackStatus.missingComponents} components in fallback mode`);
+                }
+            }
+
+            // Check parameter linking system
+            if (this.config.enableParameterLinking && this.parameterLinkingSystem) {
+                const linkingStatus = this.parameterLinkingSystem.getSystemStatus();
+                healthReport.components.parameterLinking = {
+                    enabled: linkingStatus.enabled,
+                    totalLinks: linkingStatus.totalLinks,
+                    activeLinks: linkingStatus.activeLinks,
+                    activeTransitions: linkingStatus.activeTransitions
+                };
+            }
+
+            // Check validation system
+            if (this.config.enableAdvancedValidation && this.validationSystem) {
+                const validationStats = this.validationSystem.getValidationStats();
+                healthReport.components.validation = validationStats;
+
+                if (parseFloat(validationStats.successRate) < 80) {
+                    healthReport.warnings.push(`Low validation success rate: ${validationStats.successRate}%`);
+                }
+            }
+
+            // Check keyboard shortcuts
+            if (this.config.enableKeyboardShortcuts && this.keyboardShortcuts) {
+                const shortcutStatus = this.keyboardShortcuts.getSystemStatus();
+                healthReport.components.keyboardShortcuts = shortcutStatus;
+            }
+
+            // Check error logging
+            if (this.config.enableErrorLogging && this.errorLoggingSystem) {
+                const loggingStats = this.errorLoggingSystem.getLogStatistics();
+                healthReport.components.errorLogging = loggingStats;
+
+                if (loggingStats.errorRate > 5) {
+                    healthReport.warnings.push(`High error rate: ${loggingStats.errorRate.toFixed(2)} errors/minute`);
+                }
+            }
+
+            // Add recommendations based on findings
+            if (healthReport.errors.length > 0) {
+                healthReport.recommendations.push('Critical issues detected. Consider reloading the application.');
+            }
+            if (healthReport.warnings.length > 3) {
+                healthReport.recommendations.push('Multiple warnings detected. Check system logs for details.');
+            }
+            if (healthReport.overall === 'degraded') {
+                healthReport.recommendations.push('System is running in degraded mode. Some features may be limited.');
+            }
+
+        } catch (error) {
+            healthReport.overall = 'critical';
+            healthReport.errors.push(`Health check failed: ${error.message}`);
+            console.error('Error during health check:', error);
+        }
+
+        return healthReport;
+    }
+
+    /**
+     * Perform system recovery
+     * @param {string} recoveryType - Type of recovery to perform
+     * @returns {boolean} Whether recovery was successful
+     */
+    performSystemRecovery(recoveryType = 'auto') {
+        try {
+            let recoverySuccess = false;
+
+            switch (recoveryType) {
+                case 'components':
+                    if (this.gracefulFallbackSystem) {
+                        const restoredCount = this.gracefulFallbackSystem.attemptComponentRestoration();
+                        recoverySuccess = restoredCount > 0;
+                    }
+                    break;
+
+                case 'parameters':
+                    this.parameterController.resetAllParameters();
+                    recoverySuccess = true;
+                    break;
+
+                case 'ui':
+                    this.createControlPanel();
+                    this.createControlSections();
+                    recoverySuccess = true;
+                    break;
+
+                case 'linking':
+                    if (this.parameterLinkingSystem) {
+                        this.parameterLinkingSystem.updateAllLinkedParameters();
+                        recoverySuccess = true;
+                    }
+                    break;
+
+                case 'full':
+                    // Attempt full system recovery
+                    this.performSystemRecovery('components');
+                    this.performSystemRecovery('parameters');
+                    this.performSystemRecovery('ui');
+                    this.performSystemRecovery('linking');
+                    recoverySuccess = true;
+                    break;
+
+                case 'auto':
+                default:
+                    // Automatic recovery based on system health
+                    const health = this.checkSystemHealth();
+                    
+                    if (health.overall === 'critical') {
+                        recoverySuccess = this.performSystemRecovery('full');
+                    } else if (health.components.gracefulFallbacks?.missingComponents > 0) {
+                        recoverySuccess = this.performSystemRecovery('components');
+                    } else if (health.components.validation?.successRate < 80) {
+                        recoverySuccess = this.performSystemRecovery('parameters');
+                    }
+                    break;
+            }
+
+            if (recoverySuccess) {
+                this.showGlobalFeedback(`System recovery (${recoveryType}) completed successfully`, 'success');
+                
+                // Log recovery
+                if (this.errorLoggingSystem) {
+                    this.errorLoggingSystem.log('INFO', 'recovery', `System recovery performed: ${recoveryType}`);
+                }
+            } else {
+                this.showGlobalFeedback(`System recovery (${recoveryType}) failed`, 'error');
+            }
+
+            return recoverySuccess;
+
+        } catch (error) {
+            console.error('Error during system recovery:', error);
+            this.showGlobalFeedback('System recovery failed due to an error', 'error');
+            return false;
+        }
+    }
+
+    /**
+     * Create system diagnostics panel
+     */
+    createSystemDiagnosticsPanel() {
+        const panel = document.createElement('div');
+        panel.className = 'system-diagnostics-panel';
+        panel.style.cssText = `
+            position: fixed;
+            top: 10%;
+            left: 10%;
+            right: 10%;
+            bottom: 10%;
+            background: rgba(15, 15, 20, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            padding: 24px;
+            z-index: 10002;
+            display: none;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        `;
+        
+        panel.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h3 style="margin: 0; color: #60a5fa; font-family: 'Segoe UI', sans-serif;">System Diagnostics</h3>
+                <div>
+                    <button id="refresh-diagnostics" style="background: #60a5fa; border: none; color: white; 
+                                                           padding: 8px 12px; border-radius: 6px; cursor: pointer; margin-right: 8px;">
+                        Refresh
+                    </button>
+                    <button id="download-diagnostics" style="background: #22c55e; border: none; color: white; 
+                                                            padding: 8px 12px; border-radius: 6px; cursor: pointer; margin-right: 8px;">
+                        Download
+                    </button>
+                    <button id="close-diagnostics" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); 
+                                                          color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer;">
+                        Close
+                    </button>
+                </div>
+            </div>
+            <div id="diagnostics-content">
+                Loading diagnostics...
+            </div>
+        `;
+        
+        document.body.appendChild(panel);
+        
+        // Setup event listeners
+        panel.querySelector('#refresh-diagnostics').addEventListener('click', () => {
+            this.updateDiagnosticsContent(panel);
+        });
+        
+        panel.querySelector('#download-diagnostics').addEventListener('click', () => {
+            this.downloadDiagnostics();
+        });
+        
+        panel.querySelector('#close-diagnostics').addEventListener('click', () => {
+            panel.style.display = 'none';
+        });
+        
+        return panel;
+    }
+
+    /**
+     * Update diagnostics content
+     * @param {HTMLElement} panel - Diagnostics panel
+     */
+    updateDiagnosticsContent(panel) {
+        const content = panel.querySelector('#diagnostics-content');
+        const health = this.checkSystemHealth();
+        
+        let html = `
+            <div style="margin-bottom: 20px;">
+                <h4 style="color: #fbbf24; margin-bottom: 10px;">System Health: 
+                    <span style="color: ${this.getHealthColor(health.overall)}">${health.overall.toUpperCase()}</span>
+                </h4>
+                <div style="margin-left: 20px;">
+                    <div>Timestamp: ${health.timestamp}</div>
+                    <div>Errors: ${health.errors.length}</div>
+                    <div>Warnings: ${health.warnings.length}</div>
+                </div>
+            </div>
+        `;
+        
+        // Component status
+        html += `<h4 style="color: #fbbf24; margin-bottom: 10px;">Component Status</h4>`;
+        Object.entries(health.components).forEach(([name, status]) => {
+            html += `
+                <div style="margin-left: 20px; margin-bottom: 10px;">
+                    <strong>${name}:</strong>
+                    <pre style="margin: 5px 0; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow-x: auto;">
+${JSON.stringify(status, null, 2)}
+                    </pre>
+                </div>
+            `;
+        });
+        
+        // Recent errors
+        if (this.errorLoggingSystem) {
+            const recentErrors = this.errorLoggingSystem.getLogs({ level: 'ERROR', limit: 5 });
+            html += `<h4 style="color: #ef4444; margin-bottom: 10px;">Recent Errors (${recentErrors.length})</h4>`;
+            recentErrors.forEach(error => {
+                html += `
+                    <div style="margin-left: 20px; margin-bottom: 10px; padding: 10px; background: rgba(239,68,68,0.1); border-radius: 4px;">
+                        <div><strong>Time:</strong> ${error.timestamp}</div>
+                        <div><strong>Category:</strong> ${error.category}</div>
+                        <div><strong>Message:</strong> ${error.message}</div>
+                        ${error.error ? `<div><strong>Error:</strong> ${error.error.message}</div>` : ''}
+                    </div>
+                `;
+            });
+        }
+        
+        // Recommendations
+        if (health.recommendations.length > 0) {
+            html += `<h4 style="color: #22c55e; margin-bottom: 10px;">Recommendations</h4>`;
+            health.recommendations.forEach(rec => {
+                html += `<div style="margin-left: 20px; margin-bottom: 5px;">• ${rec}</div>`;
+            });
+        }
+        
+        content.innerHTML = html;
+    }
+
+    /**
+     * Get color for health status
+     * @param {string} status - Health status
+     * @returns {string} Color code
+     */
+    getHealthColor(status) {
+        switch (status) {
+            case 'healthy': return '#22c55e';
+            case 'warning': return '#f59e0b';
+            case 'degraded': return '#ef4444';
+            case 'critical': return '#dc2626';
+            default: return '#9ca3af';
+        }
+    }
+
+    /**
+     * Download diagnostics report
+     */
+    downloadDiagnostics() {
+        try {
+            const health = this.checkSystemHealth();
+            const diagnostics = {
+                systemHealth: health,
+                errorLogs: this.errorLoggingSystem ? this.errorLoggingSystem.exportLogs() : null,
+                fallbackReport: this.gracefulFallbackSystem ? this.gracefulFallbackSystem.createDiagnosticReport() : null,
+                advancedSystemStatus: this.getAdvancedSystemStatus(),
+                timestamp: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(diagnostics, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `heart-sim-diagnostics-${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            this.showGlobalFeedback('Diagnostics report downloaded', 'success');
+            
+        } catch (error) {
+            console.error('Error downloading diagnostics:', error);
+            this.showGlobalFeedback('Failed to download diagnostics', 'error');
+        }
+    }
+
+    /**
+     * Show system diagnostics panel
+     */
+    showSystemDiagnostics() {
+        let panel = document.querySelector('.system-diagnostics-panel');
+        if (!panel) {
+            panel = this.createSystemDiagnosticsPanel();
+        }
+        
+        panel.style.display = 'block';
+        this.updateDiagnosticsContent(panel);
+    }
+
+    /**
      * Clean up resources
      */
     dispose() {
-        // Clear update callbacks
+        // Clear update callbacks and transitions
         this.updateCallbacks.forEach(timeoutId => clearTimeout(timeoutId));
         this.updateCallbacks.clear();
+        
+        this.transitionQueue.forEach(transition => clearInterval(transition.intervalId));
+        this.transitionQueue.clear();
 
-        // Remove control panel
+        // Remove control panel and advanced settings
         if (this.controlPanel) {
             this.controlPanel.remove();
             this.controlPanel = null;
         }
+        
+        const advancedPanel = document.querySelector('.advanced-settings-panel');
+        if (advancedPanel) {
+            advancedPanel.remove();
+        }
+        
+        const diagnosticsPanel = document.querySelector('.system-diagnostics-panel');
+        if (diagnosticsPanel) {
+            diagnosticsPanel.remove();
+        }
 
-        // Dispose of systems
+        // Dispose of error handling systems
+        if (this.errorHandlingSystem) {
+            this.errorHandlingSystem.dispose();
+        }
+        if (this.gracefulFallbackSystem) {
+            this.gracefulFallbackSystem.dispose();
+        }
+        if (this.errorLoggingSystem) {
+            this.errorLoggingSystem.dispose();
+        }
+
+        // Dispose of advanced systems
+        if (this.keyboardShortcuts) {
+            this.keyboardShortcuts.dispose();
+        }
+        if (this.validationSystem) {
+            this.validationSystem.dispose();
+        }
+        if (this.parameterLinkingSystem) {
+            this.parameterLinkingSystem.dispose();
+        }
+
+        // Dispose of core systems
+        if (this.presetUI) {
+            this.presetUI.dispose();
+        }
+        if (this.presetManager) {
+            this.presetManager.dispose();
+        }
+        if (this.heartControlSystem) {
+            this.heartControlSystem.dispose();
+        }
+        if (this.arteryControlSystem) {
+            this.arteryControlSystem.dispose();
+        }
+        if (this.fluidControlSystem) {
+            this.fluidControlSystem.dispose();
+        }
+        if (this.environmentControlSystem) {
+            this.environmentControlSystem.dispose();
+        }
         if (this.parameterController) {
             this.parameterController.dispose();
         }
