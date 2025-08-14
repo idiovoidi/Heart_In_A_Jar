@@ -17,6 +17,7 @@ export class HeartSimulation extends EntityBase {
         this.time = 0;
         this.beatSpeed = 2;
         this.isBeating = true;
+        this.contractionIntensity = 1.0;
         
         // Create structure containers
         this.structure = {};
@@ -602,20 +603,20 @@ export class HeartSimulation extends EntityBase {
             // Ventricle contraction
             const ventricleContract = Math.max(0, ventriclePhase);
             
-            // Update chamber scales
+            // Update chamber scales with contraction intensity
             if (this.chambers.leftVentricle) {
-                const scale = 1 - ventricleContract * 0.15;
+                const scale = 1 - ventricleContract * 0.15 * this.contractionIntensity;
                 this.chambers.leftVentricle.scaling = new BABYLON.Vector3(scale, scale, scale);
             }
 
             if (this.chambers.rightVentricle) {
-                const scale = 1 - ventricleContract * 0.12;
+                const scale = 1 - ventricleContract * 0.12 * this.contractionIntensity;
                 this.chambers.rightVentricle.scaling = new BABYLON.Vector3(scale, scale, scale);
             }
 
-            // Atrial animation
+            // Atrial animation with contraction intensity
             if (this.chambers.leftAtrium) {
-                const atrialScale = 1 + Math.max(0, -atrialPhase) * 0.1;
+                const atrialScale = 1 + Math.max(0, -atrialPhase) * 0.1 * this.contractionIntensity;
                 this.chambers.leftAtrium.scaling = new BABYLON.Vector3(
                     1.2 * atrialScale,
                     0.8 * atrialScale,
@@ -642,5 +643,9 @@ export class HeartSimulation extends EntityBase {
 
     setBeatSpeed(speed) {
         this.beatSpeed = speed;
+    }
+
+    setContractionIntensity(intensity) {
+        this.contractionIntensity = Math.max(0.1, Math.min(2.0, intensity));
     }
 } 

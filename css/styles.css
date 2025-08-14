@@ -12,21 +12,464 @@ html, body {
     touch-action: none;
 }
 
-/* Control Panel Styles */
+/* Enhanced Control Panel Styles */
 .control-panel {
     position: absolute;
     top: 20px;
     left: 20px;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 15px;
-    border-radius: 8px;
+    background: rgba(15, 15, 20, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
     color: #fff;
-    font-family: Arial, sans-serif;
-    min-width: 200px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-width: 280px;
+    max-width: 320px;
     z-index: 1000;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
 }
 
-.control-panel button {
+.control-panel.enhanced {
+    animation: slideInLeft 0.5s ease-out;
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Panel Header */
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, rgba(220, 20, 60, 0.2), rgba(139, 0, 0, 0.2));
+}
+
+.panel-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.panel-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+.panel-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+/* Panel Content */
+.panel-content {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+.panel-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.panel-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.panel-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.panel-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Control Sections */
+.control-section {
+    margin: 8px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.control-section:not(.action-section) {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.control-section.collapsed .section-content {
+    display: none;
+}
+
+/* Section Headers */
+.section-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    user-select: none;
+}
+
+.section-header:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.section-icon {
+    font-size: 16px;
+    margin-right: 8px;
+}
+
+.section-title {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.section-toggle {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.section-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+/* Section Content */
+.section-content {
+    padding: 0 16px 12px;
+}
+
+/* Parameter Controls */
+.parameter-control {
+    margin: 12px 0;
+    transition: all 0.3s ease;
+}
+
+.parameter-control.feedback-success {
+    background: rgba(34, 197, 94, 0.1);
+    border-radius: 6px;
+    padding: 8px;
+    margin: 4px -8px;
+}
+
+.parameter-control.feedback-error {
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 6px;
+    padding: 8px;
+    margin: 4px -8px;
+}
+
+/* Control Headers */
+.control-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.control-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.control-value {
+    font-size: 12px;
+    color: #60a5fa;
+    font-weight: 600;
+    background: rgba(96, 165, 250, 0.1);
+    padding: 2px 8px;
+    border-radius: 12px;
+    min-width: 40px;
+    text-align: center;
+}
+
+/* Slider Controls */
+.slider-control {
+    position: relative;
+}
+
+.slider-container {
+    position: relative;
+    margin: 8px 0;
+}
+
+.parameter-slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    outline: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+}
+
+.parameter-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(96, 165, 250, 0.4);
+    transition: all 0.2s ease;
+}
+
+.parameter-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(96, 165, 250, 0.6);
+}
+
+.parameter-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(96, 165, 250, 0.4);
+}
+
+.slider-track-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #60a5fa, #3b82f6);
+    border-radius: 3px;
+    transition: width 0.2s ease;
+    pointer-events: none;
+}
+
+/* Toggle Controls */
+.toggle-control {
+    display: flex;
+    align-items: center;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 48px;
+    height: 24px;
+}
+
+.parameter-toggle {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 24px;
+    transition: all 0.3s ease;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.parameter-toggle:checked + .toggle-slider {
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+}
+
+.parameter-toggle:checked + .toggle-slider:before {
+    transform: translateX(24px);
+}
+
+.toggle-slider:hover {
+    box-shadow: 0 0 0 8px rgba(96, 165, 250, 0.1);
+}
+
+/* Button Controls */
+.button-control {
+    margin: 8px 0;
+}
+
+.parameter-button {
+    width: 100%;
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.2), rgba(59, 130, 246, 0.2));
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    color: #60a5fa;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.parameter-button:hover {
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(59, 130, 246, 0.3));
+    border-color: rgba(96, 165, 250, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(96, 165, 250, 0.2);
+}
+
+/* Action Section */
+.action-section {
+    background: rgba(34, 197, 94, 0.05);
+    border: 1px solid rgba(34, 197, 94, 0.1);
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.action-button {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(22, 163, 74, 0.2));
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #22c55e;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.action-button:hover {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(22, 163, 74, 0.3));
+    border-color: rgba(34, 197, 94, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+}
+
+.action-button.reset-all {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2));
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+}
+
+.action-button.reset-all:hover {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(220, 38, 38, 0.3));
+    border-color: rgba(239, 68, 68, 0.5);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+/* Tooltips */
+.control-tooltip {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 4px;
+    line-height: 1.3;
+    display: none;
+}
+
+.parameter-control:hover .control-tooltip {
+    display: block;
+}
+
+/* Global Feedback */
+.global-feedback {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(15, 15, 20, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 1001;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.global-feedback.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.global-feedback.success {
+    border-color: rgba(34, 197, 94, 0.3);
+    background: rgba(15, 15, 20, 0.95);
+    color: #22c55e;
+}
+
+.global-feedback.error {
+    border-color: rgba(239, 68, 68, 0.3);
+    background: rgba(15, 15, 20, 0.95);
+    color: #ef4444;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .control-panel.mobile {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        max-width: none;
+        width: auto;
+    }
+    
+    .action-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-button.reset-all {
+        grid-column: 1;
+    }
+}
+
+/* Legacy button styles for compatibility */
+.control-panel button:not(.panel-toggle):not(.section-toggle):not(.parameter-button):not(.action-button) {
     background: #444;
     color: #fff;
     border: none;
@@ -37,33 +480,6 @@ html, body {
     transition: background 0.3s;
 }
 
-.control-panel button:hover {
+.control-panel button:not(.panel-toggle):not(.section-toggle):not(.parameter-button):not(.action-button):hover {
     background: #666;
-}
-
-.control-panel .slider-container {
-    margin: 15px 5px;
-}
-
-.control-panel label {
-    display: block;
-    margin-bottom: 5px;
-}
-
-.control-panel input[type="range"] {
-    width: 100%;
-    margin: 5px 0;
-    background: #444;
-    height: 5px;
-    border-radius: 2px;
-    -webkit-appearance: none;
-}
-
-.control-panel input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 15px;
-    height: 15px;
-    background: #fff;
-    border-radius: 50%;
-    cursor: pointer;
 } 

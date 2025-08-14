@@ -11,9 +11,10 @@ export class ArterySimulation {
         this.arteries = [];
         this.growthQueue = [];
         this.isGrowing = true;
-        this.growthSpeed = 1;
+        this.growthSpeed = 50; // milliseconds delay
         this.maxBranches = 50;
         this.branchCount = 0;  // Start from 0
+        this.defaultRadius = 0.12;
         this.pulseSpeed = 4;
         this.pulseIntensity = 0.05;
         this.jarRadius = 4.8;
@@ -213,7 +214,7 @@ export class ArterySimulation {
             this.growthQueue.push({
                 point: point,
                 direction: direction,
-                radius: artery.radius * 0.9,
+                radius: Math.max(0.05, artery.radius * 0.9, this.defaultRadius * 0.8),
                 parent: artery
             });
         }
@@ -241,10 +242,10 @@ export class ArterySimulation {
         const artery = this.addArtery(growth.point, growth.direction, growth.radius, growth.parent);
         console.log(`Added artery. Total count: ${this.arteries.length}`);
 
-        // Faster growth
+        // Use configurable growth speed
         setTimeout(() => {
             this.processGrowthQueue();
-        }, 50); // 50ms delay between growths
+        }, this.growthSpeed);
     }
 
     update(deltaTime) {

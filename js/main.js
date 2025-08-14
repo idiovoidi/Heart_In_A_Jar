@@ -1,6 +1,6 @@
 import { LabJar } from './LabJar.js';
 import { HeartSimulation } from './HeartSimulation.js';
-import { ButtonHandler } from './inputs/ButtonHandler.js';
+import { ControlPanelManager } from './controls/ControlPanelManager.js';
 import { ArterySimulation } from './ArterySimulation.js';
 import { FleshClumps } from './FleshClumps.js';
 import { FluidSimulation } from './FluidSimulation.js';
@@ -32,8 +32,8 @@ class SceneManager {
         
         this.setupEnvironment();
         
-        // Add ButtonHandler initialization
-        this.buttonHandler = new ButtonHandler(this);
+        // Add ControlPanelManager initialization
+        this.controlPanelManager = new ControlPanelManager(this);
         
         // Start the render loop with optimized settings
         this.startRenderLoop();
@@ -229,8 +229,8 @@ class SceneManager {
     }
 
     dispose() {
-        if (this.buttonHandler) {
-            this.buttonHandler.dispose();
+        if (this.controlPanelManager) {
+            this.controlPanelManager.dispose();
         }
         
         // Dispose all entities
@@ -252,6 +252,22 @@ class SceneManager {
             this.debug.dispose();
         }
         this.scene.dispose();
+    }
+
+    get heartSim() {
+        return this.getEntity('heartSim');
+    }
+
+    get arterySim() {
+        return this.getEntity('arterySim');
+    }
+
+    get fluidSim() {
+        return this.getEntity('fluidSim');
+    }
+
+    get labEnvironment() {
+        return this.getEntity('labEnvironment');
     }
 }
 
