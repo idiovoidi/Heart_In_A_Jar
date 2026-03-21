@@ -36,7 +36,7 @@ class SceneManager {
         this.setupEnvironment();
 
         // Add ControlPanelManager initialization
-        this.controlPanelManager = new ControlPanelManager(this.scene, canvas);
+        this.controlPanelManager = new ControlPanelManager(this.scene, canvas, this);
         this.interactiveControls = null;
 
         // Start the render loop with optimized settings

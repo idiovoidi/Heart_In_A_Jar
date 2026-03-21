@@ -9,22 +9,46 @@ type SceneManager = {
 
 export class ButtonHandler {
     sceneManager: SceneManager;
+    panel: HTMLElement | null = null;
 
     constructor(sceneManager: SceneManager) {
         this.sceneManager = sceneManager;
+        
+        // Always create panel immediately since scripts are loaded with type="module"
+        // which are deferred by default
         this.createControlPanel();
     }
 
     createControlPanel(): void {
+        // Remove existing panel if any
+        const existing = document.querySelector('.control-panel');
+        if (existing) existing.remove();
+        
         const panel = document.createElement('div');
         panel.className = 'control-panel';
+        this.panel = panel;
+        
+        // Add panel header
+        const header = document.createElement('div');
+        header.className = 'panel-header';
+        const title = document.createElement('h3');
+        title.textContent = 'Controls';
+        header.appendChild(title);
+        panel.appendChild(header);
+        
+        // Add content container
+        const content = document.createElement('div');
+        content.className = 'panel-content';
+        panel.appendChild(content);
+        
+        this.createHeartControls(content);
+        this.createViewControls(content);
+        this.createArteryControls(content);
+        this.createFluidControls(content);
+        this.createLabControls(content);
+        
         document.body.appendChild(panel);
-
-        this.createHeartControls(panel);
-        this.createViewControls(panel);
-        this.createArteryControls(panel);
-        this.createFluidControls(panel);
-        this.createLabControls(panel);
+        console.log('Control panel created and added to body');
     }
 
     createHeartControls(panel: HTMLElement): void {
@@ -168,9 +192,9 @@ export class ButtonHandler {
     }
 
     dispose(): void {
-        const panel = document.querySelector('.control-panel');
-        if (panel) {
-            panel.remove();
+        if (this.panel) {
+            this.panel.remove();
+            this.panel = null;
         }
     }
 }
