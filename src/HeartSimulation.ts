@@ -1,8 +1,8 @@
 import { Scene, TransformNode, MeshBuilder, Vector3, Mesh, VertexBuffer, Color3, Curve3 } from '@babylonjs/core';
-import { EntityBase, Component } from './core/EntityBase.js';
-import { MaterialComponent } from './components/MaterialComponent.js';
-import { AnimationComponent } from './components/AnimationComponent.js';
-import { ErrorDecorator } from './core/ErrorDecorator.js';
+import { EntityBase, Component } from './core/EntityBase';
+import { MaterialComponent } from './components/MaterialComponent';
+import { AnimationComponent } from './components/AnimationComponent';
+import { ErrorDecorator } from './core/ErrorDecorator';
 
 export interface HeartChambers {
     leftVentricle?: Mesh | null;

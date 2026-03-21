@@ -1,5 +1,5 @@
 import { Scene, TransformNode, DynamicTexture, ParticleSystem, PointLight, Vector3, Color4, Color3, MeshBuilder, PBRMaterial, StandardMaterial, Mesh } from '@babylonjs/core';
-import { EntityBase } from './core/EntityBase.js';
+import { EntityBase } from './core/EntityBase';
 
 export class LabEnvironment extends EntityBase {
     environmentGroup: TransformNode;

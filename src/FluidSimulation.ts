@@ -1,5 +1,5 @@
 import { Scene, TransformNode, MeshBuilder, Vector3, ShaderMaterial, Effect, ParticleSystem, DynamicTexture, Color4, Color3, Mesh } from '@babylonjs/core';
-import { EntityBase } from './core/EntityBase.js';
+import { EntityBase } from './core/EntityBase';
 
 export class FluidSimulation extends EntityBase {
     fluidGroup: TransformNode;

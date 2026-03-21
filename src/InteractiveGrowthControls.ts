@@ -1,5 +1,6 @@
 import { Scene, Vector3, Mesh, MeshBuilder, PBRMaterial, StandardMaterial, ParticleSystem, Texture, Animation, Color3, Color4, PointerInfo } from '@babylonjs/core';
-import type { VesselGrowthSystem, GrowthNode, Attractor } from './VesselGrowthSystem.js';
+import type { VesselGrowthSystem, GrowthNode, Attractor } from './VesselGrowthSystem';
+import { EntityBase } from './core/EntityBase';
 
 interface VEGFSource {
     mesh: Mesh;
@@ -75,7 +76,7 @@ export class InteractiveGrowthControls {
             direction.normalize();
         }
 
-        const { GrowthNode } = await import('./VesselGrowthSystem.js');
+        const { GrowthNode } = await import('./VesselGrowthSystem');
         const newNode = new GrowthNode(
             position,
             null,
@@ -137,7 +138,7 @@ export class InteractiveGrowthControls {
     }
 
     async addAttractorsAroundPoint(center: Vector3, radius: number, count: number): Promise<void> {
-        const { Attractor } = await import('./VesselGrowthSystem.js');
+        const { Attractor } = await import('./VesselGrowthSystem');
 
         for (let i = 0; i < count; i++) {
             const theta = Math.random() * Math.PI * 2;

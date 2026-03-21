@@ -1,5 +1,8 @@
 import { Scene, TransformNode, PBRMaterial, MeshBuilder, StandardMaterial, Color3, Vector3, Mesh } from '@babylonjs/core';
-import { EntityBase } from './core/EntityBase.js';
+import { EntityBase, Component } from './core/EntityBase';
+import { MaterialComponent } from './components/MaterialComponent';
+import { AnimationComponent } from './components/AnimationComponent';
+import { ErrorDecorator } from './core/ErrorDecorator';
 
 export class LabJar extends EntityBase {
     jarGroup: TransformNode;

@@ -1,7 +1,7 @@
 import { Scene, TransformNode, Vector3, Color3, Scalar, Mesh, MeshBuilder, VertexBuffer, VertexData, StandardMaterial, PBRMaterial } from '@babylonjs/core';
-import { EntityBase } from './core/EntityBase.js';
-import { MaterialComponent } from './components/MaterialComponent.js';
-import { ErrorDecorator, RenderError } from './core/ErrorDecorator.js';
+import { EntityBase } from './core/EntityBase';
+import { MaterialComponent } from './components/MaterialComponent';
+import { ErrorDecorator, RenderError } from './core/ErrorDecorator';
 
 export interface FleshClumpConfig {
     numClumps?: number;

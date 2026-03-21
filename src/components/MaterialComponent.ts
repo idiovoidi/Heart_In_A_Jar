@@ -1,5 +1,5 @@
 import { Scene, PBRMaterial, Material, Color3 } from '@babylonjs/core';
-import { ErrorDecorator } from '../core/ErrorDecorator.js';
+import { ErrorDecorator } from '../core/ErrorDecorator';
 
 export interface MaterialOptions {
     albedoColor?: Color3;

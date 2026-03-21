@@ -1,5 +1,5 @@
 import { Vector3 } from '@babylonjs/core';
-import { ErrorDecorator } from '../core/ErrorDecorator.js';
+import { ErrorDecorator } from '../core/ErrorDecorator';
 
 export interface MovementOptions {
     baseSpeed?: number;

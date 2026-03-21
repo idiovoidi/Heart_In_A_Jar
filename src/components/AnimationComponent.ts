@@ -1,6 +1,6 @@
 import { Animation, Scene, TransformNode, AnimationEvent } from '@babylonjs/core';
-import { ErrorDecorator } from '../core/ErrorDecorator.js';
-import type { Component } from '../core/EntityBase.js';
+import { ErrorDecorator } from '../core/ErrorDecorator';
+import type { Component } from '../core/EntityBase';
 
 export interface AnimationKeyframe {
     frame: number;

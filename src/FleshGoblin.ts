@@ -1,9 +1,9 @@
 import { Scene, TransformNode, Mesh, MeshBuilder, Vector3, Color3, StandardMaterial } from '@babylonjs/core';
-import { EntityBase } from './core/EntityBase.js';
-import { AnimationComponent } from './components/AnimationComponent.js';
-import { MaterialComponent } from './components/MaterialComponent.js';
-import { MovementComponent } from './components/MovementComponent.js';
-import { ErrorDecorator } from './core/ErrorDecorator.js';
+import { EntityBase } from './core/EntityBase';
+import { AnimationComponent } from './components/AnimationComponent';
+import { MaterialComponent } from './components/MaterialComponent';
+import { MovementComponent } from './components/MovementComponent';
+import { ErrorDecorator } from './core/ErrorDecorator';
 
 interface TentacleAnimParams {
     speedX: number;

@@ -1,6 +1,6 @@
 import type { Scene, TransformNode } from '@babylonjs/core';
 import { TransformNode as BabylonTransformNode } from '@babylonjs/core';
-import { ErrorDecorator } from './ErrorDecorator.js';
+import { ErrorDecorator } from './ErrorDecorator';
 
 export interface Component {
     type?: string;

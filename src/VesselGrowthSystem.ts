@@ -1,5 +1,5 @@
 import { Scene, TransformNode, PBRMaterial, MeshBuilder, Vector3, Color3, Mesh, Matrix } from '@babylonjs/core';
-import { EntityBase } from './core/EntityBase.js';
+import { EntityBase } from './core/EntityBase';
 
 export interface VesselGrowthOptions {
     segmentLength?: number;
