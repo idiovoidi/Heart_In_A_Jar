@@ -1,0 +1,21 @@
+{
+  "name": "artery-sim-babylon",
+  "version": "1.0.0",
+  "description": "Heart in a Jar - 3D Artery Simulation using Babylon.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "dev": "vite",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@babylonjs/core": "^7.0.0",
+    "@babylonjs/inspector": "^7.0.0",
+    "@babylonjs/loaders": "^7.0.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0",
+    "vite": "^5.0.0"
+  },
+  "dependencies": {}
+}
