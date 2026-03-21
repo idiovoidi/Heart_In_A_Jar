@@ -1,7 +1,7 @@
 import { Scene, TransformNode, MeshBuilder, Vector3, ShaderMaterial, Effect, ParticleSystem, DynamicTexture, Color4, Color3, Mesh } from '@babylonjs/core';
+import { EntityBase } from './core/EntityBase.js';
 
-export class FluidSimulation {
-    scene: Scene;
+export class FluidSimulation extends EntityBase {
     fluidGroup: TransformNode;
     currentLevel: number;
     targetLevel: number;
@@ -14,7 +14,7 @@ export class FluidSimulation {
     particleSystem!: ParticleSystem;
 
     constructor(scene: Scene) {
-        this.scene = scene;
+        super(scene, "fluidSim");
         this.fluidGroup = new TransformNode("fluidGroup", scene);
         this.currentLevel = 0;
         this.targetLevel = 0;

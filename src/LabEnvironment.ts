@@ -1,7 +1,7 @@
 import { Scene, TransformNode, DynamicTexture, ParticleSystem, PointLight, Vector3, Color4, Color3, MeshBuilder, PBRMaterial, StandardMaterial, Mesh } from '@babylonjs/core';
+import { EntityBase } from './core/EntityBase.js';
 
-export class LabEnvironment {
-    scene: Scene;
+export class LabEnvironment extends EntityBase {
     environmentGroup: TransformNode;
     isOverheadLightOn: boolean;
     particleTexture: DynamicTexture;
@@ -11,7 +11,7 @@ export class LabEnvironment {
     lightTubes: { mesh: Mesh; material: StandardMaterial }[] = [];
 
     constructor(scene: Scene) {
-        this.scene = scene;
+        super(scene, "labEnvironment");
         this.environmentGroup = new TransformNode("environmentGroup", scene);
         this.isOverheadLightOn = true;
         this.particleTexture = this.createParticleTexture();

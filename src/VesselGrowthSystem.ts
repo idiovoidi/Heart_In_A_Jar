@@ -1,4 +1,5 @@
 import { Scene, TransformNode, PBRMaterial, MeshBuilder, Vector3, Color3, Mesh, Matrix } from '@babylonjs/core';
+import { EntityBase } from './core/EntityBase.js';
 
 export interface VesselGrowthOptions {
     segmentLength?: number;
@@ -64,8 +65,7 @@ export class Attractor {
     }
 }
 
-export class VesselGrowthSystem {
-    scene: Scene;
+export class VesselGrowthSystem extends EntityBase {
     growthNodes: GrowthNode[];
     attractors: Attractor[];
     vessels: VesselData[];
@@ -90,7 +90,7 @@ export class VesselGrowthSystem {
     rootNode: TransformNode;
 
     constructor(scene: Scene, options: VesselGrowthOptions = {}) {
-        this.scene = scene;
+        super(scene, "vesselGrowth");
         this.growthNodes = [];
         this.attractors = [];
         this.vessels = [];
