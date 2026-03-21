@@ -60,15 +60,11 @@ html, body {
 
 /* Enhanced Visual Hierarchy */
 .control-panel.enhanced {
-    animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     box-shadow: 
         0 8px 32px rgba(0, 0, 0, 0.3),
         0 0 0 1px rgba(255, 255, 255, 0.05),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.control-panel.enhanced {
-    animation: slideInLeft 0.5s ease-out;
 }
 
 @keyframes slideInLeft {
@@ -549,6 +545,8 @@ html, body {
     background: rgba(255, 255, 255, 0.1);
     outline: none;
     -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
     cursor: pointer;
     position: relative;
     z-index: 2;
@@ -609,8 +607,9 @@ html, body {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-    animation: sliderShimmer 2s infinite;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: sliderShimmer 3s ease-in-out;
+    animation-fill-mode: forwards;
 }
 
 @keyframes sliderShimmer {
@@ -623,7 +622,8 @@ html, body {
 }
 
 .parameter-control:hover .slider-track-fill::after {
-    animation-duration: 1s;
+    animation: sliderShimmer 2s ease-in-out;
+    animation-fill-mode: forwards;
 }
 
 /* Toggle Controls */
@@ -1129,8 +1129,10 @@ html, body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    animation: progressShimmer 2s infinite;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: progressShimmer 4s ease-in-out;
+    animation-fill-mode: forwards;
+    animation-iteration-count: 2;
 }
 
 @keyframes progressShimmer {
@@ -1380,12 +1382,6 @@ html, body {
     background: linear-gradient(0deg, #1e40af, #3b82f6, #60a5fa);
     border-radius: 0 0 3px 3px;
     transition: height 0.5s ease;
-    animation: fluidShimmer 2s infinite;
-}
-
-@keyframes fluidShimmer {
-    0%, 100% { opacity: 0.8; }
-    50% { opacity: 1; }
 }
 
 .level-target {
@@ -1850,8 +1846,10 @@ html, body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    animation: fogShimmer 3s infinite;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: fogShimmer 5s ease-in-out;
+    animation-fill-mode: forwards;
+    animation-iteration-count: 1;
 }
 
 @keyframes fogShimmer {
@@ -2174,12 +2172,7 @@ html, body {
 .preset-btn.loading {
     opacity: 0.6;
     cursor: not-allowed;
-    animation: presetLoading 1s infinite;
-}
-
-@keyframes presetLoading {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 0.8; }
+    transition: opacity 0.3s ease;
 }
 
 .preset-icon {

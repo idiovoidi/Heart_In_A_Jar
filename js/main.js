@@ -1,7 +1,8 @@
 import { LabJar } from './LabJar.js';
 import { HeartSimulation } from './HeartSimulation.js';
 import { ControlPanelManager } from './controls/ControlPanelManager.js';
-import { ArterySimulation } from './ArterySimulation.js';
+import { VesselGrowthSystem } from './VesselGrowthSystem.js';
+import { InteractiveGrowthControls } from './InteractiveGrowthControls.js';
 import { FleshClumps } from './FleshClumps.js';
 import { FluidSimulation } from './FluidSimulation.js';
 import { LabEnvironment } from './LabEnvironment.js';
@@ -77,7 +78,33 @@ class SceneManager {
                 // Create all entities and register them
                 this.registerEntity('labJar', new LabJar(this.scene));
                 this.registerEntity('heartSim', new HeartSimulation(this.scene));
-                this.registerEntity('arterySim', new ArterySimulation(this.scene));
+                
+                // Create the new space colonization vessel growth system
+                const vesselGrowth = new VesselGrowthSystem(this.scene, {
+                    segmentLength: 0.25,
+                    branchAngle: Math.PI / 5,
+                    maxBranches: 150,
+                    attractionRadius: 2.5,
+                    killRadius: 0.25,
+                    growthSpeed: 80,
+                    branchProbability: 0.35
+                });
+                this.registerEntity('vesselGrowth', vesselGrowth);
+                
+                // Initialize growth from heart surface
+                const heartPos = new BABYLON.Vector3(0, -1.9, 0);
+                vesselGrowth.initializeFromSeed(
+                    new BABYLON.Vector3(heartPos.x, heartPos.y + 0.3, heartPos.z),
+                    new BABYLON.Vector3(0, 1, 0),
+                    0.22
+                );
+                
+                // Setup interactive growth controls
+                this.interactiveControls = new InteractiveGrowthControls(
+                    this.scene, 
+                    vesselGrowth, 
+                    canvas
+                );
                 
                 // Example of using the new configurable FleshClumps
                 this.registerEntity('fleshClumps', new FleshClumps(this.scene, {
@@ -137,21 +164,12 @@ class SceneManager {
                 heartMesh.rotation = new BABYLON.Vector3(Math.PI * 0.15, 0, 0);
             }
 
-            // Position artery system relative to heart
-            const arterySim = this.getEntity('arterySim');
-            if (arterySim && heartSim) {
-                const arteryMesh = arterySim.getMesh();
-                arteryMesh.scaling = new BABYLON.Vector3(1, 1, 1);
-                arteryMesh.position = heartSim.getMesh().position.clone();
-                
-                // Make sure arteries are visible by adding them to the scene properly
-                if (arterySim.arteries) {
-                    arterySim.arteries.forEach(artery => {
-                        if (artery.mesh && !artery.mesh.parent) {
-                            this.scene.addMesh(artery.mesh);
-                        }
-                    });
-                }
+            // Position vessel growth system relative to heart
+            const vesselGrowth = this.getEntity('vesselGrowth');
+            if (vesselGrowth && heartSim) {
+                const vesselMesh = vesselGrowth.getMesh();
+                vesselMesh.scaling = new BABYLON.Vector3(1, 1, 1);
+                vesselMesh.position = heartSim.getMesh().position.clone();
             }
 
             // Position flesh clumps
@@ -258,8 +276,8 @@ class SceneManager {
         return this.getEntity('heartSim');
     }
 
-    get arterySim() {
-        return this.getEntity('arterySim');
+    get vesselGrowth() {
+        return this.getEntity('vesselGrowth');
     }
 
     get fluidSim() {
