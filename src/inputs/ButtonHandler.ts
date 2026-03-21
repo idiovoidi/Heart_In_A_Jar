@@ -52,19 +52,25 @@ export class ButtonHandler {
     }
 
     createHeartControls(panel: HTMLElement): void {
+        const section = document.createElement('div');
+        section.className = 'control-section';
+        
         const toggleBeatBtn = document.createElement('button');
+        toggleBeatBtn.className = 'parameter-button';
         toggleBeatBtn.textContent = 'Toggle Heartbeat';
         toggleBeatBtn.onclick = () => this.toggleHeartbeat();
-        panel.appendChild(toggleBeatBtn);
+        section.appendChild(toggleBeatBtn);
 
         const speedContainer = document.createElement('div');
         speedContainer.className = 'slider-container';
 
         const speedLabel = document.createElement('label');
+        speedLabel.className = 'control-label';
         speedLabel.textContent = 'Beat Speed';
         speedContainer.appendChild(speedLabel);
 
         const speedSlider = document.createElement('input');
+        speedSlider.className = 'parameter-slider';
         speedSlider.type = 'range';
         speedSlider.min = '0.5';
         speedSlider.max = '4';
@@ -73,14 +79,21 @@ export class ButtonHandler {
         speedSlider.oninput = (e) => this.updateBeatSpeed((e.target as HTMLInputElement).value);
         speedContainer.appendChild(speedSlider);
 
-        panel.appendChild(speedContainer);
+        section.appendChild(speedContainer);
+        panel.appendChild(section);
     }
 
     createViewControls(panel: HTMLElement): void {
+        const section = document.createElement('div');
+        section.className = 'control-section';
+        
         const resetViewBtn = document.createElement('button');
+        resetViewBtn.className = 'parameter-button';
         resetViewBtn.textContent = 'Reset View';
         resetViewBtn.onclick = () => this.resetView();
-        panel.appendChild(resetViewBtn);
+        section.appendChild(resetViewBtn);
+        
+        panel.appendChild(section);
     }
 
     createArteryControls(panel: HTMLElement): void {
@@ -88,6 +101,7 @@ export class ButtonHandler {
         arteryContainer.className = 'control-section';
 
         const toggleGrowthBtn = document.createElement('button');
+        toggleGrowthBtn.className = 'parameter-button';
         toggleGrowthBtn.textContent = 'Pause Growth';
         toggleGrowthBtn.onclick = () => {
             if (this.sceneManager.arterySim) {
@@ -98,6 +112,7 @@ export class ButtonHandler {
         arteryContainer.appendChild(toggleGrowthBtn);
 
         const resetGrowthBtn = document.createElement('button');
+        resetGrowthBtn.className = 'parameter-button';
         resetGrowthBtn.textContent = 'Reset Growth';
         resetGrowthBtn.onclick = () => {
             if (this.sceneManager.arterySim) {
@@ -110,10 +125,12 @@ export class ButtonHandler {
         speedContainer.className = 'slider-container';
 
         const speedLabel = document.createElement('label');
+        speedLabel.className = 'control-label';
         speedLabel.textContent = 'Growth Speed';
         speedContainer.appendChild(speedLabel);
 
         const speedSlider = document.createElement('input');
+        speedSlider.className = 'parameter-slider';
         speedSlider.type = 'range';
         speedSlider.min = '50';
         speedSlider.max = '200';
@@ -131,6 +148,7 @@ export class ButtonHandler {
         fluidContainer.className = 'control-section';
 
         const toggleFillBtn = document.createElement('button');
+        toggleFillBtn.className = 'parameter-button';
         toggleFillBtn.textContent = 'Start Filling';
         toggleFillBtn.onclick = () => this.toggleFluidFilling();
         fluidContainer.appendChild(toggleFillBtn);
@@ -143,6 +161,7 @@ export class ButtonHandler {
         labContainer.className = 'control-section';
 
         const toggleLightBtn = document.createElement('button');
+        toggleLightBtn.className = 'parameter-button';
         toggleLightBtn.textContent = 'Toggle Overhead Light';
         toggleLightBtn.onclick = () => this.toggleOverheadLight();
         labContainer.appendChild(toggleLightBtn);

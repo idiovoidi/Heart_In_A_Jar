@@ -1,4 +1,4 @@
-import { Scene, TransformNode, MeshBuilder, Vector3, ShaderMaterial, Effect, ParticleSystem, DynamicTexture, Color4, Color3, Mesh } from '@babylonjs/core';
+import { Scene, TransformNode, MeshBuilder, Vector3, ShaderMaterial, Effect, ParticleSystem, DynamicTexture, Color4, Color3, Mesh, Matrix } from '@babylonjs/core';
 import { EntityBase } from './core/EntityBase';
 
 export class FluidSimulation extends EntityBase {
@@ -9,6 +9,7 @@ export class FluidSimulation extends EntityBase {
     isFlowing: boolean;
     jarRadius: number;
     maxHeight: number;
+    jarBottomY: number;
     fluidMesh!: Mesh;
     shaderMaterial!: ShaderMaterial;
     particleSystem!: ParticleSystem;
@@ -18,10 +19,11 @@ export class FluidSimulation extends EntityBase {
         this.fluidGroup = new TransformNode("fluidGroup", scene);
         this.currentLevel = 0;
         this.targetLevel = 0;
-        this.fillSpeed = 0.0001;
+        this.fillSpeed = 0.005;
         this.isFlowing = false;
-        this.jarRadius = 4.8;
-        this.maxHeight = 3.5;
+        this.jarRadius = 2.0; // Jar radius (jar has diameter 4)
+        this.maxHeight = 3.5; // Max fillable height inside jar (jar height is 4)
+        this.jarBottomY = -2; // Jar bottom position
 
         this.createFluid();
         this.createBloodParticles();
@@ -30,17 +32,21 @@ export class FluidSimulation extends EntityBase {
     createFluid(): void {
         const fluid = MeshBuilder.CreateCylinder("fluid", {
             height: 0.1,
-            diameter: this.jarRadius * 2 * 0.95,
+            diameter: this.jarRadius * 2 * 0.95, // Slightly smaller than jar diameter
             tessellation: 64,
             subdivisions: 2
         }, this.scene);
+        
+        // Set pivot to bottom so scaling grows upward
+        fluid.setPivotMatrix(new Matrix().setTranslationFromFloats(0, -0.05, 0), false);
+        fluid.position.y = this.jarBottomY + 0.05;
 
         const shaderMaterial = new ShaderMaterial("bloodShader", this.scene, {
             vertex: "blood",
             fragment: "blood",
         }, {
             attributes: ["position", "normal", "uv"],
-            uniforms: ["world", "worldView", "worldViewProjection", "view", "projection", "time", "height", "cameraPosition"],
+            uniforms: ["world", "worldView", "worldViewProjection", "view", "projection", "time", "height", "cameraPosition", "viscosity", "surfaceTension", "transparency", "bloodColor"],
             defines: [],
             needAlphaBlending: true,
             needAlphaTesting: false,
@@ -56,7 +62,6 @@ export class FluidSimulation extends EntityBase {
         shaderMaterial.backFaceCulling = false;
 
         fluid.material = shaderMaterial;
-        fluid.position.y = -2;
         fluid.parent = this.fluidGroup;
 
         this.fluidMesh = fluid;
@@ -167,14 +172,14 @@ export class FluidSimulation extends EntityBase {
 
         this.particleSystem.particleTexture = particleTexture;
 
-        this.particleSystem.minEmitBox = new Vector3(-0.5, 0, -0.5);
-        this.particleSystem.maxEmitBox = new Vector3(0.5, 0, 0.5);
+        this.particleSystem.minEmitBox = new Vector3(-0.3, 0, -0.3);
+        this.particleSystem.maxEmitBox = new Vector3(0.3, 0, 0.3);
         this.particleSystem.minSize = 0.05;
         this.particleSystem.maxSize = 0.15;
         this.particleSystem.minLifeTime = 1.0;
         this.particleSystem.maxLifeTime = 2.0;
         this.particleSystem.emitRate = 50;
-        this.particleSystem.gravity = new Vector3(0, -2.81, 0);
+        this.particleSystem.gravity = new Vector3(0, -9.81, 0);
         this.particleSystem.direction1 = new Vector3(-0.2, -1, -0.2);
         this.particleSystem.direction2 = new Vector3(0.2, -1, 0.2);
         this.particleSystem.minEmitPower = 0.3;
@@ -184,12 +189,13 @@ export class FluidSimulation extends EntityBase {
         this.particleSystem.color2 = new Color4(0.5, 0.05, 0.05, 1.0);
         this.particleSystem.colorDead = new Color4(0.4, 0.05, 0.05, 0.0);
 
-        this.particleSystem.emitter = this.fluidGroup as unknown as Vector3;
+        // Emitter position will be updated in update()
+        this.particleSystem.emitter = new Vector3(0, this.jarBottomY, 0);
     }
 
-    startFilling(targetLevel: number = 0.8): void {
+    startFilling(targetLevel: number = 0.85): void {
         this.isFlowing = true;
-        this.targetLevel = Math.min(targetLevel, this.maxHeight);
+        this.targetLevel = Math.min(targetLevel, 1.0); // Clamp to 0-1 range
         this.particleSystem.start();
     }
 
@@ -206,13 +212,20 @@ export class FluidSimulation extends EntityBase {
 
         if (this.isFlowing && this.currentLevel < this.targetLevel) {
             this.currentLevel += this.fillSpeed * deltaTime;
+            this.currentLevel = Math.min(this.currentLevel, this.targetLevel);
 
-            this.fluidMesh.scaling.y = this.currentLevel;
+            // Update mesh height and position
+            // currentLevel is 0-1 representing fill percentage
+            const fluidHeight = 0.1 + this.currentLevel * this.maxHeight;
+            this.fluidMesh.scaling.y = fluidHeight / 0.1; // Scale relative to base height
+            
+            // Update height uniform for shader (normalized 0-1)
             this.shaderMaterial.setFloat("height", this.currentLevel);
 
-            const emitHeight = -2 + (this.currentLevel * this.maxHeight);
-            this.particleSystem.minEmitBox.y = emitHeight;
-            this.particleSystem.maxEmitBox.y = emitHeight;
+            // Emit particles at fluid surface
+            const emitY = this.jarBottomY + fluidHeight;
+            this.particleSystem.minEmitBox = new Vector3(-0.3, emitY, -0.3);
+            this.particleSystem.maxEmitBox = new Vector3(0.3, emitY, 0.3);
         }
 
         if (this.currentLevel >= this.targetLevel) {
