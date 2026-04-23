@@ -222,31 +222,7 @@ export class LabEnvironment extends EntityBase {
         rim.material = glassMaterial;
         rim.parent = beakerGroup;
 
-        if (Math.random() > 0.3) {
-            const liquidHeight = 0.2 + Math.random() * 0.7;
-            const liquid = MeshBuilder.CreateCylinder("liquid", {
-                height: liquidHeight,
-                diameter: 0.75,
-                tessellation: 32
-            }, this.scene);
-
-            const liquidMaterial = new StandardMaterial("liquidMaterial", this.scene);
-
-            const labColors = [
-                new Color3(0.2, 0.6, 0.8),
-                new Color3(0.8, 0.2, 0.2),
-                new Color3(0.2, 0.8, 0.2),
-                new Color3(0.8, 0.6, 0.2),
-                new Color3(0.6, 0.2, 0.8),
-                new Color3(0.8, 0.4, 0.0)
-            ];
-
-            liquidMaterial.diffuseColor = labColors[Math.floor(Math.random() * labColors.length)];
-            liquidMaterial.alpha = 0.8;
-            liquid.material = liquidMaterial;
-            liquid.position.y = -0.6 + liquidHeight/2;
-            liquid.parent = beakerGroup;
-        }
+        this.createLabLiquid(beakerGroup, 0.3, 0.2, 0.9, 0.75, 32, -0.6);
     }
 
     createBunsenBurner(x: number, y: number, z: number): void {
@@ -329,6 +305,41 @@ export class LabEnvironment extends EntityBase {
         }
     }
 
+    private createLabLiquid(
+        parent: TransformNode,
+        fillProbability: number,
+        minHeight: number,
+        maxHeight: number,
+        diameter: number,
+        tessellation: number,
+        baseY: number
+    ): void {
+        if (Math.random() > fillProbability) return;
+
+        const liquidHeight = minHeight + Math.random() * (maxHeight - minHeight);
+        const liquid = MeshBuilder.CreateCylinder("liquid", {
+            height: liquidHeight,
+            diameter,
+            tessellation
+        }, this.scene);
+
+        const liquidMaterial = new StandardMaterial("liquidMaterial", this.scene);
+        const labColors = [
+            new Color3(0.2, 0.6, 0.8),
+            new Color3(0.8, 0.2, 0.2),
+            new Color3(0.2, 0.8, 0.2),
+            new Color3(0.8, 0.6, 0.2),
+            new Color3(0.6, 0.2, 0.8),
+            new Color3(0.8, 0.4, 0.0)
+        ];
+
+        liquidMaterial.diffuseColor = labColors[Math.floor(Math.random() * labColors.length)];
+        liquidMaterial.alpha = 0.8;
+        liquid.material = liquidMaterial;
+        liquid.position.y = baseY + liquidHeight / 2;
+        liquid.parent = parent;
+    }
+
     createTestTube(x: number, y: number, z: number, parent: TransformNode): void {
         const tubeGroup = new TransformNode("tubeGroup", this.scene);
         tubeGroup.position = new Vector3(x, y, z);
@@ -349,30 +360,7 @@ export class LabEnvironment extends EntityBase {
         tube.material = glassMaterial;
         tube.parent = tubeGroup;
 
-        if (Math.random() > 0.2) {
-            const liquidHeight = 0.1 + Math.random() * 0.4;
-            const liquid = MeshBuilder.CreateCylinder("liquid", {
-                height: liquidHeight,
-                diameter: 0.08,
-                tessellation: 16
-            }, this.scene);
-
-            const liquidMaterial = new StandardMaterial("liquidMaterial", this.scene);
-            const labColors = [
-                new Color3(0.2, 0.6, 0.8),
-                new Color3(0.8, 0.2, 0.2),
-                new Color3(0.2, 0.8, 0.2),
-                new Color3(0.8, 0.6, 0.2),
-                new Color3(0.6, 0.2, 0.8),
-                new Color3(0.8, 0.4, 0.0)
-            ];
-
-            liquidMaterial.diffuseColor = labColors[Math.floor(Math.random() * labColors.length)];
-            liquidMaterial.alpha = 0.8;
-            liquid.material = liquidMaterial;
-            liquid.position.y = -0.3 + liquidHeight/2;
-            liquid.parent = tubeGroup;
-        }
+        this.createLabLiquid(tubeGroup, 0.2, 0.1, 0.4, 0.08, 16, -0.3);
     }
 
     createOverheadLight(): void {

@@ -208,6 +208,19 @@ export class HeartSimulation extends EntityBase {
         }
     }
 
+    private deformAtrium(atrium: Mesh, stretchFactor: number): void {
+        const positions = atrium.getVerticesData(VertexBuffer.PositionKind);
+        if (positions) {
+            for (let i = 0; i < positions.length; i += 3) {
+                const y = positions[i + 1];
+                if (y < 0) {
+                    positions[i + 1] = y * stretchFactor;
+                }
+            }
+            atrium.updateVerticesData(VertexBuffer.PositionKind, positions);
+        }
+    }
+
     createLeftAtrium(): Mesh | null {
         try {
             const atrium = MeshBuilder.CreateSphere("leftAtrium", {
@@ -215,19 +228,8 @@ export class HeartSimulation extends EntityBase {
                 diameter: 2
             }, this.scene);
 
-            // Deform the sphere to create atrium shape
-            const positions = atrium.getVerticesData(VertexBuffer.PositionKind);
-            if (positions) {
-                for (let i = 0; i < positions.length; i += 3) {
-                    const y = positions[i + 1];
-                    if (y < 0) {
-                        positions[i + 1] = y * 1.2;
-                    }
-                }
-                atrium.updateVerticesData(VertexBuffer.PositionKind, positions);
-            }
+            this.deformAtrium(atrium, 1.2);
 
-            // Create material using component
             const material = this.materialComponent.createMaterial("leftatriummat", {
                 albedoColor: new Color3(0.6, 0.15, 0.15),
                 roughness: 0.65,
@@ -253,19 +255,8 @@ export class HeartSimulation extends EntityBase {
                 diameter: 2.2
             }, this.scene);
 
-            // Deform the sphere
-            const positions = atrium.getVerticesData(VertexBuffer.PositionKind);
-            if (positions) {
-                for (let i = 0; i < positions.length; i += 3) {
-                    const y = positions[i + 1];
-                    if (y < 0) {
-                        positions[i + 1] = y * 1.3;
-                    }
-                }
-                atrium.updateVerticesData(VertexBuffer.PositionKind, positions);
-            }
+            this.deformAtrium(atrium, 1.3);
 
-            // Create material using component
             const material = this.materialComponent.createMaterial("rightatriummat", {
                 albedoColor: new Color3(0.58, 0.24, 0.25),
                 roughness: 0.7,

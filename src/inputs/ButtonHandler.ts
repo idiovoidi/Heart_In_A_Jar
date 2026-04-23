@@ -1,11 +1,4 @@
-// Stub type for SceneManager to avoid circular dependency
-type SceneManager = {
-    heartSim?: { isBeating: boolean; setBeating(isBeating: boolean): void; setBeatSpeed(speed: number): void };
-    arterySim?: unknown;
-    fluidSim?: { isFlowing: boolean; startFilling(level: number): void; stopFilling(): void };
-    labEnvironment?: { toggleOverheadLight(): void };
-    camera?: { resetView(): void };
-};
+import type { SceneManager } from '../types/scene';
 
 export class ButtonHandler {
     sceneManager: SceneManager;
@@ -105,8 +98,8 @@ export class ButtonHandler {
         toggleGrowthBtn.textContent = 'Pause Growth';
         toggleGrowthBtn.onclick = () => {
             if (this.sceneManager.arterySim) {
-                (this.sceneManager.arterySim as { isGrowing: boolean }).isGrowing = !(this.sceneManager.arterySim as { isGrowing: boolean }).isGrowing;
-                toggleGrowthBtn.textContent = (this.sceneManager.arterySim as { isGrowing: boolean }).isGrowing ? 'Pause Growth' : 'Resume Growth';
+                this.sceneManager.arterySim.isGrowing = !this.sceneManager.arterySim.isGrowing;
+                toggleGrowthBtn.textContent = this.sceneManager.arterySim.isGrowing ? 'Pause Growth' : 'Resume Growth';
             }
         };
         arteryContainer.appendChild(toggleGrowthBtn);
@@ -116,7 +109,7 @@ export class ButtonHandler {
         resetGrowthBtn.textContent = 'Reset Growth';
         resetGrowthBtn.onclick = () => {
             if (this.sceneManager.arterySim) {
-                (this.sceneManager.arterySim as { reset(): void }).reset();
+                this.sceneManager.arterySim.reset();
             }
         };
         arteryContainer.appendChild(resetGrowthBtn);
@@ -190,7 +183,7 @@ export class ButtonHandler {
 
     updateGrowthSpeed(speed: string): void {
         if (this.sceneManager.arterySim) {
-            (this.sceneManager.arterySim as { growthSpeed: number }).growthSpeed = parseInt(speed);
+            this.sceneManager.arterySim.growthSpeed = parseInt(speed);
         }
     }
 

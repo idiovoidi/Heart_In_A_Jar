@@ -1,19 +1,11 @@
 import { ButtonHandler } from '../inputs/ButtonHandler';
 import type { Scene } from '@babylonjs/core';
-
-// Type matching the SceneManager from main.ts
-type SceneManagerLike = {
-    heartSim?: { isBeating: boolean; setBeating(isBeating: boolean): void; setBeatSpeed(speed: number): void };
-    arterySim?: { isGrowing: boolean; reset(): void; growthSpeed: number };
-    fluidSim?: { isFlowing: boolean; startFilling(level: number): void; stopFilling(): void };
-    labEnvironment?: { toggleOverheadLight(): void };
-    camera?: { resetView(): void };
-};
+import type { SceneManager } from '../types/scene';
 
 export class ControlPanelManager {
     buttonHandler: ButtonHandler;
 
-    constructor(scene: Scene, _canvas: HTMLCanvasElement, sceneManager: SceneManagerLike) {
+    constructor(scene: Scene, _canvas: HTMLCanvasElement, sceneManager: SceneManager) {
         console.log('ControlPanelManager initialized');
         this.buttonHandler = new ButtonHandler(sceneManager);
     }
