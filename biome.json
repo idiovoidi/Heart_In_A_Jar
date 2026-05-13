@@ -1,0 +1,131 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.4.12/schema.json",
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"files": {
+		"includes": ["**", "!!**/dist"]
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab",
+		"indentWidth": 4,
+		"lineEnding": "lf",
+		"lineWidth": 100,
+		"attributePosition": "auto",
+		"bracketSpacing": true,
+		"formatWithErrors": false
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"all": true,
+			"complexity": {
+				"all": true
+			},
+			"correctness": {
+				"all": true
+			},
+			"performance": {
+				"all": true
+			},
+			"security": {
+				"all": true
+			},
+			"style": {
+				"all": true,
+				"noDefaultExport": "off",
+				"useNamingConvention": {
+					"level": "error",
+					"options": {
+						"strictCase": true,
+						"requireAscii": true,
+						"enumMemberCase": "PascalCase",
+						"interfaces": ["PascalCase"],
+						"typeAlias": ["PascalCase"],
+						"classes": ["PascalCase"],
+						"functions": ["camelCase", "PascalCase"],
+						"variables": ["camelCase", "UPPER_CASE", "PascalCase"],
+						"properties": ["camelCase"],
+						"methods": ["camelCase"]
+					}
+				}
+			},
+			"suspicious": {
+				"all": true
+			},
+			"nursery": {
+				"all": true,
+				"useStrictMode": "error",
+				"useImportExtensions": "off"
+			}
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "double",
+			"jsxQuoteStyle": "double",
+			"quoteProperties": "asNeeded",
+			"semicolons": "always",
+			"arrowParentheses": "always",
+			"bracketSameLine": false,
+			"bracketSpacing": true,
+			"attributePosition": "auto"
+		},
+		"globals": [],
+		"parser": {
+			"unsafeParameterDecoratorsEnabled": false
+		}
+	},
+	"json": {
+		"formatter": {
+			"enabled": true,
+			"indentStyle": "tab",
+			"indentWidth": 4,
+			"lineEnding": "lf",
+			"lineWidth": 100,
+			"trailingCommas": "none"
+		},
+		"linter": {
+			"enabled": true
+		},
+		"parser": {
+			"allowComments": false,
+			"allowTrailingCommas": false
+		}
+	},
+	"css": {
+		"formatter": {
+			"enabled": true,
+			"indentStyle": "tab",
+			"indentWidth": 4,
+			"lineEnding": "lf",
+			"lineWidth": 100
+		},
+		"linter": {
+			"enabled": true
+		},
+		"parser": {
+			"allowWrongLineComments": false
+		}
+	},
+	"assist": {
+		"enabled": true,
+		"actions": {
+			"source": {
+				"organizeImports": {
+					"level": "on",
+					"options": {
+						"groups": [
+							"type",
+							["builtin", "external"],
+							["internal", "parent", "sibling", "index", "sideEffect"]
+						]
+					}
+				}
+			}
+		}
+	}
+}

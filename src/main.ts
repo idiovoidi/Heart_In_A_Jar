@@ -1,4 +1,4 @@
-import { Engine, Scene, Color4, DefaultRenderingPipeline, Vector3 } from '@babylonjs/core';
+import { Engine, Scene, Color4, Vector3 } from '@babylonjs/core';
 import { LabJar } from './LabJar';
 import { HeartSimulation } from './HeartSimulation';
 import { ControlPanelManager } from './controls/ControlPanelManager';
@@ -12,6 +12,7 @@ import { SceneCamera } from './camera/SceneCamera';
 import { SceneLighting } from './lighting/SceneLighting';
 import { SceneDebug } from './debug/SceneDebug';
 import { ErrorDecorator } from './core/ErrorDecorator';
+import { PostProcessingManager } from './postprocessing/PostProcessingManager';
 import type { EntityBase } from './core/EntityBase';
 
 const canvas = document.getElementById("renderCanvas") as HTMLCanvasElement;
@@ -25,6 +26,7 @@ class SceneManager {
     debug: SceneDebug;
     controlPanelManager: ControlPanelManager;
     interactiveControls: InteractiveGrowthControls | null;
+    postProcessingManager: PostProcessingManager | null;
 
     constructor() {
         this.entities = new Map();
@@ -32,6 +34,7 @@ class SceneManager {
         this.camera = new SceneCamera(this.scene, canvas);
         this.lighting = new SceneLighting(this.scene);
         this.debug = new SceneDebug(this.scene);
+        this.postProcessingManager = null;
 
         this.setupEnvironment();
 
@@ -127,7 +130,7 @@ class SceneManager {
                 // Position and scale components
                 this.positionComponents();
 
-                // Setup post-processing
+                // Setup post-processing via modular manager
                 this.setupPostProcessing();
             } catch (error) {
                 console.error("Error setting up environment:", error);
@@ -198,29 +201,10 @@ class SceneManager {
 
     setupPostProcessing(): void {
         try {
-            const pipeline = new DefaultRenderingPipeline(
-                "defaultPipeline",
-                true,
-                this.scene,
-                [this.scene.activeCamera!]
-            );
-
-            // Configure bloom effect
-            pipeline.bloomEnabled = true;
-            pipeline.bloomThreshold = 0.85;
-            pipeline.bloomWeight = 0.5;
-            pipeline.bloomKernel = 64;
-            pipeline.bloomScale = 0.5;
-
-            // Add chromatic aberration for a more cinematic look
-            pipeline.chromaticAberrationEnabled = true;
-            pipeline.chromaticAberration.aberrationAmount = 1.0;
-            pipeline.chromaticAberration.radialIntensity = 0.5;
-
-            // Add slight grain for texture
-            pipeline.grainEnabled = true;
-            pipeline.grain.intensity = 10;
-            pipeline.grain.animated = true;
+            if (!this.postProcessingManager) {
+                this.postProcessingManager = new PostProcessingManager(this.scene);
+            }
+            this.postProcessingManager.initialize(this.scene.activeCamera!);
         } catch (error) {
             console.error("Error in setupPostProcessing:", error);
             ErrorDecorator.logError(error as Error, "setupPostProcessing");
@@ -252,6 +236,10 @@ class SceneManager {
     dispose(): void {
         if (this.controlPanelManager) {
             this.controlPanelManager.dispose();
+        }
+
+        if (this.postProcessingManager) {
+            this.postProcessingManager.dispose();
         }
 
         // Dispose all entities
@@ -289,6 +277,10 @@ class SceneManager {
 
     get labEnvironment(): LabEnvironment | undefined {
         return this.getEntity('labEnvironment') as LabEnvironment;
+    }
+
+    get postProcessing(): PostProcessingManager | null {
+        return this.postProcessingManager;
     }
 }
 
