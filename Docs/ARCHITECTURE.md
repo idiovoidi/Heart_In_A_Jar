@@ -1,123 +1,65 @@
 # Architecture Overview
 
-## System Structure
+A single Babylon.js scene: a specimen jar holding a beating heart whose blood vessels grow outward
+into the preservative using space colonization.
 
 ```
-Artery_Sim_babylon/
-├── src/
-│   ├── main.ts                 # Entry point, SceneManager orchestration
-│   │
-│   ├── core/                   # Base abstractions
-│   │   ├── EntityBase.ts       # Entity interface (getMesh, update, dispose)
-│   │   └── ErrorDecorator.ts   # Error handling utility
-│   │
-│   ├── simulation/             # Core simulation systems
-│   │   ├── HeartSimulation.ts  # Heart beating animation
-│   │   ├── VesselGrowthSystem.ts  # Space colonization algorithm
-│   │   ├── FluidSimulation.ts # Blood/fluid fill simulation
-│   │   ├── FleshClumps.ts      # Ambient flesh particles
-│   │   └── FleshGoblin.ts      # Background flesh elements
-│   │
-│   ├── environment/            # Environment components
-│   │   ├── LabJar.ts           # Glass jar container
-│   │   ├── LabEnvironment.ts   # Lab setting (table, background)
-│   │   └── InteractiveGrowthControls.ts  # Growth parameter UI
-│   │
-│   ├── camera/                 # Camera system
-│   │   └── SceneCamera.ts      # ArcRotateCamera wrapper
-│   │
-│   ├── lighting/               # Lighting system
-│   │   └── SceneLighting.ts   # Scene lights setup
-│   │
-│   ├── inputs/                 # User input handling
-│   │   ├── InputManager.ts     # Keyboard/mouse input
-│   │   └── ButtonHandler.ts    # GUI button management
-│   │
-│   ├── controls/               # UI control system
-│   │   ├── ControlPanelManager.ts  # Main control panel
-│   │   └── QuickSystemTest.ts # Test utilities
-│   │
-│   ├── postprocessing/         # Visual effects
-│   │   └── PostProcessingManager.ts  # Post-processing pipeline
-│   │
-│   ├── components/             # Reusable 3D components
-│   │   ├── AnimationComponent.ts
-│   │   ├── MaterialComponent.ts
-│   │   └── MovementComponent.ts
-│   │
-│   ├── debug/                  # Debug tools
-│   │   └── SceneDebug.ts       # Babylon inspector integration
-│   │
-│   └── types/                  # TypeScript definitions
-│       ├── scene.ts            # SceneManager type exports
-│       └── babylon.d.ts        # Babylon type declarations
-│
-├── Docs/                       # Documentation
-│   └── ARCHITECTURE.md         # This file
-│
-└── public/                    # Static assets (textures, etc.)
+src/
+├── main.ts            App: engine, camera, post-processing, click-to-inject, render loop
+├── config.ts          Shared dimensions (jar radius, liquid level, heart position, cannulas)
+├── Jar.ts             Thick glass, amber liquid, steel lid, cannulas, drifting motes
+├── Heart.ts           Procedural heart, lub-dub beating, great vessels, surface queries
+├── VesselGrowth.ts    Space colonization + vessel mesh + vessel shader
+├── Environment.ts     Lights, backdrop, reflective bench, procedural studio reflections
+├── sim/util.ts        Seeded RNG, value noise, cardiac cycle curves (lub / dub)
+└── ui/Panel.ts        Control panel and live readout (plain DOM)
 ```
 
-## Core Concepts
+Everything inside the specimen lives in one local frame: origin at the centre of the jar floor,
++Y up. `main.ts` parents it to a node raised onto the coaster. Dimensions come from `config.ts`.
 
-### Entity Component System
+## Heart
 
-All simulation components implement `EntityBase`:
-- `getMesh(): AbstractMesh` - Returns the Babylon mesh
-- `update(deltaTime: number): void` - Called each frame
-- `dispose(): void` - Cleanup on shutdown
+- The mesh starts as a welded icosphere, projected onto an implicit "heart" surface, then smoothed
+  with Taubin smoothing (keeps volume, rounds the cleft) and given lumpy noise and fat/muscle
+  vertex colours.
+- Beating is a CPU vertex deformation per frame driven by `lub(phase)` and `dub(phase)`:
+  the ventricles squeeze and twist while the atria dilate. Normals are recomputed each frame.
+- The aorta and vena cava run up to the lid cannulas; a pulmonary trunk stub is added too.
+- `signedDistance(p)` and `pickSeeds(n)` expose the surface to the growth system.
 
-### SceneManager
+## Vessel growth
 
-Central orchestrator that:
-- Creates Babylon Engine and Scene
-- Manages entity registration and lifecycle
-- Coordinates render loop
-- Exposes component getters (heartSim, vesselGrowth, fluidSim, etc.)
+1. **Signals.** A few thousand attractors are scattered through the liquid (biased towards the
+   glass), outside the heart.
+2. **Iteration.** Each attractor is claimed by its nearest vessel node within the influence
+   radius (spatial hash grid). Each claimed node grows one segment towards the average direction
+   of its attractors, with inertia and a little noise. Attractors die when a node gets within the
+   kill radius.
+3. **Constraints.** New nodes are clamped inside the glass, kept out of the heart, and rejected
+   if they crowd existing nodes.
+4. **Radii.** After every step radii are recomputed bottom-up with Murray's law
+   (`r_parent^p = sum(r_child^p)`), so trunks are thick and capillaries are fine.
+5. **Rendering.** The whole tree is one mesh with a fixed index pattern; only the draw range and
+   vertex buffers change when nodes are added. Rings are mitred and use parallel-transported
+   frames so chains do not twist.
+6. **Animation is in the shader** (`vesselVertexShader`): sprouting (tip extends from its parent
+   over one growth step), the pressure wave (delay proportional to path length from the heart),
+   wall swell and a pale glow on fresh growth.
 
-### Rendering Pipeline
+Click the glass to drop a burst of attractors (`addGrowthFactor`) and trigger new branching.
 
-1. **Setup Phase**: Create scene, camera, lighting, post-processing
-2. **Entity Registration**: Create and position all simulation components
-3. **Render Loop**: Update all entities, render frame
-4. **Cleanup**: Dispose resources on shutdown
+## Look
 
-## Key Systems
+- Glass and liquid are PBR with alpha. Reflections come from a small procedural studio (emissive
+  panels) rendered once into a `ReflectionProbe`, after which the panels are hidden.
+- The bench uses a blurred `MirrorTexture`.
+- Post-processing: `DefaultRenderingPipeline` with MSAA, bloom, ACES tone mapping, vignette,
+  grain and light chromatic aberration.
 
-### Vessel Growth System
+## Dev notes
 
-Uses space colonization algorithm:
-- Seeds grow from heart surface
-- Attract points generate branches within attraction radius
-- Kill radius prevents overcrowding
-- Configurable: segment length, branch angle, max branches, growth speed
-
-### Control Panel
-
-- Built with Babylon GUI (AdvancedDynamicTexture)
-- ButtonHandler manages button interactions
-- ControlPanelManager coordinates UI updates
-
-### Post-Processing
-
-- DefaultRenderingPipeline with bloom, chromatic aberration
-- Managed by PostProcessingManager
-- Can be toggled via controls
-
-## Dependencies
-
-- **@babylonjs/core** - Core 3D engine
-- **@babylonjs/inspector** - Debug tools
-- **@babylonjs/loaders** - Asset loading
-- **biome** - Linting/formatting
-- **jscpd** - Duplicate code detection
-- **dependency-cruiser** - Dependency analysis
-
-## Build Commands
-
-```bash
-npm run dev      # Start dev server
-npm run build    # TypeScript compile
-npm run lint     # Biome check
-npm run format   # Biome format
-```
+- `npm run dev` serves `index.html` through Vite; `npm run build` runs `tsc` only. Use
+  `npx vite build` for a production bundle.
+- `?seed=N` in the URL makes growth deterministic. `window.__sim` exposes the app for debugging
+  (for example `__sim.growth.fastForward()`).
