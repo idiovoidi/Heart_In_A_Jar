@@ -8,7 +8,7 @@ export interface SceneManager {
         setBeating(isBeating: boolean): void;
         setBeatSpeed(speed: number): void;
     };
-    arterySim?: {
+    vesselGrowth?: {
         isGrowing: boolean;
         reset(): void;
         growthSpeed: number;
