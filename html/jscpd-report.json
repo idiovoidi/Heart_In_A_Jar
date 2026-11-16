@@ -1,0 +1,1870 @@
+{
+  "statistics": {
+    "detectionDate": "2026-04-23T01:14:07.203Z",
+    "formats": {
+      "javascript": {
+        "sources": {
+          "js/shaders/FluidShader.js": {
+            "lines": 106,
+            "tokens": 29,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/scene/SurfaceDetailSystem.js": {
+            "lines": 880,
+            "tokens": 9648,
+            "sources": 1,
+            "clones": 10,
+            "duplicatedLines": 88,
+            "duplicatedTokens": 882,
+            "percentage": 10,
+            "percentageTokens": 9.14,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/scene/LaboratoryEnvironment.js": {
+            "lines": 947,
+            "tokens": 9126,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 18,
+            "duplicatedTokens": 212,
+            "percentage": 1.9,
+            "percentageTokens": 2.32,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/scene/LabEnvironmentManager.js": {
+            "lines": 288,
+            "tokens": 2119,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/scene/ImmersiveLabScene.js": {
+            "lines": 277,
+            "tokens": 2485,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 18,
+            "duplicatedTokens": 212,
+            "percentage": 6.5,
+            "percentageTokens": 8.53,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/inputs/InputManager.js": {
+            "lines": 23,
+            "tokens": 219,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/UIEnhancementTest.js": {
+            "lines": 343,
+            "tokens": 2737,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 82,
+            "duplicatedTokens": 724,
+            "percentage": 23.91,
+            "percentageTokens": 26.45,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/PresetUI.js": {
+            "lines": 617,
+            "tokens": 3930,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/PresetTest.js": {
+            "lines": 398,
+            "tokens": 3557,
+            "sources": 1,
+            "clones": 10,
+            "duplicatedLines": 246,
+            "duplicatedTokens": 2044,
+            "percentage": 61.81,
+            "percentageTokens": 57.46,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/PresetManager.js": {
+            "lines": 684,
+            "tokens": 4814,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/ParameterLinkingSystem.js": {
+            "lines": 468,
+            "tokens": 3448,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/ParameterEventSystem.js": {
+            "lines": 218,
+            "tokens": 1339,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/ParameterControllerTest.js": {
+            "lines": 264,
+            "tokens": 2008,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 107,
+            "duplicatedTokens": 965,
+            "percentage": 40.53,
+            "percentageTokens": 48.06,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/ParameterController.js": {
+            "lines": 639,
+            "tokens": 4882,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/KeyboardShortcutSystem.js": {
+            "lines": 824,
+            "tokens": 5384,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/HeartControlTest.js": {
+            "lines": 340,
+            "tokens": 2722,
+            "sources": 1,
+            "clones": 3,
+            "duplicatedLines": 52,
+            "duplicatedTokens": 437,
+            "percentage": 15.29,
+            "percentageTokens": 16.05,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/HeartControlSystem.js": {
+            "lines": 627,
+            "tokens": 4224,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 16,
+            "duplicatedTokens": 149,
+            "percentage": 2.55,
+            "percentageTokens": 3.53,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/GracefulFallbackSystem.js": {
+            "lines": 569,
+            "tokens": 4173,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/FluidControlTest.js": {
+            "lines": 462,
+            "tokens": 3766,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 31,
+            "duplicatedTokens": 229,
+            "percentage": 6.71,
+            "percentageTokens": 6.08,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/FluidControlSystem.js": {
+            "lines": 782,
+            "tokens": 5806,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 16,
+            "duplicatedTokens": 149,
+            "percentage": 2.05,
+            "percentageTokens": 2.57,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/FinalIntegrationTest.js": {
+            "lines": 640,
+            "tokens": 5350,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 5,
+            "duplicatedTokens": 90,
+            "percentage": 0.78,
+            "percentageTokens": 1.68,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/ErrorLoggingSystem.js": {
+            "lines": 578,
+            "tokens": 4905,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 13,
+            "duplicatedTokens": 101,
+            "percentage": 2.25,
+            "percentageTokens": 2.06,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/ErrorHandlingTest.js": {
+            "lines": 538,
+            "tokens": 4966,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 42,
+            "duplicatedTokens": 366,
+            "percentage": 7.81,
+            "percentageTokens": 7.37,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/ErrorHandlingSystem.js": {
+            "lines": 877,
+            "tokens": 6099,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/EnvironmentControlTest.js": {
+            "lines": 452,
+            "tokens": 3796,
+            "sources": 1,
+            "clones": 3,
+            "duplicatedLines": 53,
+            "duplicatedTokens": 415,
+            "percentage": 11.73,
+            "percentageTokens": 10.93,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/EnvironmentControlSystem.js": {
+            "lines": 736,
+            "tokens": 5206,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 6,
+            "duplicatedTokens": 82,
+            "percentage": 0.82,
+            "percentageTokens": 1.58,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/ControlPanelTest.js": {
+            "lines": 233,
+            "tokens": 1967,
+            "sources": 1,
+            "clones": 3,
+            "duplicatedLines": 74,
+            "duplicatedTokens": 665,
+            "percentage": 31.76,
+            "percentageTokens": 33.81,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/ComprehensiveTestSuite.js": {
+            "lines": 760,
+            "tokens": 6602,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 38,
+            "duplicatedTokens": 371,
+            "percentage": 5,
+            "percentageTokens": 5.62,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/ArteryControlTest.js": {
+            "lines": 403,
+            "tokens": 3312,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 31,
+            "duplicatedTokens": 229,
+            "percentage": 7.69,
+            "percentageTokens": 6.91,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/ArteryControlSystem.js": {
+            "lines": 672,
+            "tokens": 4988,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/AdvancedValidationSystem.js": {
+            "lines": 561,
+            "tokens": 4437,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/controls/AdvancedFeaturesTest.js": {
+            "lines": 418,
+            "tokens": 3993,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 40,
+            "duplicatedTokens": 358,
+            "percentage": 9.57,
+            "percentageTokens": 8.97,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/scene.js": {
+            "lines": 211,
+            "tokens": 2230,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "js/ArterySimulation.js": {
+            "lines": 293,
+            "tokens": 3007,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 17128,
+          "tokens": 137274,
+          "sources": 34,
+          "clones": 28,
+          "duplicatedLines": 488,
+          "duplicatedTokens": 4340,
+          "percentage": 2.85,
+          "percentageTokens": 3.16,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      },
+      "markdown": {
+        "sources": {
+          "js/controls/README.md": {
+            "lines": 415,
+            "tokens": 2937,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 415,
+          "tokens": 2937,
+          "sources": 1,
+          "clones": 0,
+          "duplicatedLines": 0,
+          "duplicatedTokens": 0,
+          "percentage": 0,
+          "percentageTokens": 0,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      },
+      "typescript": {
+        "sources": {
+          "src/types/babylon.d.ts": {
+            "lines": 7,
+            "tokens": 32,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lighting/SceneLighting.ts": {
+            "lines": 52,
+            "tokens": 445,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/inputs/InputManager.ts": {
+            "lines": 33,
+            "tokens": 245,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/inputs/ButtonHandler.ts": {
+            "lines": 218,
+            "tokens": 2036,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 6,
+            "duplicatedTokens": 79,
+            "percentage": 2.75,
+            "percentageTokens": 3.88,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/debug/SceneDebug.ts": {
+            "lines": 50,
+            "tokens": 373,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/core/ErrorDecorator.ts": {
+            "lines": 128,
+            "tokens": 915,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/core/EntityBase.ts": {
+            "lines": 119,
+            "tokens": 902,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/controls/QuickSystemTest.ts": {
+            "lines": 12,
+            "tokens": 62,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/controls/ControlPanelManager.ts": {
+            "lines": 27,
+            "tokens": 291,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 6,
+            "duplicatedTokens": 79,
+            "percentage": 22.22,
+            "percentageTokens": 27.15,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/components/MovementComponent.ts": {
+            "lines": 147,
+            "tokens": 1084,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/components/MaterialComponent.ts": {
+            "lines": 146,
+            "tokens": 1122,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/components/AnimationComponent.ts": {
+            "lines": 168,
+            "tokens": 1103,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/camera/SceneCamera.ts": {
+            "lines": 54,
+            "tokens": 423,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/VesselGrowthSystem.ts": {
+            "lines": 427,
+            "tokens": 4284,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/main.ts": {
+            "lines": 295,
+            "tokens": 2607,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/LabJar.ts": {
+            "lines": 121,
+            "tokens": 1092,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/LabEnvironment.ts": {
+            "lines": 468,
+            "tokens": 5098,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 30,
+            "duplicatedTokens": 382,
+            "percentage": 6.41,
+            "percentageTokens": 7.49,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/InteractiveGrowthControls.ts": {
+            "lines": 325,
+            "tokens": 2914,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/HeartSimulation.ts": {
+            "lines": 746,
+            "tokens": 6817,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 10,
+            "duplicatedTokens": 204,
+            "percentage": 1.34,
+            "percentageTokens": 2.99,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/FluidSimulation.ts": {
+            "lines": 251,
+            "tokens": 1746,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/FleshGoblin.ts": {
+            "lines": 325,
+            "tokens": 3335,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/FleshClumps.ts": {
+            "lines": 277,
+            "tokens": 3420,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 4396,
+          "tokens": 40346,
+          "sources": 22,
+          "clones": 3,
+          "duplicatedLines": 26,
+          "duplicatedTokens": 372,
+          "percentage": 0.59,
+          "percentageTokens": 0.92,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      }
+    },
+    "total": {
+      "lines": 21939,
+      "tokens": 180557,
+      "sources": 57,
+      "clones": 31,
+      "duplicatedLines": 514,
+      "duplicatedTokens": 4712,
+      "percentage": 2.34,
+      "percentageTokens": 2.61,
+      "newDuplicatedLines": 0,
+      "newClones": 0
+    }
+  },
+  "duplicates": [
+    {
+      "format": "javascript",
+      "lines": 11,
+      "fragment": ";\r\n            context.beginPath();\r\n            context.moveTo(startX, startY);\r\n            context.lineTo(\r\n                startX + Math.cos(angle) * length,\r\n                startY + Math.sin(angle) * length\r\n            );\r\n            context.stroke();\r\n        }\r\n        \r\n        scratchTexture",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\scene\\SurfaceDetailSystem.js",
+        "start": 134,
+        "end": 144,
+        "startLoc": {
+          "line": 134,
+          "column": 4,
+          "position": 1142
+        },
+        "endLoc": {
+          "line": 144,
+          "column": 15,
+          "position": 1230
+        }
+      },
+      "secondFile": {
+        "name": "js\\scene\\SurfaceDetailSystem.js",
+        "start": 115,
+        "end": 125,
+        "startLoc": {
+          "line": 115,
+          "column": 6,
+          "position": 890
+        },
+        "endLoc": {
+          "line": 125,
+          "column": 23,
+          "position": 978
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 9,
+      "fragment": "${opacity})`;\r\n            context.save();\r\n            context.translate(x, y);\r\n            context.rotate(Math.random() * Math.PI);\r\n            context.fillRect(-width/2, -height/2, width, height);\r\n            context.restore();\r\n        }\r\n        \r\n        discolorationTexture",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\scene\\SurfaceDetailSystem.js",
+        "start": 312,
+        "end": 320,
+        "startLoc": {
+          "line": 312,
+          "column": 22,
+          "position": 3386
+        },
+        "endLoc": {
+          "line": 320,
+          "column": 21,
+          "position": 3476
+        }
+      },
+      "secondFile": {
+        "name": "js\\scene\\SurfaceDetailSystem.js",
+        "start": 213,
+        "end": 221,
+        "startLoc": {
+          "line": 213,
+          "column": 22,
+          "position": 2104
+        },
+        "endLoc": {
+          "line": 221,
+          "column": 20,
+          "position": 2194
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 10,
+      "fragment": "})`);\r\n            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');\r\n            \r\n            context.fillStyle = gradient;\r\n            context.beginPath();\r\n            context.arc(x, y, size, 0, Math.PI * 2);\r\n            context.fill();\r\n        }\r\n        \r\n        agingTexture",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\scene\\SurfaceDetailSystem.js",
+        "start": 703,
+        "end": 712,
+        "startLoc": {
+          "line": 703,
+          "column": 8,
+          "position": 8004
+        },
+        "endLoc": {
+          "line": 712,
+          "column": 13,
+          "position": 8089
+        }
+      },
+      "secondFile": {
+        "name": "js\\scene\\SurfaceDetailSystem.js",
+        "start": 295,
+        "end": 304,
+        "startLoc": {
+          "line": 295,
+          "column": 4,
+          "position": 3154
+        },
+        "endLoc": {
+          "line": 304,
+          "column": 25,
+          "position": 3239
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 9,
+      "fragment": "${opacity})`;\r\n            context.save();\r\n            context.translate(x, y);\r\n            context.rotate(Math.random() * Math.PI);\r\n            context.fillRect(-width/2, -height/2, width, height);\r\n            context.restore();\r\n        }\r\n        \r\n        usageTexture",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\scene\\SurfaceDetailSystem.js",
+        "start": 737,
+        "end": 745,
+        "startLoc": {
+          "line": 737,
+          "column": 22,
+          "position": 8397
+        },
+        "endLoc": {
+          "line": 745,
+          "column": 13,
+          "position": 8487
+        }
+      },
+      "secondFile": {
+        "name": "js\\scene\\SurfaceDetailSystem.js",
+        "start": 213,
+        "end": 221,
+        "startLoc": {
+          "line": 213,
+          "column": 22,
+          "position": 2104
+        },
+        "endLoc": {
+          "line": 221,
+          "column": 20,
+          "position": 2194
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 10,
+      "fragment": "* 0.5})`);\r\n            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');\r\n            \r\n            context.fillStyle = gradient;\r\n            context.beginPath();\r\n            context.arc(x, y, size, 0, Math.PI * 2);\r\n            context.fill();\r\n        }\r\n        \r\n        envTexture",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\scene\\SurfaceDetailSystem.js",
+        "start": 772,
+        "end": 781,
+        "startLoc": {
+          "line": 772,
+          "column": 9,
+          "position": 8827
+        },
+        "endLoc": {
+          "line": 781,
+          "column": 11,
+          "position": 8915
+        }
+      },
+      "secondFile": {
+        "name": "js\\scene\\SurfaceDetailSystem.js",
+        "start": 295,
+        "end": 304,
+        "startLoc": {
+          "line": 295,
+          "column": 11,
+          "position": 3151
+        },
+        "endLoc": {
+          "line": 304,
+          "column": 25,
+          "position": 3239
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 10,
+      "fragment": "const leftWall = BABYLON.MeshBuilder.CreatePlane(\"leftWall\", {\r\n            width: depth,\r\n            height: height\r\n        }, this.scene);\r\n        leftWall.position.x = -width / 2;\r\n        leftWall.rotation.y = Math.PI / 2;\r\n        leftWall.material = wallMaterial;\r\n        leftWall.receiveShadows = true;\r\n        \r\n        // Add electrical panel",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\scene\\ImmersiveLabScene.js",
+        "start": 180,
+        "end": 189,
+        "startLoc": {
+          "line": 180,
+          "column": 9,
+          "position": 1579
+        },
+        "endLoc": {
+          "line": 189,
+          "column": 24,
+          "position": 1685
+        }
+      },
+      "secondFile": {
+        "name": "js\\scene\\LaboratoryEnvironment.js",
+        "start": 160,
+        "end": 169,
+        "startLoc": {
+          "line": 160,
+          "column": 9,
+          "position": 1485
+        },
+        "endLoc": {
+          "line": 169,
+          "column": 14,
+          "position": 1591
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 10,
+      "fragment": "const rightWall = BABYLON.MeshBuilder.CreatePlane(\"rightWall\", {\r\n            width: depth,\r\n            height: height\r\n        }, this.scene);\r\n        rightWall.position.x = width / 2;\r\n        rightWall.rotation.y = -Math.PI / 2;\r\n        rightWall.material = wallMaterial;\r\n        rightWall.receiveShadows = true;\r\n        \r\n        // Add emergency shower and eyewash station",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\scene\\ImmersiveLabScene.js",
+        "start": 193,
+        "end": 202,
+        "startLoc": {
+          "line": 193,
+          "column": 9,
+          "position": 1707
+        },
+        "endLoc": {
+          "line": 202,
+          "column": 44,
+          "position": 1813
+        }
+      },
+      "secondFile": {
+        "name": "js\\scene\\LaboratoryEnvironment.js",
+        "start": 170,
+        "end": 179,
+        "startLoc": {
+          "line": 170,
+          "column": 9,
+          "position": 1595
+        },
+        "endLoc": {
+          "line": 179,
+          "column": 5,
+          "position": 1701
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 11,
+      "fragment": "},\r\n            getEntity: (name) => {\r\n                const entities = {\r\n                    heartSim: {\r\n                        beatSpeed: 2.0,\r\n                        isBeating: true,\r\n                        contractionIntensity: 1.0,\r\n                        setBeatSpeed: (speed) => { this.beatSpeed = speed; },\r\n                        setBeating: (beating) => { this.isBeating = beating; },\r\n                        setContractionIntensity: (intensity) => { this.contractionIntensity = intensity; },\r\n                        getMesh",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\ParameterControllerTest.js",
+        "start": 21,
+        "end": 31,
+        "startLoc": {
+          "line": 21,
+          "column": 13,
+          "position": 116
+        },
+        "endLoc": {
+          "line": 31,
+          "column": 8,
+          "position": 250
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\PresetTest.js",
+        "start": 22,
+        "end": 32,
+        "startLoc": {
+          "line": 22,
+          "column": 2,
+          "position": 172
+        },
+        "endLoc": {
+          "line": 32,
+          "column": 14,
+          "position": 306
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 37,
+      "fragment": "; },\r\n                        getMesh: () => ({\r\n                            scaling: new BABYLON.Vector3(1, 1, 1)\r\n                        })\r\n                    },\r\n                    arterySim: {\r\n                        growthSpeed: 50,\r\n                        maxBranches: 50,\r\n                        defaultRadius: 0.12,\r\n                        isGrowing: true,\r\n                        processGrowthQueue: () => {}\r\n                    },\r\n                    fluidSim: {\r\n                        fillSpeed: 0.0001,\r\n                        targetLevel: 0.8,\r\n                        isFlowing: false,\r\n                        shaderMaterial: {\r\n                            setFloat: (name, value) => {}\r\n                        },\r\n                        startFilling: (level) => { this.isFlowing = true; },\r\n                        stopFilling: () => { this.isFlowing = false; }\r\n                    },\r\n                    labEnvironment: {\r\n                        isOverheadLightOn: true,\r\n                        toggleOverheadLight: () => { this.isOverheadLightOn = !this.isOverheadLightOn; }\r\n                    }\r\n                };\r\n                return entities[name] || null;\r\n            }\r\n        };\r\n    }\r\n\r\n    /**\r\n     * Run all tests\r\n     */\r\n    async runAllTests() {\r\n        console.log('Starting ParameterController tests...'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\ParameterControllerTest.js",
+        "start": 30,
+        "end": 66,
+        "startLoc": {
+          "line": 30,
+          "column": 10,
+          "position": 243
+        },
+        "endLoc": {
+          "line": 66,
+          "column": 40,
+          "position": 560
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\PresetTest.js",
+        "start": 32,
+        "end": 64,
+        "startLoc": {
+          "line": 32,
+          "column": 6,
+          "position": 324
+        },
+        "endLoc": {
+          "line": 64,
+          "column": 45,
+          "position": 633
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 30,
+      "fragment": ".dispose();\r\n    }\r\n\r\n    /**\r\n     * Assert a condition and record the result\r\n     */\r\n    assert(condition, message) {\r\n        const result = {\r\n            passed: !!condition,\r\n            message: message,\r\n            timestamp: new Date().toISOString()\r\n        };\r\n        \r\n        this.testResults.push(result);\r\n        \r\n        if (result.passed) {\r\n            console.log(`✓ ${message}`);\r\n        } else {\r\n            console.error(`✗ ${message}`);\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Print test results summary\r\n     */\r\n    printResults() {\r\n        const passed = this.testResults.filter(r => r.passed).length;\r\n        const total = this.testResults.length;\r\n        \r\n        console.log(`\\nTest Results: ",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\ParameterControllerTest.js",
+        "start": 222,
+        "end": 251,
+        "startLoc": {
+          "line": 222,
+          "column": 18,
+          "position": 1687
+        },
+        "endLoc": {
+          "line": 251,
+          "column": 18,
+          "position": 1898
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\PresetTest.js",
+        "start": 356,
+        "end": 385,
+        "startLoc": {
+          "line": 356,
+          "column": 12,
+          "position": 3236
+        },
+        "endLoc": {
+          "line": 385,
+          "column": 32,
+          "position": 3447
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 6,
+      "fragment": ",\r\n                        setBeatSpeed: (speed) => { this.beatSpeed = speed; },\r\n                        setBeating: (beating) => { this.isBeating = beating; },\r\n                        setContractionIntensity: (intensity) => { this.contractionIntensity = intensity; },\r\n                        setHeartScale: (scale) => { this.scale = scale; },\r\n                        getHeartPhase",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\HeartControlTest.js",
+        "start": 27,
+        "end": 32,
+        "startLoc": {
+          "line": 27,
+          "column": 2,
+          "position": 192
+        },
+        "endLoc": {
+          "line": 32,
+          "column": 14,
+          "position": 296
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\PresetTest.js",
+        "start": 28,
+        "end": 33,
+        "startLoc": {
+          "line": 28,
+          "column": 4,
+          "position": 227
+        },
+        "endLoc": {
+          "line": 33,
+          "column": 8,
+          "position": 331
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 32,
+      "fragment": ".dispose();\r\n        parameterController.dispose();\r\n        eventSystem.dispose();\r\n    }\r\n\r\n    /**\r\n     * Assert a condition and record the result\r\n     */\r\n    assert(condition, message) {\r\n        const result = {\r\n            passed: !!condition,\r\n            message: message,\r\n            timestamp: new Date().toISOString()\r\n        };\r\n        \r\n        this.testResults.push(result);\r\n        \r\n        if (result.passed) {\r\n            console.log(`✓ ${message}`);\r\n        } else {\r\n            console.error(`✗ ${message}`);\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Print test results summary\r\n     */\r\n    printResults() {\r\n        const passed = this.testResults.filter(r => r.passed).length;\r\n        const total = this.testResults.length;\r\n        \r\n        console.log(`\\nHeartControl Test Results: ",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\HeartControlTest.js",
+        "start": 296,
+        "end": 327,
+        "startLoc": {
+          "line": 296,
+          "column": 13,
+          "position": 2383
+        },
+        "endLoc": {
+          "line": 327,
+          "column": 31,
+          "position": 2612
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\PresetTest.js",
+        "start": 354,
+        "end": 385,
+        "startLoc": {
+          "line": 354,
+          "column": 14,
+          "position": 3218
+        },
+        "endLoc": {
+          "line": 385,
+          "column": 32,
+          "position": 3447
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 32,
+      "fragment": ".dispose();\r\n        parameterController.dispose();\r\n        eventSystem.dispose();\r\n    }\r\n\r\n    /**\r\n     * Assert a condition and record the result\r\n     */\r\n    assert(condition, message) {\r\n        const result = {\r\n            passed: !!condition,\r\n            message: message,\r\n            timestamp: new Date().toISOString()\r\n        };\r\n        \r\n        this.testResults.push(result);\r\n        \r\n        if (result.passed) {\r\n            console.log(`✓ ${message}`);\r\n        } else {\r\n            console.error(`✗ ${message}`);\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Print test results summary\r\n     */\r\n    printResults() {\r\n        const passed = this.testResults.filter(r => r.passed).length;\r\n        const total = this.testResults.length;\r\n        \r\n        console.log(`\\nFluidControl Test Results: ",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\FluidControlTest.js",
+        "start": 418,
+        "end": 449,
+        "startLoc": {
+          "line": 418,
+          "column": 13,
+          "position": 3427
+        },
+        "endLoc": {
+          "line": 449,
+          "column": 31,
+          "position": 3656
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\PresetTest.js",
+        "start": 354,
+        "end": 385,
+        "startLoc": {
+          "line": 354,
+          "column": 14,
+          "position": 3218
+        },
+        "endLoc": {
+          "line": 385,
+          "column": 32,
+          "position": 3447
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 17,
+      "fragment": ") * canvas.width;\r\n            const y = canvas.height - value;\r\n            \r\n            if (index === 0) {\r\n                ctx.moveTo(x, y);\r\n            } else {\r\n                ctx.lineTo(x, y);\r\n            }\r\n        });\r\n        \r\n        ctx.stroke();\r\n        \r\n        // Draw baseline\r\n        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';\r\n        ctx.lineWidth = 1;\r\n        ctx.beginPath();\r\n        ctx.moveTo(0, canvas.height - 25",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\FluidControlSystem.js",
+        "start": 505,
+        "end": 521,
+        "startLoc": {
+          "line": 505,
+          "column": 2,
+          "position": 3486
+        },
+        "endLoc": {
+          "line": 521,
+          "column": 3,
+          "position": 3635
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\HeartControlSystem.js",
+        "start": 384,
+        "end": 400,
+        "startLoc": {
+          "line": 384,
+          "column": 7,
+          "position": 2580
+        },
+        "endLoc": {
+          "line": 400,
+          "column": 3,
+          "position": 2729
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 29,
+      "fragment": ";\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Add a test result\r\n     * @param {string} testName - Name of the test\r\n     * @param {boolean} passed - Whether the test passed\r\n     */\r\n    addTestResult(testName, passed) {\r\n        this.testResults.push({\r\n            name: testName,\r\n            passed: passed,\r\n            timestamp: new Date().toISOString()\r\n        });\r\n        \r\n        const status = passed ? '✅' : '❌';\r\n        console.log(`${status} ${testName}: ${passed ? 'PASSED' : 'FAILED'}`);\r\n    }\r\n\r\n    /**\r\n     * Report all test results\r\n     */\r\n    reportResults() {\r\n        const totalTests = this.testResults.length;\r\n        const passedTests = this.testResults.filter(result => result.passed).length;\r\n        const failedTests = totalTests - passedTests;\r\n        \r\n        console.log('\\n📊 Error Handling Test Results:'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\ErrorHandlingTest.js",
+        "start": 430,
+        "end": 458,
+        "startLoc": {
+          "line": 430,
+          "column": 6,
+          "position": 3933
+        },
+        "endLoc": {
+          "line": 458,
+          "column": 36,
+          "position": 4140
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\UIEnhancementTest.js",
+        "start": 259,
+        "end": 287,
+        "startLoc": {
+          "line": 259,
+          "column": 2,
+          "position": 2040
+        },
+        "endLoc": {
+          "line": 287,
+          "column": 36,
+          "position": 2247
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 15,
+      "fragment": ");\r\n        console.log(`Total Tests: ${totalTests}`);\r\n        console.log(`✅ Passed: ${passedTests}`);\r\n        console.log(`❌ Failed: ${failedTests}`);\r\n        console.log(`Success Rate: ${((passedTests / totalTests) * 100).toFixed(1)}%`);\r\n        \r\n        if (failedTests > 0) {\r\n            console.log('\\n❌ Failed Tests:');\r\n            this.testResults\r\n                .filter(result => !result.passed)\r\n                .forEach(result => console.log(`  - ${result.name}`));\r\n        }\r\n        \r\n        // Store results for debugging\r\n        window.errorHandlingTestResults",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\ErrorHandlingTest.js",
+        "start": 458,
+        "end": 472,
+        "startLoc": {
+          "line": 458,
+          "column": 36,
+          "position": 4141
+        },
+        "endLoc": {
+          "line": 472,
+          "column": 25,
+          "position": 4300
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\UIEnhancementTest.js",
+        "start": 287,
+        "end": 301,
+        "startLoc": {
+          "line": 287,
+          "column": 36,
+          "position": 2248
+        },
+        "endLoc": {
+          "line": 301,
+          "column": 14,
+          "position": 2407
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 17,
+      "fragment": "();\r\n        this.testUIElements();\r\n        \r\n        this.printResults();\r\n        return this.testResults;\r\n    }\r\n\r\n    /**\r\n     * Setup mock DOM elements for testing\r\n     */\r\n    setupMockDOM() {\r\n        // Create mock control panel structure\r\n        if (!document.querySelector('.control-panel')) {\r\n            const panel = document.createElement('div');\r\n            panel.className = 'control-panel';\r\n            \r\n            const environmentSection",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\EnvironmentControlTest.js",
+        "start": 63,
+        "end": 79,
+        "startLoc": {
+          "line": 63,
+          "column": 27,
+          "position": 535
+        },
+        "endLoc": {
+          "line": 79,
+          "column": 19,
+          "position": 639
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\HeartControlTest.js",
+        "start": 62,
+        "end": 78,
+        "startLoc": {
+          "line": 62,
+          "column": 19,
+          "position": 530
+        },
+        "endLoc": {
+          "line": 78,
+          "column": 13,
+          "position": 634
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 32,
+      "fragment": ".dispose();\r\n        parameterController.dispose();\r\n        eventSystem.dispose();\r\n    }\r\n\r\n    /**\r\n     * Assert a condition and record the result\r\n     */\r\n    assert(condition, message) {\r\n        const result = {\r\n            passed: !!condition,\r\n            message: message,\r\n            timestamp: new Date().toISOString()\r\n        };\r\n        \r\n        this.testResults.push(result);\r\n        \r\n        if (result.passed) {\r\n            console.log(`✓ ${message}`);\r\n        } else {\r\n            console.error(`✗ ${message}`);\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Print test results summary\r\n     */\r\n    printResults() {\r\n        const passed = this.testResults.filter(r => r.passed).length;\r\n        const total = this.testResults.length;\r\n        \r\n        console.log(`\\nEnvironmentControl Test Results: ",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\EnvironmentControlTest.js",
+        "start": 408,
+        "end": 439,
+        "startLoc": {
+          "line": 408,
+          "column": 19,
+          "position": 3457
+        },
+        "endLoc": {
+          "line": 439,
+          "column": 37,
+          "position": 3686
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\PresetTest.js",
+        "start": 354,
+        "end": 385,
+        "startLoc": {
+          "line": 354,
+          "column": 14,
+          "position": 3218
+        },
+        "endLoc": {
+          "line": 385,
+          "column": 32,
+          "position": 3447
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 7,
+      "fragment": "const postProcessingStatus = document.getElementById('postProcessingStatus');\r\n        const bloomStatus = document.getElementById('bloomStatus');\r\n        const aberrationStatus = document.getElementById('aberrationStatus');\r\n        const grainStatus = document.getElementById('grainStatus');\r\n        const cameraStatus = document.getElementById('cameraStatus');\r\n        \r\n        if",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\EnvironmentControlSystem.js",
+        "start": 591,
+        "end": 597,
+        "startLoc": {
+          "line": 591,
+          "column": 9,
+          "position": 4160
+        },
+        "endLoc": {
+          "line": 597,
+          "column": 3,
+          "position": 4242
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\EnvironmentControlTest.js",
+        "start": 342,
+        "end": 348,
+        "startLoc": {
+          "line": 342,
+          "column": 9,
+          "position": 2830
+        },
+        "endLoc": {
+          "line": 348,
+          "column": 5,
+          "position": 2912
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 33,
+      "fragment": "{\r\n    constructor() {\r\n        this.testResults = [];\r\n        this.mockSceneManager = this.createMockSceneManager();\r\n    }\r\n\r\n    /**\r\n     * Create a mock scene manager for testing\r\n     */\r\n    createMockSceneManager() {\r\n        return {\r\n            scene: {\r\n                fogDensity: 0.05\r\n            },\r\n            getEntity: (name) => {\r\n                const entities = {\r\n                    heartSim: {\r\n                        beatSpeed: 2.0,\r\n                        isBeating: true,\r\n                        contractionIntensity: 1.0,\r\n                        setBeatSpeed: (speed) => { this.beatSpeed = speed; },\r\n                        setBeating: (beating) => { this.isBeating = beating; },\r\n                        setContractionIntensity: (intensity) => { this.contractionIntensity = intensity; },\r\n                        getMesh: () => ({\r\n                            scaling: new BABYLON.Vector3(1, 1, 1)\r\n                        })\r\n                    },\r\n                    arterySim: {\r\n                        growthSpeed: 50,\r\n                        maxBranches: 50,\r\n                        defaultRadius: 0.12,\r\n                        isGrowing: true,\r\n                        processGrowthQueue: () => {},",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\ControlPanelTest.js",
+        "start": 7,
+        "end": 39,
+        "startLoc": {
+          "line": 7,
+          "column": 2,
+          "position": 25
+        },
+        "endLoc": {
+          "line": 39,
+          "column": 2,
+          "position": 328
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\ParameterControllerTest.js",
+        "start": 8,
+        "end": 41,
+        "startLoc": {
+          "line": 8,
+          "column": 2,
+          "position": 39
+        },
+        "endLoc": {
+          "line": 41,
+          "column": 2,
+          "position": 422
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 14,
+      "fragment": ",\r\n                        shaderMaterial: {\r\n                            setFloat: (name, value) => {}\r\n                        },\r\n                        startFilling: (level) => { this.isFlowing = true; },\r\n                        stopFilling: () => { this.isFlowing = false; }\r\n                    },\r\n                    labEnvironment: {\r\n                        isOverheadLightOn: true,\r\n                        toggleOverheadLight: () => { this.isOverheadLightOn = !this.isOverheadLightOn; }\r\n                    }\r\n                };\r\n                return entities[name] || null;\r\n            },",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\ControlPanelTest.js",
+        "start": 46,
+        "end": 59,
+        "startLoc": {
+          "line": 46,
+          "column": 2,
+          "position": 385
+        },
+        "endLoc": {
+          "line": 59,
+          "column": 2,
+          "position": 536
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\PresetTest.js",
+        "start": 45,
+        "end": 57,
+        "startLoc": {
+          "line": 45,
+          "column": 6,
+          "position": 454
+        },
+        "endLoc": {
+          "line": 57,
+          "column": 2,
+          "position": 604
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 30,
+      "fragment": ".dispose();\r\n    }\r\n\r\n    /**\r\n     * Assert a condition and record the result\r\n     */\r\n    assert(condition, message) {\r\n        const result = {\r\n            passed: !!condition,\r\n            message: message,\r\n            timestamp: new Date().toISOString()\r\n        };\r\n        \r\n        this.testResults.push(result);\r\n        \r\n        if (result.passed) {\r\n            console.log(`✓ ${message}`);\r\n        } else {\r\n            console.error(`✗ ${message}`);\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Print test results summary\r\n     */\r\n    printResults() {\r\n        const passed = this.testResults.filter(r => r.passed).length;\r\n        const total = this.testResults.length;\r\n        \r\n        console.log(`\\nControlPanel Test Results: ",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\ControlPanelTest.js",
+        "start": 191,
+        "end": 220,
+        "startLoc": {
+          "line": 191,
+          "column": 8,
+          "position": 1646
+        },
+        "endLoc": {
+          "line": 220,
+          "column": 31,
+          "position": 1857
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\PresetTest.js",
+        "start": 356,
+        "end": 385,
+        "startLoc": {
+          "line": 356,
+          "column": 12,
+          "position": 3236
+        },
+        "endLoc": {
+          "line": 385,
+          "column": 32,
+          "position": 3447
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 11,
+      "fragment": ".testDetails.push({\r\n                    name: test.name,\r\n                    passed: false,\r\n                    error: error.message,\r\n                    timestamp: new Date().toISOString()\r\n                });\r\n                console.log(`❌ ${test.name}: ERROR - ${error.message}`);\r\n            }\r\n        }\r\n\r\n        stressResults",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\ComprehensiveTestSuite.js",
+        "start": 345,
+        "end": 355,
+        "startLoc": {
+          "line": 345,
+          "column": 14,
+          "position": 2813
+        },
+        "endLoc": {
+          "line": 355,
+          "column": 14,
+          "position": 2903
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\ComprehensiveTestSuite.js",
+        "start": 268,
+        "end": 278,
+        "startLoc": {
+          "line": 268,
+          "column": 19,
+          "position": 2152
+        },
+        "endLoc": {
+          "line": 278,
+          "column": 19,
+          "position": 2242
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 6,
+      "fragment": "${health.overall.toUpperCase()}`);\r\n            console.log(`   Components: ${Object.keys(health.components).length}`);\r\n            console.log(`   Errors: ${health.errors.length}`);\r\n            console.log(`   Warnings: ${health.warnings.length}`);\r\n        } catch (error) {\r\n            console.log(`   Health Check Failed: ",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\ComprehensiveTestSuite.js",
+        "start": 667,
+        "end": 672,
+        "startLoc": {
+          "line": 667,
+          "column": 21,
+          "position": 5761
+        },
+        "endLoc": {
+          "line": 672,
+          "column": 26,
+          "position": 5851
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\FinalIntegrationTest.js",
+        "start": 572,
+        "end": 577,
+        "startLoc": {
+          "line": 572,
+          "column": 13,
+          "position": 4693
+        },
+        "endLoc": {
+          "line": 577,
+          "column": 35,
+          "position": 4783
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 14,
+      "fragment": ",\r\n                url: window.location.href,\r\n                memory: window.performance && window.performance.memory ? {\r\n                    used: window.performance.memory.usedJSHeapSize,\r\n                    total: window.performance.memory.totalJSHeapSize,\r\n                    limit: window.performance.memory.jsHeapSizeLimit\r\n                } : null\r\n            }\r\n        };\r\n    }\r\n\r\n    /**\r\n     * Download test results as JSON\r\n     */",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\ComprehensiveTestSuite.js",
+        "start": 721,
+        "end": 734,
+        "startLoc": {
+          "line": 721,
+          "column": 10,
+          "position": 6259
+        },
+        "endLoc": {
+          "line": 734,
+          "column": 8,
+          "position": 6360
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\ErrorLoggingSystem.js",
+        "start": 543,
+        "end": 556,
+        "startLoc": {
+          "line": 543,
+          "column": 9,
+          "position": 4656
+        },
+        "endLoc": {
+          "line": 556,
+          "column": 8,
+          "position": 4757
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 32,
+      "fragment": ".dispose();\r\n        parameterController.dispose();\r\n        eventSystem.dispose();\r\n    }\r\n\r\n    /**\r\n     * Assert a condition and record the result\r\n     */\r\n    assert(condition, message) {\r\n        const result = {\r\n            passed: !!condition,\r\n            message: message,\r\n            timestamp: new Date().toISOString()\r\n        };\r\n        \r\n        this.testResults.push(result);\r\n        \r\n        if (result.passed) {\r\n            console.log(`✓ ${message}`);\r\n        } else {\r\n            console.error(`✗ ${message}`);\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Print test results summary\r\n     */\r\n    printResults() {\r\n        const passed = this.testResults.filter(r => r.passed).length;\r\n        const total = this.testResults.length;\r\n        \r\n        console.log(`\\nArteryControl Test Results: ",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\ArteryControlTest.js",
+        "start": 359,
+        "end": 390,
+        "startLoc": {
+          "line": 359,
+          "column": 14,
+          "position": 2973
+        },
+        "endLoc": {
+          "line": 390,
+          "column": 32,
+          "position": 3202
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\PresetTest.js",
+        "start": 354,
+        "end": 385,
+        "startLoc": {
+          "line": 354,
+          "column": 14,
+          "position": 3218
+        },
+        "endLoc": {
+          "line": 385,
+          "column": 32,
+          "position": 3447
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 27,
+      "fragment": "}\r\n\r\n    /**\r\n     * Add a test result\r\n     * @param {string} testName - Name of the test\r\n     * @param {boolean} passed - Whether the test passed\r\n     */\r\n    addTestResult(testName, passed) {\r\n        this.testResults.push({\r\n            name: testName,\r\n            passed: passed,\r\n            timestamp: new Date().toISOString()\r\n        });\r\n        \r\n        const status = passed ? '✅' : '❌';\r\n        console.log(`${status} ${testName}: ${passed ? 'PASSED' : 'FAILED'}`);\r\n    }\r\n\r\n    /**\r\n     * Report all test results\r\n     */\r\n    reportResults() {\r\n        const totalTests = this.testResults.length;\r\n        const passedTests = this.testResults.filter(result => result.passed).length;\r\n        const failedTests = totalTests - passedTests;\r\n        \r\n        console.log('\\n📊 Advanced Features Test Results:'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\AdvancedFeaturesTest.js",
+        "start": 315,
+        "end": 341,
+        "startLoc": {
+          "line": 315,
+          "column": 5,
+          "position": 3003
+        },
+        "endLoc": {
+          "line": 341,
+          "column": 39,
+          "position": 3202
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\UIEnhancementTest.js",
+        "start": 261,
+        "end": 287,
+        "startLoc": {
+          "line": 261,
+          "column": 5,
+          "position": 2048
+        },
+        "endLoc": {
+          "line": 287,
+          "column": 36,
+          "position": 2247
+        }
+      }
+    },
+    {
+      "format": "javascript",
+      "lines": 15,
+      "fragment": ");\r\n        console.log(`Total Tests: ${totalTests}`);\r\n        console.log(`✅ Passed: ${passedTests}`);\r\n        console.log(`❌ Failed: ${failedTests}`);\r\n        console.log(`Success Rate: ${((passedTests / totalTests) * 100).toFixed(1)}%`);\r\n        \r\n        if (failedTests > 0) {\r\n            console.log('\\n❌ Failed Tests:');\r\n            this.testResults\r\n                .filter(result => !result.passed)\r\n                .forEach(result => console.log(`  - ${result.name}`));\r\n        }\r\n        \r\n        // Store results for debugging\r\n        window.advancedFeaturesTestResults",
+      "tokens": 0,
+      "firstFile": {
+        "name": "js\\controls\\AdvancedFeaturesTest.js",
+        "start": 341,
+        "end": 355,
+        "startLoc": {
+          "line": 341,
+          "column": 39,
+          "position": 3203
+        },
+        "endLoc": {
+          "line": 355,
+          "column": 28,
+          "position": 3362
+        }
+      },
+      "secondFile": {
+        "name": "js\\controls\\UIEnhancementTest.js",
+        "start": 287,
+        "end": 301,
+        "startLoc": {
+          "line": 287,
+          "column": 36,
+          "position": 2248
+        },
+        "endLoc": {
+          "line": 301,
+          "column": 14,
+          "position": 2407
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 7,
+      "fragment": ";\n    fluidSim?: { isFlowing: boolean; startFilling(level: number): void; stopFilling(): void };\n    labEnvironment?: { toggleOverheadLight(): void };\n    camera?: { resetView(): void };\n};\n\nexport class ControlPanelManager",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src\\controls\\ControlPanelManager.ts",
+        "start": 7,
+        "end": 13,
+        "startLoc": {
+          "line": 7,
+          "column": 2,
+          "position": 105
+        },
+        "endLoc": {
+          "line": 13,
+          "column": 20,
+          "position": 184
+        }
+      },
+      "secondFile": {
+        "name": "src\\inputs\\ButtonHandler.ts",
+        "start": 4,
+        "end": 10,
+        "startLoc": {
+          "line": 4,
+          "column": 8,
+          "position": 55
+        },
+        "endLoc": {
+          "line": 10,
+          "column": 14,
+          "position": 134
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 16,
+      "fragment": "}, this.scene);\n\n            const liquidMaterial = new StandardMaterial(\"liquidMaterial\", this.scene);\n            const labColors = [\n                new Color3(0.2, 0.6, 0.8),\n                new Color3(0.8, 0.2, 0.2),\n                new Color3(0.2, 0.8, 0.2),\n                new Color3(0.8, 0.6, 0.2),\n                new Color3(0.6, 0.2, 0.8),\n                new Color3(0.8, 0.4, 0.0)\n            ];\n\n            liquidMaterial.diffuseColor = labColors[Math.floor(Math.random() * labColors.length)];\n            liquidMaterial.alpha = 0.8;\n            liquid.material = liquidMaterial;\n            liquid.position.y = -0.3",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src\\LabEnvironment.ts",
+        "start": 358,
+        "end": 373,
+        "startLoc": {
+          "line": 358,
+          "column": 13,
+          "position": 3915
+        },
+        "endLoc": {
+          "line": 373,
+          "column": 4,
+          "position": 4106
+        }
+      },
+      "secondFile": {
+        "name": "src\\LabEnvironment.ts",
+        "start": 231,
+        "end": 247,
+        "startLoc": {
+          "line": 231,
+          "column": 13,
+          "position": 2461
+        },
+        "endLoc": {
+          "line": 247,
+          "column": 4,
+          "position": 2653
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 6,
+      "fragment": "const positions = atrium.getVerticesData(VertexBuffer.PositionKind);\n            if (positions) {\n                for (let i = 0; i < positions.length; i += 3) {\n                    const y = positions[i + 1];\n                    if (y < 0) {\n                        positions[i + 1] = y * 1.3",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src\\HeartSimulation.ts",
+        "start": 257,
+        "end": 262,
+        "startLoc": {
+          "line": 257,
+          "column": 13,
+          "position": 2231
+        },
+        "endLoc": {
+          "line": 262,
+          "column": 4,
+          "position": 2333
+        }
+      },
+      "secondFile": {
+        "name": "src\\HeartSimulation.ts",
+        "start": 219,
+        "end": 224,
+        "startLoc": {
+          "line": 219,
+          "column": 13,
+          "position": 1876
+        },
+        "endLoc": {
+          "line": 224,
+          "column": 4,
+          "position": 1978
+        }
+      }
+    }
+  ],
+  "filename": "C:\\Users\\Mitchell\\Documents\\My_Code\\Art\\Artery_Sim_babylon\\node_modules\\@jscpd\\html-reporter\\dist\\templates\\main.pug"
+}
